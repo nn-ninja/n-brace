@@ -1,16 +1,16 @@
 import type { App, TFile } from "obsidian";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 import type { QuickSwitcherPlugin } from "@/typings/types-obsidian";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 
-export const getMySwitcher = (view: BaseGraph3dView) => {
+export const getMySwitcher = (view: BaseForceGraphView) => {
   const switcherInstance = (view.plugin.app.internalPlugins.plugins.switcher as QuickSwitcherPlugin)
     .instance;
   const QuickSwitcherModal = switcherInstance?.QuickSwitcherModal;
   if (!QuickSwitcherModal) return;
   // you need the options to open quick switcher, https://github.com/darlal/obsidian-switcher-plus/blob/2a1a8ccb0ca955397aa7516b746853427f5483ec/src/settings/switcherPlusSettings.ts#L132-L134
   const MySwitcher = class extends QuickSwitcherModal {
-    constructor(app: App, public plugin: Graph3dPlugin) {
+    constructor(app: App, public plugin: ForceGraphPlugin) {
       // @ts-ignore
       super(app, switcherInstance.options);
     }

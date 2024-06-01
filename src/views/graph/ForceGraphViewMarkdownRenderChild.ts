@@ -1,10 +1,10 @@
-import type Graph3dPlugin from "@/main";
-import { PostProcessorGraph3dView } from "@/views/graph/3dView/PostProcessorGraph3dView";
+import type ForceGraphPlugin from "@/main";
+import { PostProcessorForceGraphView } from "@/views/graph/forceview/PostProcessorForceGraphView";
 import type { MarkdownPostProcessorContext, MarkdownView } from "obsidian";
 import { MarkdownRenderChild } from "obsidian";
 
-export class Graph3DViewMarkdownRenderChild extends MarkdownRenderChild {
-  plugin: Graph3dPlugin;
+export class ForceGraphViewMarkdownRenderChild extends MarkdownRenderChild {
+  plugin: ForceGraphPlugin;
   source: string;
   ctx: MarkdownPostProcessorContext;
   markdownView: MarkdownView;
@@ -12,11 +12,11 @@ export class Graph3DViewMarkdownRenderChild extends MarkdownRenderChild {
   // Add a property for the ResizeObserver
   resizeObserver: ResizeObserver;
 
-  graph3dView: PostProcessorGraph3dView;
+  ForceGraphView: PostProcessorForceGraphView;
 
   constructor(
     contentEl: HTMLElement,
-    plugin: Graph3dPlugin,
+    plugin: ForceGraphPlugin,
     source: string,
     ctx: MarkdownPostProcessorContext,
     markdownView: MarkdownView
@@ -36,7 +36,7 @@ export class Graph3DViewMarkdownRenderChild extends MarkdownRenderChild {
     // Start observing the content element
     this.resizeObserver.observe(contentEl);
 
-    this.graph3dView = PostProcessorGraph3dView.new(
+    this.ForceGraphView = PostProcessorForceGraphView.new(
       this.plugin,
       this.containerEl,
       this.markdownView,
@@ -46,7 +46,7 @@ export class Graph3DViewMarkdownRenderChild extends MarkdownRenderChild {
 
   onload(): void {
     super.onload();
-    this.plugin.activeGraphViews.push(this.graph3dView);
+    this.plugin.activeGraphViews.push(this.ForceGraphView);
   }
 
   onunload(): void {
@@ -57,9 +57,9 @@ export class Graph3DViewMarkdownRenderChild extends MarkdownRenderChild {
     // console.log("unload");
     this.resizeObserver.disconnect();
     // destroy the graph and remove from the active graph views
-    this.graph3dView.getForceGraph().instance._destructor();
+    this.ForceGraphView.getForceGraph().instance._destructor();
     this.plugin.activeGraphViews = this.plugin.activeGraphViews.filter(
-      (view) => view !== this.graph3dView
+      (view) => view !== this.ForceGraphView
     );
   }
 
@@ -69,7 +69,7 @@ export class Graph3DViewMarkdownRenderChild extends MarkdownRenderChild {
     const { width } = entry.contentRect;
 
     // Perform any actions you need on resize here
-    this.graph3dView.getForceGraph().updateDimensions([width, 300]);
+    this.ForceGraphView.getForceGraph().updateDimensions([width, 300]);
 
     // If you need to redraw or adjust anything related to the plugin or content,
     // this is where you'd do it.

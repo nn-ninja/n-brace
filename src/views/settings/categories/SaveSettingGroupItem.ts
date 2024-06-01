@@ -1,6 +1,6 @@
 import type { SavedSetting } from "@/SettingsSchemas";
 import { createNotice } from "@/util/createNotice";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import { ExtraButtonComponent, TextComponent } from "obsidian";
 
 /**
@@ -9,7 +9,7 @@ import { ExtraButtonComponent, TextComponent } from "obsidian";
 export const addSaveSettingGroupItem = (
   containerEl: HTMLDivElement,
   savedSetting: SavedSetting,
-  view: BaseGraph3dView
+  view: BaseForceGraphView
 ) => {
   // create a new div element
   const innerEl = containerEl.createDiv({

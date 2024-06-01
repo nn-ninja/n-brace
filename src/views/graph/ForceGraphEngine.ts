@@ -12,7 +12,7 @@ import type { TFile } from "obsidian";
 
 const origin = new THREE.Vector3(0, 0, 0);
 const cameraLookAtCenterTransitionDuration = 1000;
-const LINK_PARTICLE_MULTIPLIER = 2;
+const LINK_PARTICLE_MULTIPLIER = 4;
 export const FOCAL_FROM_CAMERA = 400;
 const selectedColor = "#CCA700";
 const PARTICLE_FREQUECY = 4;
@@ -67,7 +67,7 @@ export class ForceGraphEngine {
 
     const distanceToCenter = camera.position.distanceTo(origin);
     camera.updateProjectionMatrix();
-    this.forceGraph.centerCoordinates.setLength(distanceToCenter / 10);
+    // this.forceGraph.centerCoordinates.setLength(distanceToCenter / 10);
 
     if (this.isZooming) {
       clearTimeout(this.endZoomTimeout);
@@ -215,7 +215,7 @@ export class ForceGraphEngine {
 
     const shouldUseCommand =
       this.forceGraph.view.plugin.app.internalPlugins.getPluginById("page-preview").instance
-        .overrides["3d-graph"] !== false;
+        .overrides["force-graph"] !== false;
     // show the hover preview
     if (node && node.labelEl && ((shouldUseCommand && this.commandDown) || !shouldUseCommand)) {
       this.forceGraph.view.hoverPopover?.hide();
@@ -307,13 +307,7 @@ export class ForceGraphEngine {
   };
 
   getLinkDirectionalArrowLength = () => {
-    const settings = this.forceGraph.view.settingManager.getCurrentSetting();
-
-    return (
-      settings.display.linkThickness *
-      LINK_ARROW_WIDTH_MULTIPLIER *
-      (settings.display.showLinkArrow ? 1 : 0)
-    );
+    return 0;
   };
 
   private isHighlightedLink = (link: Link): boolean => {

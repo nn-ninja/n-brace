@@ -1,12 +1,12 @@
 import type { SearchConfig } from "@/Interfaces";
 import { ActiveSearchEngine } from "@/Interfaces";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 import type { TAbstractFile } from "obsidian";
 
 export class BasicSearchEngine extends ActiveSearchEngine {
-  private plugin: Graph3dPlugin;
+  private plugin: ForceGraphPlugin;
 
-  constructor(plugin: Graph3dPlugin) {
+  constructor(plugin: ForceGraphPlugin) {
     super(false);
     this.plugin = plugin;
   }

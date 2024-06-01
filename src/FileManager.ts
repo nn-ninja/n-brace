@@ -4,17 +4,17 @@ import type { IFileManager, PassiveSearchEngine } from "@/Interfaces";
 import { ActiveSearchEngine } from "@/Interfaces";
 import { DefaultSearchEngine as DefaultSearchEngine } from "@/PassiveSearchEngine";
 import { SearchEngineType } from "@/SettingsSchemas";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 
 /**
  * this class will handle the active searching of a graph view.
  */
 export class MyFileManager implements IFileManager {
-  private plugin: Graph3dPlugin;
+  private plugin: ForceGraphPlugin;
 
   private _searchEngine: ActiveSearchEngine | PassiveSearchEngine;
 
-  constructor(plugin: Graph3dPlugin) {
+  constructor(plugin: ForceGraphPlugin) {
     this.plugin = plugin;
     this._searchEngine = this._setSearchEngine();
   }
@@ -23,7 +23,7 @@ export class MyFileManager implements IFileManager {
    * @internal
    */
   private _setSearchEngine() {
-    const getSearchEngine = (searchEngine: SearchEngineType, plugin: Graph3dPlugin) => {
+    const getSearchEngine = (searchEngine: SearchEngineType, plugin: ForceGraphPlugin) => {
       if (searchEngine === SearchEngineType.default) return new DefaultSearchEngine(plugin);
       else if (searchEngine === SearchEngineType.dataview) return new DvSearchEngine(plugin);
       else return new BasicSearchEngine(plugin);

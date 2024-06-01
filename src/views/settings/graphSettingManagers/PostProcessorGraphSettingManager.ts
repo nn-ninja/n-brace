@@ -2,21 +2,21 @@ import { PluginSettingManager } from "@/SettingManager";
 import { State } from "@/util/State";
 import type { MarkdownPostProcessorGraphSettings } from "@/SettingsSchemas";
 import { GraphType } from "@/SettingsSchemas";
-import type { PostProcessorGraph3dView } from "@/views/graph/3dView/PostProcessorGraph3dView";
+import type { PostProcessorForceGraphView } from "@/views/graph/forceview/PostProcessorForceGraphView";
 import { GraphSettingManager } from "@/views/settings/graphSettingManagers/GraphSettingsManager";
 
 export class PostProcessorGraphSettingManager extends GraphSettingManager<
   MarkdownPostProcessorGraphSettings,
-  PostProcessorGraph3dView
+  PostProcessorForceGraphView
 > {
   protected currentSetting: State<MarkdownPostProcessorGraphSettings>;
 
-  private constructor(parentView: PostProcessorGraph3dView) {
+  private constructor(parentView: PostProcessorForceGraphView) {
     super(parentView);
     this.currentSetting = new State(PluginSettingManager.getNewSetting(GraphType.postProcessor));
   }
 
-  static new(parentView: PostProcessorGraph3dView) {
+  static new(parentView: PostProcessorForceGraphView) {
     const settingManager = new PostProcessorGraphSettingManager(parentView);
     settingManager.onReady();
     return settingManager;

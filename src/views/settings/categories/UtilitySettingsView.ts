@@ -1,8 +1,8 @@
 import { ButtonComponent } from "obsidian";
 import { getMySwitcher } from "@/views/settings/categories/getMySwitcher";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 
-export const UtilitySettingsView = async (containerEl: HTMLElement, view: BaseGraph3dView) => {
+export const UtilitySettingsView = async (containerEl: HTMLElement, view: BaseForceGraphView) => {
   const plugin = view.plugin;
 
   const div = containerEl.createDiv();

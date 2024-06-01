@@ -1,10 +1,10 @@
 import type { SavedSetting } from "@/SettingsSchemas";
 import { generateUUID } from "@/util/generateUUID";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import { addSaveSettingGroupItem } from "@/views/settings/categories/SaveSettingGroupItem";
 import { Setting } from "obsidian";
 
-export const SavedSettingsView = (containerEl: HTMLElement, view: BaseGraph3dView) => {
+export const SavedSettingsView = (containerEl: HTMLElement, view: BaseForceGraphView) => {
   const div = containerEl.createDiv({
     cls: "saved-settings-view",
     attr: {

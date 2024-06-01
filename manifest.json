@@ -1,13 +1,11 @@
 {
-	"id": "3d-graph-new",
-	"name": "3D Graph New",
-	"version": "1.1.11",
-	"description": "A 3D Graph for Obsidian",
-	"author": "Hananoshika Yomaru",
-	"authorUrl": "https://github.com/HananoshikaYomaru",
-	"fundingUrl": {
-		"buymeacoffee": "https://www.buymeacoffee.com/yomaru",
-		"Github Sponsor": "https://github.com/sponsors/HananoshikaYomaru"
-	},
-	"isDesktopOnly": true
+	"id": "brainavigator-plugin",
+	"name": "Brainavigator",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Brainavigator plugin helping with exploring notes and better orientate in node view.",
+	"author": "Rafael Hazan",
+	"authorUrl": "https://hayio.github.io/brainavigator/",
+	"fundingUrl": "https://hayio.github.io/brainavigator/buymeacoffeetodo",
+	"isDesktopOnly": false
 }

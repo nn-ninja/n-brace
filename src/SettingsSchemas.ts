@@ -37,10 +37,6 @@ export const distanceFromFocal = {
 
 export enum GraphType {
   /**
-   * the global graph
-   */
-  global = "global",
-  /**
    * the local graph
    */
   local = "local",
@@ -85,7 +81,6 @@ const commonSetting = {
     linkHoverColor: "#0000ff",
     showExtension: false,
     showFullPath: false,
-    showCenterCoordinates: true,
     showLinkArrow: true,
     dontMoveWhenDrag: false,
   },
@@ -104,7 +99,6 @@ export const BaseDisplaySettingsSchema = z.object({
   linkHoverColor: z.string().default(commonSetting.display.linkHoverColor),
   showExtension: z.boolean().default(commonSetting.display.showExtension),
   showFullPath: z.boolean().default(commonSetting.display.showFullPath),
-  showCenterCoordinates: z.boolean().default(commonSetting.display.showCenterCoordinates),
   showLinkArrow: z.boolean().default(commonSetting.display.showLinkArrow),
   dontMoveWhenDrag: z.boolean().default(commonSetting.display.dontMoveWhenDrag),
   dagOrientation: z.undefined().or(z.nativeEnum(DagOrientation)).default(DagOrientation.null),
@@ -137,14 +131,6 @@ export const GroupSettingsSchema = z.array(
   })
 );
 
-// ** graph Setting Schemas
-
-export const GlobalGraphSettingsSchema = z.object({
-  filter: BaseFilterSettingsSchema,
-  groups: GroupSettingsSchema,
-  display: BaseDisplaySettingsSchema,
-});
-
 export const LocalGraphSettingsSchema = z.object({
   filter: LocalFilterSettingSchema,
   groups: GroupSettingsSchema,
@@ -155,12 +141,12 @@ export const MarkdownPostProcessorGraphSettingSchema = z
   .union([
     z.object({
       /**
-       * if the center file is undefined, it is a global graph. If the center file is defined, it is a local graph.
+       * If the center file is defined, it is a local graph.
        * @remarks the file is the path of the file (with the extension) or "current"
        */
       centerFile: z.string(),
       /**
-       * if center file is exist, then it should use the local schema. Otherwise, it should use the global schema
+       * if center file is exist, then it should use the local schema.
        */
       filter: LocalFilterSettingSchema,
     }),
@@ -183,14 +169,13 @@ export const MarkdownPostProcessorGraphSettingSchema = z
 export const SavedSettingSchema = z.object({
   title: z.string(),
   id: z.string(),
-  setting: GlobalGraphSettingsSchema.or(LocalGraphSettingsSchema),
+  setting: LocalGraphSettingsSchema,
   type: z.nativeEnum(GraphType),
 });
 
 export const SettingSchema = z.object({
   savedSettings: z.array(SavedSettingSchema),
   temporaryLocalGraphSetting: LocalGraphSettingsSchema,
-  temporaryGlobalGraphSetting: GlobalGraphSettingsSchema,
   pluginSetting: z.object({
     maxNodeNumber: z.number(),
     searchEngine: z.nativeEnum(SearchEngineType),
@@ -214,8 +199,6 @@ export type BaseDisplaySettings = Prettify<z.TypeOf<typeof BaseDisplaySettingsSc
 
 export type LocalDisplaySettings = Prettify<z.TypeOf<typeof LocalDisplaySettingsSchema>>;
 
-export type GlobalGraphSettings = Prettify<z.TypeOf<typeof GlobalGraphSettingsSchema>>;
-
 export type LocalGraphSettings = Prettify<z.TypeOf<typeof LocalGraphSettingsSchema>>;
 
 export type MarkdownPostProcessorGraphSettings = Prettify<
@@ -227,22 +210,9 @@ export type SavedSetting = Prettify<z.TypeOf<typeof SavedSettingSchema>>;
 export type Setting = Prettify<z.TypeOf<typeof SettingSchema>>;
 
 export type GraphSetting = Exclude<
-  LocalGraphSettings | GlobalGraphSettings | MarkdownPostProcessorGraphSettings,
+  LocalGraphSettings | MarkdownPostProcessorGraphSettings,
   undefined
 >;
-
-export const defaultGlobalGraphSetting: GlobalGraphSettings = {
-  filter: {
-    searchQuery: "",
-    showOrphans: true,
-    showAttachments: false,
-  },
-  groups: [],
-  display: {
-    ...commonSetting.display,
-    dagOrientation: DagOrientation.null,
-  },
-};
 
 export const defaultLocalGraphSetting: LocalGraphSettings = {
   filter: {

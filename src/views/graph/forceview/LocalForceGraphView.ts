@@ -1,15 +1,15 @@
 import { Graph } from "@/graph/Graph";
 import type { Node } from "@/graph/Node";
 import type { Link } from "@/graph/Link";
-import type Graph3dPlugin from "@/main";
-import { Graph3dView } from "@/views/graph/3dView/Graph3dView";
+import type ForceGraphPlugin from "@/main";
+import { ForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import type { SearchResult } from "@/views/settings/graphSettingManagers/GraphSettingsManager";
 import { LocalGraphSettingManager } from "@/views/settings/graphSettingManagers/LocalGraphSettingManager";
 import type { Component, TAbstractFile, TFile } from "obsidian";
 import { type LocalGraphItemView } from "@/views/graph/LocalGraphItemView";
 import type { LocalGraphSettings } from "@/SettingsSchemas";
 import { GraphType } from "@/SettingsSchemas";
-import { ForceGraph } from "@/views/graph/ForceGraph";
+import { MyForceGraph } from "@/views/graph/ForceGraph";
 
 /**
  *
@@ -94,7 +94,7 @@ const traverseNode = (
  * It will not have any setting. The files is also
  */
 export const getNewLocalGraph = (
-  plugin: Graph3dPlugin,
+  plugin: ForceGraphPlugin,
   config?: {
     centerFile: TAbstractFile | null;
     searchResults: SearchResult["filter"]["files"];
@@ -157,12 +157,12 @@ export const getNewLocalGraph = (
 };
 
 type ConstructorParameters = [
-  plugin: Graph3dPlugin,
+  plugin: ForceGraphPlugin,
   contentEl: HTMLDivElement,
   itemView: LocalGraphItemView
 ];
 
-export class LocalGraph3dView extends Graph3dView<LocalGraphSettingManager, LocalGraphItemView> {
+export class LocalForceGraphView extends ForceGraphView<LocalGraphSettingManager, LocalGraphItemView> {
   settingManager: LocalGraphSettingManager;
   /**
    * when the app is just open, this can be null
@@ -170,7 +170,7 @@ export class LocalGraph3dView extends Graph3dView<LocalGraphSettingManager, Loca
   currentFile: TAbstractFile | null;
 
   private constructor(
-    plugin: Graph3dPlugin,
+    plugin: ForceGraphPlugin,
     contentEl: HTMLDivElement,
     itemView: LocalGraphItemView
   ) {
@@ -190,8 +190,8 @@ export class LocalGraph3dView extends Graph3dView<LocalGraphSettingManager, Loca
 
   protected onReady() {
     super.onReady();
-    type LocalGraph3dView = typeof this.forceGraph.view;
-    this.forceGraph = new ForceGraph(this as LocalGraph3dView, getNewLocalGraph(this.plugin));
+    type LocalForceGraphView = typeof this.forceGraph.view;
+    this.forceGraph = new MyForceGraph(this as LocalForceGraphView, getNewLocalGraph(this.plugin));
     this.settingManager.initNewView({
       collapsed: true,
     });
@@ -239,7 +239,7 @@ export class LocalGraph3dView extends Graph3dView<LocalGraphSettingManager, Loca
   }
 
   static new(...args: ConstructorParameters) {
-    const view = new LocalGraph3dView(...args);
+    const view = new LocalForceGraphView(...args);
     view.onReady();
     // put the setting view in the content el
 

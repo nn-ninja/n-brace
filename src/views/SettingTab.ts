@@ -1,14 +1,14 @@
 import type { App } from "obsidian";
 import { PluginSettingTab, Setting } from "obsidian";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 import { CommandClickNodeAction, SearchEngineType } from "@/SettingsSchemas";
 import { DEFAULT_SETTING } from "@/SettingManager";
 
 const DEFAULT_NUMBER = DEFAULT_SETTING.pluginSetting.maxNodeNumber;
 export class SettingTab extends PluginSettingTab {
-  plugin: Graph3dPlugin;
+  plugin: ForceGraphPlugin;
 
-  constructor(app: App, plugin: Graph3dPlugin) {
+  constructor(app: App, plugin: ForceGraphPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }

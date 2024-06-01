@@ -1,5 +1,5 @@
 import { ActiveSearchEngine } from "@/Interfaces";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import { spawnLeafView } from "@/views/leafView";
 import type { SearchView, TAbstractFile } from "obsidian";
 import { TextComponent } from "obsidian";
@@ -25,7 +25,7 @@ export const addSearchInput = async (
    * @param files the files that match the query
    */
   onChange: (value: string) => void,
-  view: BaseGraph3dView
+  view: BaseForceGraphView
 ) => {
   const searchEl = containerEl.createDiv({
     // cls :

@@ -2,7 +2,6 @@ import type { ISettingManager } from "@/Interfaces";
 import { AsyncQueue } from "@/util/AsyncQueue";
 import type {
   Setting,
-  GlobalGraphSettings,
   LocalGraphSettings,
   MarkdownPostProcessorGraphSettings,
   GraphSetting,
@@ -13,7 +12,6 @@ import {
   SearchEngineType,
   CommandClickNodeAction,
   defaultLocalGraphSetting,
-  defaultGlobalGraphSetting,
   defaultMarkdownPostProcessorGraphSetting,
 } from "@/SettingsSchemas";
 import { createNotice } from "@/util/createNotice";
@@ -117,14 +115,11 @@ export class PluginSettingManager implements ISettingManager<Setting> {
     // console.log("saved: ", this.setting.value);
   }
 
-  static getNewSetting(type: GraphType.global): GlobalGraphSettings;
   static getNewSetting(type: GraphType.local): LocalGraphSettings;
   static getNewSetting(type: GraphType.postProcessor): MarkdownPostProcessorGraphSettings;
   static getNewSetting(type: GraphType): GraphSetting;
   static getNewSetting(type: GraphType) {
-    if (type === GraphType.global) {
-      return defaultGlobalGraphSetting;
-    } else if (type === GraphType.local) {
+    if (type === GraphType.local) {
       return defaultLocalGraphSetting;
     } else {
       return defaultMarkdownPostProcessorGraphSetting;
@@ -135,7 +130,6 @@ export class PluginSettingManager implements ISettingManager<Setting> {
 export const DEFAULT_SETTING: Setting = {
   savedSettings: [],
   temporaryLocalGraphSetting: defaultLocalGraphSetting,
-  temporaryGlobalGraphSetting: defaultGlobalGraphSetting,
   pluginSetting: {
     maxNodeNumber: 1000,
     searchEngine: SearchEngineType.default,

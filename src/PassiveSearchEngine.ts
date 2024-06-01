@@ -1,5 +1,5 @@
 import type { PassiveSearchEngine } from "@/Interfaces";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 import { AsyncQueue } from "@/util/AsyncQueue";
 import { waitForStable } from "@/util/waitFor";
 import type { SearchView, TAbstractFile, TFile } from "obsidian";
@@ -26,9 +26,9 @@ export const getResultFromSearchView = async (searchView: SearchView) => {
  */
 export class DefaultSearchEngine implements PassiveSearchEngine {
   useBuiltInSearchInput = true;
-  plugin: Graph3dPlugin;
+  plugin: ForceGraphPlugin;
 
-  constructor(plugin: Graph3dPlugin) {
+  constructor(plugin: ForceGraphPlugin) {
     this.plugin = plugin;
   }
 

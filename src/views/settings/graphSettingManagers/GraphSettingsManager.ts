@@ -9,10 +9,9 @@ import type { StateChange } from "@/util/State";
 import { State } from "@/util/State";
 import { GroupSettingsView } from "@/views/settings/categories/GroupSettingsView";
 import { DisplaySettingsView } from "@/views/settings/categories/DisplaySettingsView";
-import type { BaseGraph3dView, Graph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView, ForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import { waitFor } from "@/util/waitFor";
 import type {
-  GlobalGraphSettings,
   GraphSetting,
   LocalGraphSettings,
   SavedSetting,
@@ -30,11 +29,11 @@ export type SearchResult = {
   }[];
 };
 
-export type BaseGraphSettingManager = GraphSettingManager<GraphSetting, BaseGraph3dView>;
+export type BaseGraphSettingManager = GraphSettingManager<GraphSetting, BaseForceGraphView>;
 
 export abstract class GraphSettingManager<
   S extends GraphSetting,
-  V extends Graph3dView<GraphSettingManager<S, V>, ItemView>
+  V extends ForceGraphView<GraphSettingManager<S, V>, ItemView>
 > extends classes(LifeCycle) {
   protected graphView: V;
   protected abstract currentSetting: State<S>;
@@ -271,9 +270,6 @@ export abstract class GraphSettingManager<
     this.graphView.plugin.settingManager.updateSettings((setting) => {
       if (this.graphView.graphType === GraphType.local)
         setting.value.temporaryLocalGraphSetting = this.currentSetting.value as LocalGraphSettings;
-      else
-        setting.value.temporaryGlobalGraphSetting = this.currentSetting
-          .value as GlobalGraphSettings;
     });
 
     if (shouldUpdateGraphView)

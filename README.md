@@ -1,6 +1,6 @@
-## Obsidian 3D Graph (Yomaru)
+# Obsidian BraiNavigator Plugin
 
-![Obsidian 3D graph](https://github.com/HananoshikaYomaru/obsidian-3d-graph/assets/43137033/c8a501e8-c5b6-4622-b5df-2a2335609cae)
+![Obsidian 3D graph](https://github.com/HananoshikaYomaru/obsidian-brainavigator/assets/43137033/c8a501e8-c5b6-4622-b5df-2a2335609cae)
 
 A 3D Graph for Obsidian with dozen of features!
 
@@ -14,28 +14,14 @@ see the demo: <https://www.youtube.com/watch?v=w1H-pcM8nOU>
 
 You can install this on community plugin store 😎
 
-### Through BRAT
-
-1. install the BRAT plugin
-2. go to the plugin option, add beta plugin, copy and paste the link of this repo.
-3. the plugin will automatically appear in the list of installed community plugins, enabled this plugin
-
 ### Manual installation
 
 1. cd to `.obsidian/plugins`
 2. git clone this repo
-3. `cd obsidian-3d-graph && bun install && bun run build`
+3. `cd obsidian-brainavigator && bun install && bun run build`
 4. there you go 🎉
 
 ## Features
-
-### Global Graph
-
-Use ribbon button or command to open the global graph.
-
-You can do zooming (scroll you wheel), rotating (drag the scene) and panning (`ctrl`/`cmd` and drag the scene) in the graph.
-
-> ⚠️ The underly [3D graph](https://github.com/vasturiano/3d-force-graph) has Performance issue that I don't know how to fix. You can set the max node number limit on the plugin setting. If the total node number on the graph beyond the limit, the graph will not be rendered to protect your computer from hanging.
 
 ### Local Graph
 
@@ -47,6 +33,9 @@ In local graph you will have all the features of global graph, plus:
 2. link type: show only inlinks, outlinks or both.
 
 > ✨ Tips: I set the `cmd + L` to open local 3D graph.
+
+### Not present Global Graph
+(as I feel it to be useless)
 
 ### Filter Node on global graph
 
@@ -79,10 +68,10 @@ You can change the following:
 8. show center coordination
 9. show link arrow
 10. don't node move on drag
-11. [dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph) mode. See more on [DAG Mode](https://github.com/HananoshikaYomaru/obsidian-3d-graph#dag-mode).
-12. embedding graph into note through `3d-graph` code block post processor (working in progress)
+11. [dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph) mode. See more on [DAG Mode](https://github.com/HananoshikaYomaru/obsidian-3d--graph#dag-mode).
+12. embedding graph into note through `3d--graph` code block post processor (working in progress)
 
-> [!CAUTION] The `3d-graph` code block post processor is still in working progress.
+> [!CAUTION] The `force-graph` code block post processor is still in working progress.
 > It is definitely not stable yet, use it in your own risk.
 
 ### Focus on node
@@ -121,12 +110,12 @@ body {
   --graph-line: #ff0000;
 }
 
-.graph-3d-view canvas {
+.force-graph-view canvas {
   /* change the background color */
   background: white;
 }
 
-.graph-3d-view .node-label {
+.force-graph-view .node-label {
   /* change the default node label color */
   color: #00ff00;
 }
@@ -140,31 +129,3 @@ body {
 2. expose API to make it even more easier for other plugin to integrate.
 
 some other uncertain features are will sit in the github issues but I work on them base on ICE (Impact, confidence, effort)
-
-## Development
-
-1. cd to `.obsidian/plugins`
-2. git clone this repo
-3. `cd obsidian-3d-graph && bun install && bun run dev`
-4. there you go 🎉
-
-for release, just run `bun release` to release patch. You can also add `--minor` or `--major` to change update version.
-
-## Note
-
-1. I have been developing this for free. I try to prioritize the functions before fanciness. I also prioritize my tasks base on ICE (Impact, Confidence, Effort).
-2. I have other on-going projects. I need open source helpers. Sponsorship will give me motivation and code contributors are very appreciate. I am open for discussion through <https://cal.com/manlung>.
-3. If you have an question or feature request, please open Github issues.
-
-## Say thank you
-
-If you are enjoying this plugin then please support my work and enthusiasm by sponsoring me on Github or buying me a coffee on <https://www.buymeacoffee.com/yomaru>.
-
-<a href="https://www.buymeacoffee.com/yomaru" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 30px !important;width: 105px !important;" ></a> [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/hananoshikayomaru)
-
-## Acknowledgement
-
-Just want to say thanks to those people. Without them, this repo will not be here.
-
-1. The original repo: <https://github.com/AlexW00/obsidian-3d-graph>
-2. The 3d force graph by @vasturiano: <https://github.com/vasturiano/3d-force-graph>

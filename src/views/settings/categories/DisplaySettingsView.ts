@@ -3,7 +3,6 @@ import { addColorPickerSetting } from "@/views/atomics/addColorPickerSetting";
 import { addToggle } from "@/views/atomics/addToggle";
 import { DropdownComponent, Setting } from "obsidian";
 import type {
-  GlobalGraphSettings,
   LocalDisplaySettings,
   LocalGraphSettings,
 } from "@/SettingsSchemas";
@@ -20,7 +19,7 @@ import type { State } from "@/util/State";
 import { createNotice } from "@/util/createNotice";
 
 export const DisplaySettingsView = (
-  graphSetting: GlobalGraphSettings | LocalGraphSettings,
+  graphSetting: LocalGraphSettings,
   containerEl: HTMLElement,
   settingManager: BaseGraphSettingManager
 ) => {
@@ -170,19 +169,6 @@ export const DisplaySettingsView = (
   addToggle(
     containerEl,
     {
-      name: "Show center coordinates",
-      value: displaySettings.showCenterCoordinates,
-    },
-    (value) => {
-      settingManager.updateCurrentSettings((setting) => {
-        setting.value.display.showCenterCoordinates = value;
-      });
-    }
-  );
-
-  addToggle(
-    containerEl,
-    {
       name: "Show link arrow",
       value: displaySettings.showLinkArrow,
     },
@@ -225,14 +211,6 @@ export const DisplaySettingsView = (
         }
       });
     });
-
-  // if (
-  //   settingManager.getGraphView().graphType === GraphType.global ||
-  //   (graphSetting as LocalGraphSettings).filter.linkType === "both"
-  // ) {
-  //   // hide the dag orientation setting
-  //   dagDropDown.settingEl.hide();
-  // }
 
   const hideDagOrientationSetting = () => {
     // if the link type is both, then we need to hide the dag orientation setting

@@ -1,16 +1,15 @@
 import type {
-  GlobalGraphSettings,
   GraphSetting,
   GraphType,
   LocalGraphSettings,
 } from "@/SettingsSchemas";
 import { Graph } from "@/graph/Graph";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 import { AsyncEventBus } from "@/util/EventBus";
 import { LifeCycle } from "@/util/LifeCycle";
 import { ObsidianTheme } from "@/util/ObsidianTheme";
 import { createNotice } from "@/util/createNotice";
-import { ForceGraph, getTooManyNodeMessage } from "@/views/graph/ForceGraph";
+import { MyForceGraph, getTooManyNodeMessage } from "@/views/graph/ForceGraph";
 import type {
   BaseGraphSettingManager,
   GraphSettingManager,
@@ -19,18 +18,18 @@ import type { Component, HoverParent, HoverPopover, ItemView } from "obsidian";
 import { classes } from "polytype";
 import type { Node } from "@/graph/Node";
 
-export type BaseGraph3dView = Graph3dView<BaseGraphSettingManager, ItemView>;
+export type BaseForceGraphView = ForceGraphView<BaseGraphSettingManager, ItemView>;
 
-export abstract class Graph3dView<
-    M extends GraphSettingManager<GraphSetting, Graph3dView<M, V>>,
+export abstract class ForceGraphView<
+    M extends GraphSettingManager<GraphSetting, ForceGraphView<M, V>>,
     V extends ItemView
   >
   extends classes(LifeCycle)
   implements HoverParent
 {
-  readonly plugin: Graph3dPlugin;
+  readonly plugin: ForceGraphPlugin;
   readonly graphType: GraphType;
-  protected forceGraph: ForceGraph<Graph3dView<M, ItemView>>;
+  protected forceGraph: MyForceGraph<ForceGraphView<M, ItemView>>;
   public theme: ObsidianTheme;
   eventBus: AsyncEventBus = new AsyncEventBus();
 
@@ -46,20 +45,20 @@ export abstract class Graph3dView<
 
   protected constructor(
     contentEl: HTMLDivElement,
-    plugin: Graph3dPlugin,
+    plugin: ForceGraphPlugin,
     graphType: GraphType,
     itemView: V
   ) {
     super();
     this.contentEl = contentEl;
-    this.contentEl.classList.add("graph-3d-view");
+    this.contentEl.classList.add("force-graph-view");
     this.plugin = plugin;
     this.itemView = itemView;
     this.graphType = graphType;
     this.theme = new ObsidianTheme(this.plugin.app.workspace.containerEl);
     // since setting manager need to be initialized first before the force graph
-    // in the graph 3d view constructor, we need to initialize it in the in the onReady function
-    this.forceGraph = undefined as unknown as ForceGraph<Graph3dView<M, ItemView>>;
+    // in the graph view constructor, we need to initialize it in the in the onReady function
+    this.forceGraph = undefined as unknown as MyForceGraph<ForceGraphView<M, ItemView>>;
   }
 
   /**
@@ -79,7 +78,7 @@ export abstract class Graph3dView<
         });
         this.forceGraph.view.plugin.app.workspace.trigger("hover-link", {
           event: event,
-          source: "3d-graph",
+          source: "force-graph",
           hoverParent: this.forceGraph.view,
           targetEl: this.forceGraph.view.contentEl,
           linktext: node.path,
@@ -131,10 +130,10 @@ export abstract class Graph3dView<
     }
 
     // seem like typescript cannot handle the type of this correctly when circular dependency generics
-    type Graph3dView = typeof this.forceGraph.view;
+    type ForceGraphView = typeof this.forceGraph.view;
 
     if (!this.forceGraph)
-      this.forceGraph = new ForceGraph(this as Graph3dView, tooLarge ? Graph.createEmpty() : graph);
+      this.forceGraph = new MyForceGraph(this as ForceGraphView, tooLarge ? Graph.createEmpty() : graph);
     else this.forceGraph.updateGraph(tooLarge ? Graph.createEmpty() : graph);
     // get current focus element
     const focusEl = document.activeElement as HTMLElement | null;
@@ -163,7 +162,7 @@ export abstract class Graph3dView<
   public abstract handleGroupColorSearchResultChange(): void;
 
   /**
-   * when the metadata cache is change, the global graph is updated. The graph view need to know how to response to this.
+   * when the metadata cache is change, the graph is updated. The graph view need to know how to response to this.
    */
   public abstract handleMetadataCacheChange(): void;
 
@@ -174,7 +173,7 @@ export abstract class Graph3dView<
    */
   public handleSettingUpdate(
     newSetting: GraphSetting,
-    ...path: (NestedKeyOf<GlobalGraphSettings> | NestedKeyOf<LocalGraphSettings>)[]
+    ...path: (NestedKeyOf<LocalGraphSettings>)[]
   ): void {
     if (path.includes("")) {
       this.forceGraph?.interactionManager.updateNodeLabelDiv();
@@ -211,13 +210,6 @@ export abstract class Graph3dView<
       this.forceGraph?.updateConfig({
         display: {
           nodeRepulsion: newSetting.display.nodeRepulsion,
-        },
-      });
-    }
-    if (path.includes("display.showCenterCoordinates")) {
-      this.forceGraph?.updateConfig({
-        display: {
-          showCenterCoordinates: newSetting.display.showCenterCoordinates,
         },
       });
     }

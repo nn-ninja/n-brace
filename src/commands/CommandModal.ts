@@ -1,14 +1,14 @@
 import { FuzzySuggestModal } from "obsidian";
 import type { Node } from "@/graph/Node";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import type { Command } from "@/commands/Command";
 import { commands } from "@/commands/Command";
 
 export class CommandModal extends FuzzySuggestModal<Command> {
   private nodes: Set<Node>;
-  private view: BaseGraph3dView;
+  private view: BaseForceGraphView;
 
-  constructor(view: BaseGraph3dView, selectedNodes: Set<Node>) {
+  constructor(view: BaseForceGraphView, selectedNodes: Set<Node>) {
     super(view.plugin.app);
     this.nodes = selectedNodes;
     this.view = view;

@@ -1,5 +1,5 @@
 {
-  "name": "3d-graph-new",
+  "name": "brainavigator",
   "version": "1.1.11",
   "description": "A 3D graph for Obsidian",
   "main": "main.js",
@@ -20,10 +20,12 @@
     "3D graph",
     "graph"
   ],
-  "author": "Hananoshika Yomaru",
+  "author": "Rafael Hazan",
   "license": "MIT",
   "devDependencies": {
     "@total-typescript/ts-reset": "^0.5.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@types/d3": "^7.4.0",
     "@types/eslint": "^8.44.4",
     "@types/node": "^16.11.6",
@@ -47,11 +49,13 @@
     "typescript": "^5.0.5"
   },
   "dependencies": {
-    "3d-force-graph": "^1.72.3",
+    "react": "^18.3.1",
+    "react-dom": "18.3.1",
+    "force-graph": "^1.43.5",
     "@tweenjs/tween.js": "^21.0.0",
     "copy-anything": "^3.0.5",
-    "d3": "^7.8.5",
-    "d3-force-3d": "^3.0.5",
+    "d3": "^7.9.0",
+    "d3-force": "^3.0.0",
     "observable-slim": "^0.1.6",
     "obsidian-dataview": "^0.5.61",
     "polytype": "^0.17.0",

@@ -12,26 +12,26 @@ import { config } from "@/config";
 import { MyFileManager } from "@/FileManager";
 import { PluginSettingManager } from "@/SettingManager";
 import { GraphType } from "@/SettingsSchemas";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
-import { GlobalGraphItemView } from "@/views/graph/GlobalGraphItemView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import { LocalGraphItemView } from "@/views/graph/LocalGraphItemView";
-import { Graph3DViewMarkdownRenderChild } from "@/views/graph/Graph3DViewMarkdownRenderChild";
+import { ExampleView } from "@/views/ExampleView";
+import { ForceGraphViewMarkdownRenderChild } from "@/views/graph/ForceGraphViewMarkdownRenderChild";
 
-export default class Graph3dPlugin extends Plugin implements HoverParent {
+export default class ForceGraphPlugin extends Plugin implements HoverParent {
   _resolvedCache: ResolvedLinkCache;
   public readonly cacheIsReady: State<boolean> = new State(
     this.app.metadataCache.resolvedLinks !== undefined
   );
   private isCacheReadyOnce = false;
   /**
-   *  we keep a global graph here because we dont want to create a new graph every time we open a graph view
+   *  we keep a graph here because we dont want to create a new graph every time we open a graph view
    */
   public globalGraph: Graph;
 
   public fileManager: MyFileManager;
   public settingManager: PluginSettingManager;
 
-  public activeGraphViews: BaseGraph3dView[] = [];
+  public activeGraphViews: BaseForceGraphView[] = [];
 
   public mousePosition = { x: 0, y: 0 };
 
@@ -73,17 +73,9 @@ export default class Graph3dPlugin extends Plugin implements HoverParent {
     // init listeners
     this.initListeners();
 
-    this.addRibbonIcon(config.icon, config.displayText.global, this.openGlobalGraph);
-
     this.addCommand({
-      id: "open-3d-graph-global",
-      name: "Open Global 3D Graph",
-      callback: this.openGlobalGraph,
-    });
-
-    this.addCommand({
-      id: "open-3d-graph-local",
-      name: "Open Local 3D Graph",
+      id: "open-graph-local",
+      name: "Open Local Graph",
       callback: this.openLocalGraph,
     });
 
@@ -95,27 +87,26 @@ export default class Graph3dPlugin extends Plugin implements HoverParent {
 
     this.addSettingTab(new SettingTab(this.app, this));
 
-    // register global view
-    this.registerView(config.viewType.global, (leaf) => {
-      return new GlobalGraphItemView(leaf, this);
-    });
-
     // register local view
     this.registerView(config.viewType.local, (leaf) => {
       return new LocalGraphItemView(leaf, this);
     });
 
+    this.registerView("aa", (leaf) => {
+      return new ExampleView(leaf);
+    });
+
     // register markdown code block processor
-    this.registerMarkdownCodeBlockProcessor("3d-graph", (source, el, ctx) => {
+    this.registerMarkdownCodeBlockProcessor("force-graph", (source, el, ctx) => {
       // get the markdown view of this file
       const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView) as MarkdownView;
-      ctx.addChild(new Graph3DViewMarkdownRenderChild(el, this, source, ctx, markdownView));
+      ctx.addChild(new ForceGraphViewMarkdownRenderChild(el, this, source, ctx, markdownView));
     });
 
     // register hover link source
-    this.registerHoverLinkSource("3d-graph", {
+    this.registerHoverLinkSource("force-graph", {
       defaultMod: true,
-      display: "3D Graph",
+      display: "Brainavigator Graph",
     });
   }
 
@@ -138,7 +129,7 @@ export default class Graph3dPlugin extends Plugin implements HoverParent {
         if (!file) return;
         menu.addItem((item) => {
           item
-            .setTitle("Open in local 3D Graph")
+            .setTitle("Open in Brainavigator Graph")
             .setIcon(config.icon)
             .onClick(() => this.openLocalGraph());
         });
@@ -157,7 +148,7 @@ export default class Graph3dPlugin extends Plugin implements HoverParent {
   };
 
   /**
-   * check if the cache is ready and if it is, update the global graph
+   * check if the cache is ready and if it is, update the graph
    */
   public onGraphCacheChanged = () => {
     // check if the cache actually updated
@@ -196,20 +187,14 @@ export default class Graph3dPlugin extends Plugin implements HoverParent {
    * Opens a local graph view in a new leaf
    */
   private openLocalGraph = () => {
+    console.info('a');
     const localGraphItemView = this.app.workspace.getActiveViewOfType(LocalGraphItemView);
+    console.info('b' + localGraphItemView);
     if (localGraphItemView) {
       this.app.workspace.setActiveLeaf(localGraphItemView.leaf);
-    } else this.openGraph(GraphType.local);
-  };
-
-  /**
-   * Opens a global graph view in the current leaf
-   */
-  private openGlobalGraph = () => {
-    const globalGraphView = this.app.workspace.getActiveViewOfType(GlobalGraphItemView);
-    if (globalGraphView) {
-      this.app.workspace.setActiveLeaf(globalGraphView.leaf);
-    } else this.openGraph(GraphType.global);
+    } else {
+      this.openGraph(GraphType.local);
+    }
   };
 
   /**
@@ -218,9 +203,9 @@ export default class Graph3dPlugin extends Plugin implements HoverParent {
   private openGraph = async (graphType: GraphType) => {
     eventBus.trigger("open-graph");
 
-    const leaf = this.app.workspace.getLeaf(graphType === GraphType.local ? "split" : false);
+    const leaf = this.app.workspace.getLeaf("split");
     await leaf.setViewState({
-      type: graphType === GraphType.local ? config.viewType.local : config.viewType.global,
+      type: "aa",
       active: true,
     });
   };

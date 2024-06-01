@@ -1,19 +1,19 @@
 import { GraphType } from "@/SettingsSchemas";
 import type { Graph } from "@/graph/Graph";
-import { Graph3dView } from "@/views/graph/3dView/Graph3dView";
-import { getNewLocalGraph } from "@/views/graph/3dView/LocalGraph3dView";
+import { ForceGraphView } from "@/views/graph/forceview/ForceGraphView";
+import { getNewLocalGraph } from "@/views/graph/forceview/LocalForceGraphView";
 import { PostProcessorGraphSettingManager } from "@/views/settings/graphSettingManagers/PostProcessorGraphSettingManager";
 import type { Component, MarkdownView, TFile } from "obsidian";
-import type { Graph3DViewMarkdownRenderChild } from "@/views/graph/Graph3DViewMarkdownRenderChild";
-import { ForceGraph } from "@/views/graph/ForceGraph";
-import type Graph3dPlugin from "@/main";
+import type { ForceGraphViewMarkdownRenderChild } from "@/views/graph/ForceGraphViewMarkdownRenderChild";
+import { MyForceGraph } from "@/views/graph/ForceGraph";
+import type ForceGraphPlugin from "@/main";
 
-export class PostProcessorGraph3dView extends Graph3dView<
+export class PostProcessorForceGraphView extends ForceGraphView<
   PostProcessorGraphSettingManager,
   MarkdownView
 > {
   itemView: MarkdownView;
-  parent: Graph3DViewMarkdownRenderChild;
+  parent: ForceGraphViewMarkdownRenderChild;
   settingManager: PostProcessorGraphSettingManager;
 
   public handleSearchResultChange(): void {
@@ -44,10 +44,10 @@ export class PostProcessorGraph3dView extends Graph3dView<
     return graph;
   }
   private constructor(
-    plugin: Graph3dPlugin,
+    plugin: ForceGraphPlugin,
     contentEl: HTMLElement,
     markdownView: MarkdownView,
-    parent: Graph3DViewMarkdownRenderChild
+    parent: ForceGraphViewMarkdownRenderChild
   ) {
     super(contentEl as HTMLDivElement, plugin, GraphType.postProcessor, markdownView);
     this.parent = parent;
@@ -58,12 +58,12 @@ export class PostProcessorGraph3dView extends Graph3dView<
   }
 
   static new(
-    plugin: Graph3dPlugin,
+    plugin: ForceGraphPlugin,
     contentEl: HTMLElement,
     markdownView: MarkdownView,
-    parent: Graph3DViewMarkdownRenderChild
+    parent: ForceGraphViewMarkdownRenderChild
   ) {
-    const view = new PostProcessorGraph3dView(plugin, contentEl, markdownView, parent);
+    const view = new PostProcessorForceGraphView(plugin, contentEl, markdownView, parent);
     view.onReady();
     // put the setting view in the content el
     return view;
@@ -76,11 +76,11 @@ export class PostProcessorGraph3dView extends Graph3dView<
   onReady(): void {
     super.onReady();
     // first we need to create the force graph
-    this.forceGraph = new ForceGraph(
+    this.forceGraph = new MyForceGraph(
       this as typeof this.forceGraph.view,
       getNewLocalGraph(this.plugin)
     );
-    // post process graph will not have 3d graph
+    // post process graph will not have graph
     //  setting manager init view
     // this.settingManager.initNewView(true);
   }

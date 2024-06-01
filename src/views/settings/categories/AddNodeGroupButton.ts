@@ -1,6 +1,6 @@
 import { ButtonComponent } from "obsidian";
 import { AddNodeGroupItem } from "@/views/settings/categories/AddGroupSettingItem";
-import type { BaseGraph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import type { addSearchInput } from "@/views/atomics/addSearchInput";
 
 const getRandomColor = () => {
@@ -9,7 +9,7 @@ const getRandomColor = () => {
 
 export const addNodeGroupButton = (
   containerEl: HTMLElement,
-  view: BaseGraph3dView,
+  view: BaseForceGraphView,
   searchInputs: Awaited<ReturnType<typeof addSearchInput>>[]
 ) => {
   // make sure there is only one button

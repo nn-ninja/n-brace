@@ -1,9 +1,8 @@
-import type { ForceGraph3DInstance } from "3d-force-graph";
-import ForceGraph3D from "3d-force-graph";
+import type { ForceGraphInstance as ForceGraphInstance, LinkObject } from "force-graph";
+import ForceGraph from "force-graph";
 import { Graph } from "@/graph/Graph";
-import { CenterCoordinates } from "@/views/graph/CenterCoordinates";
 import * as THREE from "three";
-import * as d3 from "d3-force-3d";
+import * as d3 from "d3-force";
 import { hexToRGBA } from "@/util/hexToRGBA";
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { FOCAL_FROM_CAMERA, ForceGraphEngine } from "@/views/graph/ForceGraphEngine";
@@ -12,39 +11,38 @@ import type { Node } from "@/graph/Node";
 
 import { rgba } from "polished";
 import { createNotice } from "@/util/createNotice";
-import type { GlobalGraphSettings, GraphSetting, LocalGraphSettings } from "@/SettingsSchemas";
+import type { GraphSetting, LocalGraphSettings } from "@/SettingsSchemas";
 import { DagOrientation } from "@/SettingsSchemas";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import type { BaseGraph3dView, Graph3dView } from "@/views/graph/3dView/Graph3dView";
+import type { BaseForceGraphView, ForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import type { ItemView, TFile } from "obsidian";
 import type { GraphSettingManager } from "@/views/settings/graphSettingManagers/GraphSettingsManager";
 import { syncOf } from "@/util/awaitof";
+import { Link } from "@/graph/Link";
 
 export const getTooManyNodeMessage = (nodeNumber: number) =>
   `Graph is too large to be rendered. Have ${nodeNumber} nodes.`;
 
-type MyForceGraph3DInstance = Omit<ForceGraph3DInstance, "graphData"> & {
+type MyForceGraphInstance = Omit<ForceGraphInstance, "graphData"> & {
   graphData: {
     (): Graph; // When no argument is passed, it returns a Graph
-    (graph: Graph): MyForceGraph3DInstance; // When a Graph is passed, it returns MyForceGraph3DInstance
+    (graph: Graph): MyForceGraphInstance; // When a Graph is passed, it returns MyForceGraphInstance
   };
 };
 
-export type BaseForceGraph = ForceGraph<BaseGraph3dView>;
+export type BaseForceGraph = MyForceGraph<BaseForceGraphView>;
 
 /**
  * this class control the config and graph of the force graph. The interaction is not control here.
  */
-export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, V>, ItemView>> {
+export class MyForceGraph<V extends ForceGraphView<GraphSettingManager<GraphSetting, V>, ItemView>> {
   /**
-   * this can be a local graph or a global graph
+   * this can be a local graph
    */
   public readonly view: V;
-  // private config: LocalGraphSettings | GlobalGraphSettings;
+  // private config: LocalGraphSettings;
 
-  public readonly instance: MyForceGraph3DInstance;
-  public readonly centerCoordinates: CenterCoordinates;
-  public readonly myCube: THREE.Mesh;
+  public readonly instance: MyForceGraphInstance;
 
   public readonly interactionManager: ForceGraphEngine;
   public nodeLabelEl: HTMLDivElement;
@@ -74,15 +72,7 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
     this.nodeLabelEl = nodeLabelEl;
     // create the instance
     // these config will not changed by user
-    this.instance = ForceGraph3D({
-      controlType: pluginSetting.rightClickToPan ? undefined : "orbit",
-      extraRenderers: [
-        // @ts-ignore https://github.com/vasturiano/3d-force-graph/blob/522d19a831e92015ff77fb18574c6b79acfc89ba/example/html-nodes/index.html#L27C9-L29
-        new CSS2DRenderer({
-          element: divEl,
-        }),
-      ],
-    })(this.view.contentEl)
+    this.instance = ForceGraph()(this.view.contentEl)
       .graphData(graph)
       .nodeColor(this.interactionManager.getNodeColor)
       // @ts-ignore
@@ -100,8 +90,6 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
       .onBackgroundRightClick(() => {
         this.interactionManager.removeSelection();
       })
-      .nodeOpacity(0.9)
-      .linkOpacity(0.3)
       .onNodeHover(this.interactionManager.onNodeHover)
       .onNodeDrag(this.interactionManager.onNodeDrag)
       .onNodeDragEnd(this.interactionManager.onNodeDragEnd)
@@ -112,6 +100,7 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
       .linkWidth(this.interactionManager.getLinkWidth)
       .linkDirectionalParticles(this.interactionManager.getLinkDirectionalParticles)
       .linkDirectionalParticleWidth(this.interactionManager.getLinkDirectionalParticleWidth)
+      .linkDirectionalParticleColor(link => 'rgba(71, 30, 143, 0.25)')
       .linkDirectionalArrowLength(this.interactionManager.getLinkDirectionalArrowLength)
       .linkDirectionalArrowRelPos(1)
       // the options here are auto
@@ -119,69 +108,87 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
       .height(this.view.contentEl.innerHeight)
       .d3Force("collide", d3.forceCollide(5))
       //   transparent
-      .backgroundColor(hexToRGBA("#000000", 0)) as unknown as MyForceGraph3DInstance;
+      .backgroundColor(hexToRGBA("#000000", 0)) as unknown as MyForceGraphInstance;
 
-    const scene = this.instance.scene();
-    const renderer = this.instance.renderer();
-    renderer.domElement.addEventListener("wheel", (e) => this.interactionManager.onZoom(e));
-    // add others things
-    // add center coordinates
-    this.centerCoordinates = new CenterCoordinates(
-      this.view.settingManager.getCurrentSetting().display.showCenterCoordinates
-    );
-    scene.add(this.centerCoordinates.arrowsGroup);
-
-    this.myCube = this.createCube();
-    scene.add(this.myCube);
+    // this.view.settingManager.getCurrentSetting().display.showCenterCoordinates
+    this.instance.cooldownTicks(20)
+      .onEngineStop(() => this.instance.zoomToFit(200, 50));
 
     // add node label
     this.instance
-      .nodeThreeObject((node: Node) => {
-        const nodeEl = document.createElement("div");
-
+      .nodeCanvasObject((node: Node & Coords, ctx, globalScale) => {
         const text = this.interactionManager.getNodeLabelText(node);
-        nodeEl.textContent = text;
-        // @ts-ignore
-        nodeEl.style.color = node.color;
-        nodeEl.className = "node-label";
-        nodeEl.style.top = "20px";
-        nodeEl.style.fontSize = "12px";
-        nodeEl.style.padding = "1px 4px";
-        nodeEl.style.borderRadius = "4px";
-        nodeEl.style.backgroundColor = rgba(0, 0, 0, 0.5);
-        nodeEl.style.userSelect = "none";
+        const fontSize = 16/globalScale;
+        ctx.font = `${fontSize}px Sans-Serif`;
+        const textWidth = ctx.measureText(text).width;
+        const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
 
-        const cssObject = new CSS2DObject(nodeEl);
-        cssObject.onAfterRender = (renderer, scene, camera) => {
-          const value = 1 - this.interactionManager.getNodeOpacityEasedValue(node);
-          nodeEl.style.opacity = `${
-            this.interactionManager.getIsAnyHighlighted() &&
-            !this.interactionManager.isHighlightedNode(node)
-              ? Math.clamp(value, 0, 0.2)
-              : this.interactionManager.hoveredNode === node
-              ? 1
-              : value
-          }`;
-        };
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
 
-        node.labelEl = nodeEl;
-        // add an on hover event to the label element
-        // when hover, trigger hover link and show the preview
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(0, 0, 0, 1.0)';
+        ctx.fillText(text, node.x, node.y);
 
-        return cssObject;
-      })
-      .nodeThreeObjectExtend(true);
+        node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+      }).nodePointerAreaPaint((node: Node & Coords, color, ctx) => {
+        ctx.fillStyle = color;
+        const bckgDimensions = node.__bckgDimensions;
+        bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, 
+          ...bckgDimensions);
+
+      }).linkCanvasObject((link: LinkObject, ctx, globalScale: number) => {
+        // Destructure the source and target coordinates
+        var { x: x1, y: y1 } = link.source;
+        var { x: x2, y: y2 } = link.target;
+        if (!x1) {
+          x1 = 0;
+          y1 = 0;
+          x2 = 0;
+          y2 = 0;
+        }
+
+        // Set the starting width and ending width for the link
+        const startWidth = 1;
+        const endWidth = 20;
+
+        // Calculate the length of the link
+        const length = Math.hypot(x2 - x1, y2 - y1);
+
+        // Save the current canvas state
+        ctx.save();
+
+        // Translate to the start point of the link
+        ctx.translate(x1, y1);
+
+        // Rotate the canvas to align with the link direction
+        ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
+
+        // Create a gradient for the line width
+        const gradient = ctx.createLinearGradient(0, 0, length, 0);
+        gradient.addColorStop(0, 'rgba(71, 30, 143, 1)');  // Start color
+        gradient.addColorStop(1, 'rgba(71, 30, 143, 0.25)');  // End color
+
+        // Set the stroke style to the gradient
+        ctx.strokeStyle = gradient;
+
+        // Create a pattern for widening the link
+        for (let i = 1; i < length; i++) {
+          ctx.beginPath();
+          ctx.lineWidth = startWidth + (endWidth - startWidth) * (i / length);
+          ctx.moveTo(i-1, 0);
+          ctx.lineTo(i, 0);
+          ctx.stroke();
+        }
+
+        // Restore the canvas state
+        ctx.restore();
+
+      });
 
     // init other setting
     this.updateConfig(this.view.settingManager.getCurrentSetting());
-
-    // this disable the right click to pan
-    if (!pluginSetting.rightClickToPan) {
-      const controls = this.instance.controls() as OrbitControls;
-      controls.mouseButtons.RIGHT = undefined;
-      // also if right click to pan cmd + left pan should be disabled
-      // to disable it, we just need to remove the orbit controls
-    }
 
     //  change the nav info text
     this.view.contentEl
@@ -204,32 +211,6 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
     return { divEl, nodeLabelEl };
   }
 
-  private createCube() {
-    // add cube
-    const myCube = new THREE.Mesh(
-      new THREE.BoxGeometry(30, 30, 30),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 })
-    );
-
-    myCube.position.set(0, 0, -FOCAL_FROM_CAMERA);
-
-    const oldOnBeforeRender = this.instance.scene().onBeforeRender;
-
-    this.instance.scene().onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
-      // first run the old onBeforeRender
-      oldOnBeforeRender(renderer, scene, camera, geometry, material, group);
-
-      const cwd = new THREE.Vector3();
-      camera.getWorldDirection(cwd);
-      cwd.multiplyScalar(FOCAL_FROM_CAMERA);
-      cwd.add(camera.position);
-      myCube.position.set(cwd.x, cwd.y, cwd.z);
-      myCube.setRotationFromQuaternion(camera.quaternion);
-    };
-    myCube.visible = false;
-    return myCube;
-  }
-
   /**
    * update the dimensions of the graph
    */
@@ -242,7 +223,7 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
     }
   }
 
-  public updateConfig(config: DeepPartial<LocalGraphSettings | GlobalGraphSettings>) {
+  public updateConfig(config: DeepPartial<LocalGraphSettings>) {
     const { error } = syncOf(() => this.updateInstance(undefined, config));
     if (error) {
       console.error(error);
@@ -269,7 +250,7 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
    */
   private updateInstance = (
     graph?: Graph,
-    config?: DeepPartial<LocalGraphSettings | GlobalGraphSettings>
+    config?: DeepPartial<LocalGraphSettings>
   ) => {
     if (graph !== undefined) this.instance.graphData(graph);
     if (config?.display?.nodeSize !== undefined)
@@ -281,11 +262,7 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
       this.instance.d3Force("charge")?.strength(-config.display?.nodeRepulsion);
       this.instance
         .d3Force("x", d3.forceX(0).strength(1 - config.display?.nodeRepulsion / 3000 + 0.001))
-        .d3Force("y", d3.forceY(0).strength(1 - config.display?.nodeRepulsion / 3000 + 0.001))
-        .d3Force("z", d3.forceZ(0).strength(1 - config.display?.nodeRepulsion / 3000 + 0.001));
-    }
-    if (config?.display?.showCenterCoordinates !== undefined) {
-      this.centerCoordinates.setVisibility(config.display.showCenterCoordinates);
+        .d3Force("y", d3.forceY(0).strength(1 - config.display?.nodeRepulsion / 3000 + 0.001));
     }
 
     if ((config as LocalGraphSettings)?.display?.dagOrientation !== undefined) {
@@ -314,8 +291,7 @@ export class ForceGraph<V extends Graph3dView<GraphSettingManager<GraphSetting, 
       (config as LocalGraphSettings)?.display?.dagOrientation !== undefined;
 
     if (needReheat) {
-      this.instance.numDimensions(3); // reheat simulation
-      this.instance.refresh();
+      this.instance.d3ReheatSimulation();
     }
   };
 }

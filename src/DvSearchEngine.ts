@@ -1,13 +1,13 @@
 import type { SearchConfig } from "@/Interfaces";
 import { ActiveSearchEngine } from "@/Interfaces";
-import type Graph3dPlugin from "@/main";
+import type ForceGraphPlugin from "@/main";
 import { createNotice } from "@/util/createNotice";
 import type { TAbstractFile } from "obsidian";
 import { getAPI } from "obsidian-dataview";
 
 export class DvSearchEngine extends ActiveSearchEngine {
-  private plugin: Graph3dPlugin;
-  constructor(plugin: Graph3dPlugin) {
+  private plugin: ForceGraphPlugin;
+  constructor(plugin: ForceGraphPlugin) {
     super(false);
     this.plugin = plugin;
   }
