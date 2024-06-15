@@ -183,6 +183,14 @@ export class Graph {
     return Graph.createFromLinkMap(linkMap, filteredNodes);
   };
 
+  public filterNodes(pred: (node: Node) => boolean): Node[] {
+    return this.nodes.filter(pred);
+  }
+
+  public applyNodes = (fun: (node: Node) => void): void => {
+    this.nodes.forEach(fun);
+  };
+
   public static compare = (graph1: Graph, graph2: Graph): boolean => {
     // Quick checks for lengths
     if (graph1.nodes.length !== graph2.nodes.length) {

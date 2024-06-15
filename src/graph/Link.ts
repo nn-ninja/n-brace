@@ -5,6 +5,7 @@ export type ResolvedLinkCache = Record<string, Record<string, number>>;
 export class Link {
   public readonly source: Node;
   public readonly target: Node;
+  public color: string = "green";
 
   constructor(source: Node, target: Node) {
     this.source = source;

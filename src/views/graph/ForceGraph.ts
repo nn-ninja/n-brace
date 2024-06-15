@@ -111,14 +111,14 @@ export class MyForceGraph<V extends ForceGraphView<GraphSettingManager<GraphSett
       .backgroundColor(hexToRGBA("#000000", 0)) as unknown as MyForceGraphInstance;
 
     // this.view.settingManager.getCurrentSetting().display.showCenterCoordinates
-    this.instance.cooldownTicks(20)
+    this.instance.cooldownTicks(40)
       .onEngineStop(() => this.instance.zoomToFit(200, 50));
 
     // add node label
     this.instance
       .nodeCanvasObject((node: Node & Coords, ctx, globalScale) => {
         const text = this.interactionManager.getNodeLabelText(node);
-        const fontSize = 16/globalScale;
+        const fontSize = 16 / globalScale;
         ctx.font = `${fontSize}px Sans-Serif`;
         const textWidth = ctx.measureText(text).width;
         const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
@@ -138,7 +138,10 @@ export class MyForceGraph<V extends ForceGraphView<GraphSettingManager<GraphSett
         bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, 
           ...bckgDimensions);
 
-      }).linkCanvasObject((link: LinkObject, ctx, globalScale: number) => {
+      }).linkCanvasObject((link: Link, ctx, globalScale: number) => {
+        if (link.color === "parent") {
+          return;
+        }
         // Destructure the source and target coordinates
         var { x: x1, y: y1 } = link.source;
         var { x: x2, y: y2 } = link.target;

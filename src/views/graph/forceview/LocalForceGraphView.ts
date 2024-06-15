@@ -1,6 +1,6 @@
 import { Graph } from "@/graph/Graph";
 import type { Node } from "@/graph/Node";
-import type { Link } from "@/graph/Link";
+import { Link } from "@/graph/Link";
 import type ForceGraphPlugin from "@/main";
 import { ForceGraphView } from "@/views/graph/forceview/ForceGraphView";
 import type { SearchResult } from "@/views/settings/graphSettingManagers/GraphSettingsManager";
@@ -152,6 +152,24 @@ export const getNewLocalGraph = (
       if (node.links.length === 0 && !config.filterSetting.showOrphans) return false;
       return true;
     });
+
+  const parentNodes = graph.filterNodes((node: Node) => {
+    return node.isParentOf(centerFile.path);
+  });
+
+  function applyToConsecutivePairs<T>(arr: T[], func: (a: T, b: T) => void): void {
+    for (let i = 0; i < arr.length - 1; i++) {
+      func(arr[i], arr[i + 1]);
+    }
+  }
+
+  if (parentNodes.length > 1) {
+    applyToConsecutivePairs(parentNodes, (n1, n2) => {
+      const link = new Link(n1, n2);
+      link.color = "parent";
+      graph.links.push(link);
+    });
+  }
 
   return graph;
 };

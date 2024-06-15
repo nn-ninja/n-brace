@@ -52,6 +52,10 @@ export class Node {
     else return this.neighbors.some((neighbor) => neighbor.id === node);
   }
 
+  public isParentOf(nodePath: string) {
+    return this.path !== nodePath && this.links.some((link) => link.target.path === nodePath);
+  }
+
   public static compare = (a: Node, b: Node) => {
     return a.path === b.path;
   };
