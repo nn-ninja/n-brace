@@ -1,11 +1,12 @@
 import { type Node } from "@/graph/Node";
 
-export type ResolvedLinkCache = Record<string, Record<string, number>>;
+export type LinkCache = Record<string, Record<string, number>>;
 
 export class Link {
-  public readonly source: Node;
-  public readonly target: Node;
+  public source: Node;
+  public target: Node;
   public color: string = "green";
+  public label?: string;
 
   constructor(source: Node, target: Node) {
     this.source = source;

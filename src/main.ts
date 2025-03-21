@@ -2,7 +2,7 @@ import type { App, HoverParent, HoverPopover, PluginManifest } from "obsidian";
 import { MarkdownView, Plugin } from "obsidian";
 import { State } from "@/util/State";
 import { Graph } from "@/graph/Graph";
-import type { ResolvedLinkCache } from "@/graph/Link";
+import type { LinkCache } from "@/graph/Link";
 import { deepCompare } from "@/util/deepCompare";
 import "@total-typescript/ts-reset";
 import "@total-typescript/ts-reset/dom";
@@ -12,16 +12,17 @@ import { config } from "@/config";
 import { MyFileManager } from "@/FileManager";
 import { PluginSettingManager } from "@/SettingManager";
 import { GraphType } from "@/SettingsSchemas";
-import type { BaseForceGraphView } from "@/views/graph/forceview/ForceGraphView";
-import { LocalGraphItemView } from "@/views/graph/LocalGraphItemView";
-import { ExampleView } from "@/views/ExampleView";
-import { ForceGraphViewMarkdownRenderChild } from "@/views/graph/ForceGraphViewMarkdownRenderChild";
+import { ReactForceGraphView, VIEW_TYPE_REACT_FORCE_GRAPH } from "@/views/ReactForceGraphView";
+import { getDefaultStore } from "jotai/index";
+import { graphDataAtom, graphNavAtom } from "@/atoms/graphAtoms";
+import { RESET } from "jotai/utils";
 
 export default class ForceGraphPlugin extends Plugin implements HoverParent {
-  _resolvedCache: ResolvedLinkCache;
+  _resolvedCache: LinkCache;
   public readonly cacheIsReady: State<boolean> = new State(
     this.app.metadataCache.resolvedLinks !== undefined
   );
+  readonly store = getDefaultStore();
   private isCacheReadyOnce = false;
   /**
    *  we keep a graph here because we dont want to create a new graph every time we open a graph view
@@ -30,8 +31,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
   public fileManager: MyFileManager;
   public settingManager: PluginSettingManager;
-
-  public activeGraphViews: BaseForceGraphView[] = [];
+  public baseFolder: string = "";
 
   public mousePosition = { x: 0, y: 0 };
 
@@ -41,7 +41,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     super(app, manifest);
 
     // this will be initialized in the on cache changed function
-    this._resolvedCache = undefined as unknown as ResolvedLinkCache;
+    this._resolvedCache = undefined as unknown as LinkCache;
     // this will be initialized in the on cache changed function
     this.globalGraph = undefined as unknown as Graph;
 
@@ -67,17 +67,13 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     this.fileManager = new MyFileManager(this);
 
     // init the theme
-    this.cacheIsReady.value = this.app.metadataCache.resolvedLinks !== undefined;
+    this.cacheIsReady.value =
+      this.app.metadataCache.resolvedLinks !== undefined &&
+      Object.keys(this.app.metadataCache.resolvedLinks).length > 0;
     this.onGraphCacheChanged();
 
     // init listeners
     this.initListeners();
-
-    this.addCommand({
-      id: "open-graph-local",
-      name: "Open Local Graph",
-      callback: this.openLocalGraph,
-    });
 
     this.registerDomEvent(window, "mousemove", (event) => {
       // set the mouse position
@@ -87,23 +83,11 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
     this.addSettingTab(new SettingTab(this.app, this));
 
-    // register local view
     this.registerView(config.viewType.local, (leaf) => {
-      return new LocalGraphItemView(leaf, this);
+      return new ReactForceGraphView(leaf, this);
     });
 
-    this.registerView("aa", (leaf) => {
-      return new ExampleView(leaf);
-    });
-
-    // register markdown code block processor
-    this.registerMarkdownCodeBlockProcessor("force-graph", (source, el, ctx) => {
-      // get the markdown view of this file
-      const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView) as MarkdownView;
-      ctx.addChild(new ForceGraphViewMarkdownRenderChild(el, this, source, ctx, markdownView));
-    });
-
-    // register hover link source
+    // register hover link source TODO
     this.registerHoverLinkSource("force-graph", {
       defaultMod: true,
       display: "Brainavigator Graph",
@@ -131,7 +115,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
           item
             .setTitle("Open in Brainavigator Graph")
             .setIcon(config.icon)
-            .onClick(() => this.openLocalGraph());
+            .onClick(() => this.openGraph(GraphType.local));
         });
       })
     );
@@ -154,58 +138,53 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     // check if the cache actually updated
     // Obsidian API sends a lot of (for this plugin) unnecessary stuff
     // with the resolve event
+    if (!this.settingManager) {
+      return;
+    }
     if (
       this.cacheIsReady.value &&
       !deepCompare(this._resolvedCache, this.app.metadataCache.resolvedLinks)
     ) {
       this._resolvedCache = structuredClone(this.app.metadataCache.resolvedLinks);
-      this.globalGraph = Graph.createFromApp(this.app);
+      const pluginSetting = this.settingManager.getSettings().pluginSetting;
+      this.baseFolder = pluginSetting.baseFolder;
+      this.baseFolder = (this.baseFolder.endsWith("/") ? this.baseFolder : this.baseFolder + "/").substring(1);
+      this.globalGraph = Graph.createFromApp(this.app, this.baseFolder);
 
-      if (this.isCacheReadyOnce) {
-        // update graph view
-        this.activeGraphViews.forEach((view) => {
-          view.handleMetadataCacheChange();
-        });
-      }
     } else {
       this.isCacheReadyOnce = true;
-      // console.log(
-      //   "changed but ",
-      //   this.cacheIsReady.value,
-      //   " and ",
-      //   deepCompare(this._resolvedCache, this.app.metadataCache.resolvedLinks)
-      // );
-
-      // update graph views
-      this.activeGraphViews.forEach((view) => {
-        view.handleMetadataCacheChange();
-      });
     }
   };
 
-  /**
-   * Opens a local graph view in a new leaf
-   */
-  private openLocalGraph = () => {
-    console.info('a');
-    const localGraphItemView = this.app.workspace.getActiveViewOfType(LocalGraphItemView);
-    console.info('b' + localGraphItemView);
-    if (localGraphItemView) {
-      this.app.workspace.setActiveLeaf(localGraphItemView.leaf);
-    } else {
-      this.openGraph(GraphType.local);
+  public resetGlobalGraph = async (baseFolder: string) => {
+    this.baseFolder = (baseFolder.endsWith("/") ? baseFolder : baseFolder + "/").substring(1);
+    console.info(`resetGlobalGraph ${this.baseFolder}`);
+    // currentFile = this.app.workspace.getActiveFile();
+    this.globalGraph = Graph.createFromApp(this.app, this.baseFolder);
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH);
+    if (!leaves || !leaves.length) {
+      return;
     }
+    const view: ReactForceGraphView = leaves[0].view;
+    const graph = await view.getNewGraphData();
+    this.store.set(graphDataAtom, graph);
+    this.store.set(graphNavAtom, RESET);
   };
 
   /**
    * this function will open a graph view in the current leaf
    */
   private openGraph = async (graphType: GraphType) => {
+    if (!this.app.workspace.lastActiveFile.path.startsWith(this.baseFolder)) {
+      alert(`Your file isn't under mind map base path ${this.baseFolder}. You can set it up in settings.`);
+      return;
+    }
+
     eventBus.trigger("open-graph");
 
     const leaf = this.app.workspace.getLeaf("split");
     await leaf.setViewState({
-      type: "aa",
+      type: config.viewType.local,
       active: true,
     });
   };

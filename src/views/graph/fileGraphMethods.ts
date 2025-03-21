@@ -1,15 +1,9 @@
 import { Graph } from "@/graph/Graph";
 import type { Node } from "@/graph/Node";
 import { Link } from "@/graph/Link";
-import type ForceGraphPlugin from "@/main";
-import { ForceGraphView } from "@/views/graph/forceview/ForceGraphView";
-import type { SearchResult } from "@/views/settings/graphSettingManagers/GraphSettingsManager";
-import { LocalGraphSettingManager } from "@/views/settings/graphSettingManagers/LocalGraphSettingManager";
-import type { Component, TAbstractFile, TFile } from "obsidian";
-import { type LocalGraphItemView } from "@/views/graph/LocalGraphItemView";
-import type { LocalGraphSettings } from "@/SettingsSchemas";
-import { GraphType } from "@/SettingsSchemas";
-import { MyForceGraph } from "@/views/graph/ForceGraph";
+import { SearchResult, TFile } from "obsidian";
+import ForceGraphPlugin from "@/main";
+import { LocalGraphSettings } from "@/SettingsSchemas";
 
 /**
  *
@@ -89,6 +83,53 @@ const traverseNode = (
   };
 };
 
+export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph) => {
+  console.info("Loading images...");
+  const imageLoad = graph.nodes.map(async (node) => {
+    // console.info(`try image ${node.path}... ${node.imagePath}`);
+    if (node.imagePath && !node.image) {
+      console.info(`Loading ${node.imagePath} image for ${node.path}`);
+      const file = plugin.app.vault.getAbstractFileByPath(node.imagePath);
+      if (file instanceof TFile) {
+        const arrayBuffer = await plugin.app.vault.readBinary(file);
+        const blob = new Blob([arrayBuffer]);
+        // Option for just rect image
+        // node.image = await createImageBitmap(blob, { resizeWidth: 64, resizeHeight: 64 });
+
+        const size = 192;
+        const tempImage = await createImageBitmap(blob);
+        const offscreenCanvas = new OffscreenCanvas(size, size);
+        const ctx = offscreenCanvas.getContext("2d");
+        if (!ctx) throw new Error("Failed to get 2D context");
+
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.clip();
+
+        const lenRatio = tempImage.width / tempImage.height;
+        // Option where you have clipped center of the image.
+        const scaledW = lenRatio > 1.0 ? size * lenRatio : size;
+        const scaledH = lenRatio > 1.0 ? size : size * lenRatio;
+        // Option where you want to have shown full image fit in circle
+        // const scaledW = lenRatio > 1.0 ? size : size / lenRatio;
+        // const scaledH = lenRatio > 1.0 ? size / lenRatio : size;
+        ctx.drawImage(tempImage, (size - scaledW) / 2, (size - scaledH) / 2, scaledW, scaledH);
+        tempImage.close(); // Clean up temporary ImageBitmap
+
+        const circularBlob = await offscreenCanvas.convertToBlob();
+        node.image = await createImageBitmap(circularBlob);
+
+        plugin.globalGraph.nodes.find((n) => n.path == node.path).image = node.image;
+      }
+    } else if (node.imagePath) {
+      console.info(`Image ${node.imagePath} for ${node.path} already loaded!`);
+    }
+    return node;
+  });
+  await Promise.all(imageLoad);
+};
+
 /**
  * this is called by the plugin to create a new local graph.
  * It will not have any setting. The files is also
@@ -96,7 +137,7 @@ const traverseNode = (
 export const getNewLocalGraph = (
   plugin: ForceGraphPlugin,
   config?: {
-    centerFile: TAbstractFile | null;
+    centerFilePath: string | null;
     searchResults: SearchResult["filter"]["files"];
     filterSetting: LocalGraphSettings["filter"];
   }
@@ -108,13 +149,13 @@ export const getNewLocalGraph = (
   // get the current show attachments and show orphans from graph setting
 
   // compose a new graph
-  const centerFile = config?.centerFile ?? plugin.app.workspace.getActiveFile();
+  const centerFilePath = config?.centerFilePath ?? plugin.app.workspace.getActiveFile().path;
 
-  if (!centerFile || !config) return Graph.createEmpty();
+  if (!centerFilePath || !config) return Graph.createEmpty();
 
   const { nodes, links } = traverseNode(
     plugin.globalGraph,
-    centerFile.path,
+    centerFilePath,
     config.filterSetting.depth,
     config.filterSetting.linkType
   );
@@ -123,9 +164,10 @@ export const getNewLocalGraph = (
   const graph = plugin.globalGraph
     // filter the nodes and links
     .filter(
+      plugin.app,
       (node) => {
         // the center file, which must be shown
-        if (node.path === centerFile.path) return true;
+        if (node.path === centerFilePath) return true;
         return nodes.some((n) => n.path === node.path);
       },
 
@@ -135,26 +177,24 @@ export const getNewLocalGraph = (
         );
       }
     )
-    .filter((node) => {
+    .filter(plugin.app, (node) => {
       // the center file, which must be shown
-      if (node.path === centerFile.path) return true;
-      // if node is not a markdown  and show attachment is false, then we will not show it
-      if (!node.path.endsWith(".md") && !config.filterSetting.showAttachments) return false;
+      if (node.path === centerFilePath) return true;
       //  if the search query is not empty and the search result is empty, then we don't need to filter the search result
       if (config.searchResults.length === 0 && config.filterSetting.searchQuery === "") return true;
       // if the node is not in the files, then we will not show it, except
       return config.searchResults.some((file) => file.path === node.path);
     })
-    .filter((node) => {
+    .filter(plugin.app, (node) => {
       // the center file, which must be shown
-      if (node.path === centerFile.path) return true;
+      if (node.path === centerFilePath) return true;
       // if node is an orphan and show orphan is false, then we will not show it
       if (node.links.length === 0 && !config.filterSetting.showOrphans) return false;
       return true;
     });
 
   const parentNodes = graph.filterNodes((node: Node) => {
-    return node.isParentOf(centerFile.path);
+    return node.isParentOf(centerFilePath);
   });
 
   function applyToConsecutivePairs<T>(arr: T[], func: (a: T, b: T) => void): void {
@@ -163,104 +203,14 @@ export const getNewLocalGraph = (
     }
   }
 
-  if (parentNodes.length > 1) {
-    applyToConsecutivePairs(parentNodes, (n1, n2) => {
-      const link = new Link(n1, n2);
-      link.color = "parent";
-      graph.links.push(link);
-    });
-  }
+  // parents linked together
+  // if (parentNodes.length > 1) {
+  //   applyToConsecutivePairs(parentNodes, (n1, n2) => {
+  //     const link = new Link(n1, n2);
+  //     link.color = "parent";
+  //     graph.links.push(link);
+  //   });
+  // }
 
   return graph;
 };
-
-type ConstructorParameters = [
-  plugin: ForceGraphPlugin,
-  contentEl: HTMLDivElement,
-  itemView: LocalGraphItemView
-];
-
-export class LocalForceGraphView extends ForceGraphView<LocalGraphSettingManager, LocalGraphItemView> {
-  settingManager: LocalGraphSettingManager;
-  /**
-   * when the app is just open, this can be null
-   */
-  currentFile: TAbstractFile | null;
-
-  private constructor(
-    plugin: ForceGraphPlugin,
-    contentEl: HTMLDivElement,
-    itemView: LocalGraphItemView
-  ) {
-    super(contentEl, plugin, GraphType.local, itemView);
-    this.currentFile = this.plugin.app.workspace.getActiveFile();
-    this.settingManager = LocalGraphSettingManager.new(this);
-
-    // register event on this item view
-    this.itemView.registerEvent(
-      this.plugin.app.workspace.on("file-open", this.handleFileChange.bind(this))
-    );
-  }
-
-  getParent(): Component {
-    return this.itemView;
-  }
-
-  protected onReady() {
-    super.onReady();
-    type LocalForceGraphView = typeof this.forceGraph.view;
-    this.forceGraph = new MyForceGraph(this as LocalForceGraphView, getNewLocalGraph(this.plugin));
-    this.settingManager.initNewView({
-      collapsed: true,
-    });
-  }
-
-  public handleFileChange = (file: TFile) => {
-    if (!file) return;
-    this.currentFile = file;
-    this.updateGraphData();
-  };
-
-  public handleSearchResultChange(): void {
-    this.updateGraphData();
-  }
-
-  public handleMetadataCacheChange(): void {
-    this.updateGraphData();
-  }
-
-  protected getNewGraphData(): Graph {
-    const graph = getNewLocalGraph(this.plugin, {
-      centerFile: this.currentFile,
-      searchResults: this.settingManager.searchResult.value.filter.files,
-      filterSetting: this.settingManager.getCurrentSetting().filter,
-    });
-    return graph;
-  }
-
-  protected updateGraphData() {
-    super.updateGraphData(this.getNewGraphData());
-  }
-
-  public handleGroupColorSearchResultChange(): void {
-    this.forceGraph?.interactionManager.updateColor();
-  }
-
-  public handleSettingUpdate(
-    newSetting: LocalGraphSettings,
-    ...path: NestedKeyOf<LocalGraphSettings>[]
-  ): void {
-    super.handleSettingUpdate(newSetting, ...path);
-    if (path.some((p) => p === "filter.depth" || p === "filter.linkType")) {
-      this.updateGraphData();
-    }
-  }
-
-  static new(...args: ConstructorParameters) {
-    const view = new LocalForceGraphView(...args);
-    view.onReady();
-    // put the setting view in the content el
-
-    return view;
-  }
-}

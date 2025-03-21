@@ -5,6 +5,7 @@ import { CommandClickNodeAction, SearchEngineType } from "@/SettingsSchemas";
 import { DEFAULT_SETTING } from "@/SettingManager";
 
 const DEFAULT_NUMBER = DEFAULT_SETTING.pluginSetting.maxNodeNumber;
+const DEFAULT_BASE_FOLDER = DEFAULT_SETTING.pluginSetting.baseFolder;
 export class SettingTab extends PluginSettingTab {
   plugin: ForceGraphPlugin;
 
@@ -43,9 +44,6 @@ export class SettingTab extends PluginSettingTab {
               this.plugin.settingManager.updateSettings((setting) => {
                 setting.value.pluginSetting.maxNodeNumber = Number(value);
               });
-
-              // force all the graph view to reset their settings
-              this.plugin.activeGraphViews.forEach((view) => view.refreshGraph());
             }
             text.inputEl.reportValidity();
           });
@@ -72,10 +70,36 @@ export class SettingTab extends PluginSettingTab {
 
             // update the plugin file manager
             this.plugin.fileManager.setSearchEngine();
-
-            // force all the graph view to reset their settings
-            this.plugin.activeGraphViews.forEach((view) => view.settingManager.resetSettings());
           });
+      });
+
+    new Setting(containerEl)
+      .setName("Base Folder")
+      .setDesc("Base folder, within which the mind map can navigate.")
+      .addText((text) => {
+        text
+          .setPlaceholder(`${DEFAULT_BASE_FOLDER}`)
+          .setValue(String(pluginSetting.baseFolder ?? DEFAULT_BASE_FOLDER))
+          .onChange(async (value) => {
+            // check if value is a number
+            if (!value.startsWith("/")) {
+              // set the error to the input
+              text.inputEl.setCustomValidity("Please enter absolute path (beginning with /).");
+              this.plugin.settingManager.updateSettings((setting) => {
+                setting.value.pluginSetting.baseFolder = DEFAULT_BASE_FOLDER;
+              });
+            } else {
+              // remove the error
+              text.inputEl.setCustomValidity("");
+              this.plugin.settingManager.updateSettings((setting) => {
+                setting.value.pluginSetting.baseFolder = value;
+              });
+
+              this.plugin.resetGlobalGraph(value);
+            }
+            text.inputEl.reportValidity();
+          });
+        text.inputEl.setAttribute("type", "string");
       });
 
     // create an H2 element called "Controls"
@@ -92,9 +116,6 @@ export class SettingTab extends PluginSettingTab {
           this.plugin.settingManager.updateSettings((setting) => {
             setting.value.pluginSetting.rightClickToPan = value;
           });
-
-          // force all the graph view to reset their settings
-          this.plugin.activeGraphViews.forEach((view) => view.refreshGraph());
         });
       });
 
@@ -114,9 +135,6 @@ export class SettingTab extends PluginSettingTab {
             this.plugin.settingManager.updateSettings((setting) => {
               setting.value.pluginSetting.commandLeftClickNode = value as CommandClickNodeAction;
             });
-
-            // force all the graph view to reset their settings
-            this.plugin.activeGraphViews.forEach((view) => view.refreshGraph());
           });
       });
 
@@ -136,9 +154,6 @@ export class SettingTab extends PluginSettingTab {
             this.plugin.settingManager.updateSettings((setting) => {
               setting.value.pluginSetting.commandRightClickNode = value as CommandClickNodeAction;
             });
-
-            // force all the graph view to reset their settings
-            this.plugin.activeGraphViews.forEach((view) => view.refreshGraph());
           });
       });
   }

@@ -131,6 +131,7 @@ export const DEFAULT_SETTING: Setting = {
   savedSettings: [],
   temporaryLocalGraphSetting: defaultLocalGraphSetting,
   pluginSetting: {
+    baseFolder: "/",
     maxNodeNumber: 1000,
     searchEngine: SearchEngineType.default,
     rightClickToPan: false,

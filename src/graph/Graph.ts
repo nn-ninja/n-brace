@@ -1,8 +1,9 @@
-import type { ResolvedLinkCache } from "@/graph/Link";
+import type { LinkCache } from "@/graph/Link";
 import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
 import { copy } from "copy-anything";
 import type { App, TAbstractFile } from "obsidian";
+import { node } from "prop-types";
 
 export class Graph {
   public readonly nodes: Node[];
@@ -22,6 +23,10 @@ export class Graph {
     this.links = links;
     this.nodeIndex = nodeIndex || new Map<string, number>();
     this.linkIndex = linkIndex || new Map<string, Map<string, number>>();
+  }
+
+  public resort() {
+    this.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   }
 
   public getNodeByPath = (path: string): Node | null => {
@@ -102,8 +107,13 @@ export class Graph {
   };
 
   // Creates a graph using the Obsidian API
-  public static createFromApp = (app: App): Graph => {
-    const map = getMapFromMetaCache(app.metadataCache.resolvedLinks);
+  public static createFromApp = (app: App, baseFolder: string): Graph => {
+    console.info(`Create mind map from path ${baseFolder}`);
+    const map = getMapFromMetaCache(
+      baseFolder,
+      app.metadataCache.resolvedLinks,
+      app.metadataCache.unresolvedLinks
+    );
     const config = app.vault.config;
     const userExcludedFolders = config.userIgnoreFilters;
     const allFiles = userExcludedFolders
@@ -113,17 +123,20 @@ export class Graph {
       : app.vault.getFiles();
 
     const nodes = Node.createFromFiles(allFiles);
-    return Graph.createFromLinkMap(map, nodes);
+    return Graph.createFromLinkMap(app, map, nodes, true);
   };
 
   public static createFromLinkMap(
+    app: App,
     map: {
       [x: string]: string[];
     },
-    nodes: Node[]
+    nodes: Node[],
+    isGlobal: boolean = false
   ) {
     // Create new instances of nodes
-    const newNodes = nodes.map((node) => new Node(node.name, node.path, node.val));
+    const newNodes = nodes.map((node) => new Node(node.name, node.path,
+      node.inlinkCount, node.outlinkCount, node.imagePath, node.image, node.val));
     const nodeMap = new Map<string, Node>();
     newNodes.forEach((node) => nodeMap.set(node.id, node));
 
@@ -134,17 +147,24 @@ export class Graph {
       if (!sourceNode) return;
 
       targetIds.forEach((targetId) => {
-        const targetNode = nodeMap.get(targetId);
-        if (!targetNode) return;
+        if (isAvatarImg(targetId)) {
+          sourceNode.imagePath = targetId;
+        } else {
+          let targetNode = nodeMap.get(targetId);
+          if (!targetNode) {
+            targetNode = new Node(targetId, targetId, 0, 0);
+            newNodes.push(targetNode);
+          }
 
-        // Create new instances of links
-        const link = new Link(sourceNode, targetNode);
-        links.push(link);
+          // Create new instances of links
+          const link = new Link(sourceNode, targetNode);
+          links.push(link);
 
-        // As we are creating new nodes, we need to make sure they are properly linked
-        sourceNode.addNeighbor(targetNode);
-        sourceNode.addLink(link);
-        targetNode.addLink(link);
+          // As we are creating new nodes, we need to make sure they are properly linked
+          sourceNode.addNeighbor(targetNode);
+          sourceNode.addLink(link, isGlobal);
+          targetNode.addLink(link, isGlobal);
+        }
       });
     });
 
@@ -158,6 +178,7 @@ export class Graph {
    * @returns a new graph
    */
   public filter = (
+    app: App,
     predicate: (node: Node) => boolean,
     linksPredicate?: (link: Link) => boolean
   ) => {
@@ -180,7 +201,7 @@ export class Graph {
     // transform the link to linkmap
     const linkMap = Link.createLinkMap(filteredLinks);
 
-    return Graph.createFromLinkMap(linkMap, filteredNodes);
+    return Graph.createFromLinkMap(app, linkMap, filteredNodes);
   };
 
   public filterNodes(pred: (node: Node) => boolean): Node[] {
@@ -276,13 +297,16 @@ export class Graph {
   };
 }
 
-const getMapFromMetaCache = (resolvedLinks: ResolvedLinkCache) => {
+function isAvatarImg(nodePath: string) {
+  return nodePath.startsWith("avatars/");
+}
+
+const getMapFromMetaCache = (baseFolder: string, resolvedLinks: LinkCache, unresolvedLinks: LinkCache) => {
   const result: Record<string, string[]> = {};
-  Object.keys(resolvedLinks).map((nodeId) => {
-    result[nodeId] =
-      Object.keys(resolvedLinks[nodeId]!).map((nodePath) => {
-        return nodePath;
-      }) ?? [];
+  Object.keys(resolvedLinks).filter((nodeId) => nodeId.startsWith(baseFolder)).map((nodeId) => {
+      result[nodeId] = ((Object.keys(resolvedLinks[nodeId]!).map((nodePath) => { return nodePath; }) ?? [])
+        .concat(Object.keys(unresolvedLinks[nodeId]!).map((nodePath) => { return nodePath; }) ?? []))
+        .filter((nodePath) => nodePath.startsWith(baseFolder) && (nodePath.endsWith(".md") || isAvatarImg(nodePath)));
   });
 
   // remove self links

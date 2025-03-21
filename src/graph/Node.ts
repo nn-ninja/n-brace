@@ -6,25 +6,57 @@ export class Node {
   public readonly name: string;
   public readonly path: string;
   public readonly val: number; // = weight, currently = 1 because scaling doesn't work well
+  public readonly unresolved: boolean;
 
   public readonly neighbors: Node[];
-  public readonly links: Link[];
+  // public readonly parents: Node[];
+  public inlinkCount: number;
+  public outlinkCount: number;
+  public links: Link[];
   public labelEl: HTMLDivElement | null = null;
+  public imagePath?: string;
+  public image?: ImageBitmap;
+  public zIndex: number = 10;
+  public topped: boolean = false;
 
-  constructor(name: string, path: string, val = 10, neighbors: Node[] = [], links: Link[] = []) {
+  constructor(
+    name: string,
+    path: string,
+    inlinkCount: number,
+    outlinkCount: number,
+    imagePath?: string,
+    image?: ImageBitmap,
+    val = 10,
+    neighbors: Node[] = [],
+    links: Link[] = []
+    // parents: Node[] = []
+  ) {
     this.id = path;
     this.name = name;
     this.path = path;
+    this.inlinkCount = inlinkCount;
+    this.outlinkCount = outlinkCount;
     this.val = val;
     this.neighbors = neighbors;
+    // this.parents = parents;
     this.links = links;
+    this.unresolved = val == 0;
+    this.imagePath = imagePath;
+    this.image = image;
   }
 
   // Creates an array of nodes from an array of files (from the Obsidian API)
   static createFromFiles(files: TAbstractFile[]): Node[] {
     return files.map((file) => {
-      return new Node(file.name, file.path);
+      return new Node(file.name, file.path, 0, 0);
     });
+  }
+
+  toggle(currMin: number, currMax: number) {
+    // this.topped = !this.topped;
+    // if (this.topped) {
+    this.zIndex = currMax + 1;
+    // }
   }
 
   /**
@@ -39,10 +71,22 @@ export class Node {
     }
   }
 
+  // addParent(parent: Node) {
+  //   if (!this.parents.includes(parent)) this.parents.push(parent);
+  // }
+
   // Pushes a link to the node's links array if it doesn't already exist
-  addLink(link: Link) {
+  addLink(link: Link, isGlobal: boolean = false) {
     if (!this.links.some((l) => l.source === link.source && l.target === link.target)) {
       this.links.push(link);
+
+      if (isGlobal) {
+        if (link.source.path === this.path) {
+          ++this.outlinkCount;
+        } else {
+          ++this.inlinkCount;
+        }
+      }
     }
   }
 
@@ -52,7 +96,12 @@ export class Node {
     else return this.neighbors.some((neighbor) => neighbor.id === node);
   }
 
+  /**
+   * Child links has target pointing to the child.
+   * @param nodePath
+   */
   public isParentOf(nodePath: string) {
+    // return this.parents.some((parent) => parent.path === nodePath);
     return this.path !== nodePath && this.links.some((link) => link.target.path === nodePath);
   }
 
@@ -67,20 +116,4 @@ export class Node {
     });
     return nodeIndex;
   }
-
-  public static checkNodesValid = (nodes: Node[]) => {
-    // check if there are duplicate nodes
-    const nodeSet = new Set(nodes);
-    if (nodeSet.size !== nodes.length) {
-      throw new Error("Duplicate nodes found");
-    }
-
-    // check if there are duplicate neighbors in a node
-    nodes.forEach((node) => {
-      const neighborSet = new Set(node.neighbors);
-      if (neighborSet.size !== node.neighbors.length) {
-        throw new Error(`Duplicate neighbors found for node ${node.name}`);
-      }
-    });
-  };
 }

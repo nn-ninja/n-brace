@@ -39,11 +39,13 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "husky": "^8.0.3",
     "obsidian": "latest",
-    "prettier": "^2.8.8",
+    "prettier": "^3.3.3",
     "semver": "^7.5.4",
     "tslib": "2.4.0",
     "typescript": "^5.0.5"
@@ -51,6 +53,7 @@
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "18.3.1",
+    "jotai": "^2.9.1",
     "force-graph": "^1.43.5",
     "@tweenjs/tween.js": "^21.0.0",
     "copy-anything": "^3.0.5",

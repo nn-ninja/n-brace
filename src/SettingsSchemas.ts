@@ -177,6 +177,7 @@ export const SettingSchema = z.object({
   savedSettings: z.array(SavedSettingSchema),
   temporaryLocalGraphSetting: LocalGraphSettingsSchema,
   pluginSetting: z.object({
+    baseFolder: z.string(),
     maxNodeNumber: z.number(),
     searchEngine: z.nativeEnum(SearchEngineType),
     rightClickToPan: z.boolean().default(false),
