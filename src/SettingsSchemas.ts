@@ -178,15 +178,9 @@ export const SettingSchema = z.object({
   temporaryLocalGraphSetting: LocalGraphSettingsSchema,
   pluginSetting: z.object({
     baseFolder: z.string(),
+    titleFontSize: z.number(),
     maxNodeNumber: z.number(),
     searchEngine: z.nativeEnum(SearchEngineType),
-    rightClickToPan: z.boolean().default(false),
-    commandLeftClickNode: z
-      .nativeEnum(CommandClickNodeAction)
-      .default(CommandClickNodeAction.openNodeInNewTab),
-    commandRightClickNode: z
-      .nativeEnum(CommandClickNodeAction)
-      .default(CommandClickNodeAction.focusNode),
   }),
 });
 

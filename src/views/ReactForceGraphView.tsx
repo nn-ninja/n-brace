@@ -11,6 +11,8 @@ import { getDefaultStore } from "jotai";
 import { Link } from "@/graph/Link";
 import type { Node } from "@/graph/Node";
 import { getNewLocalGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
+import { eventBus } from "@/util/EventBus";
+import { PluginSettingManager } from "@/SettingManager";
 
 export const VIEW_TYPE_REACT_FORCE_GRAPH = "react-force-graph-view";
 
@@ -26,11 +28,15 @@ export class ReactForceGraphView extends ItemView {
   currentFile: TAbstractFile | null;
   root: Root | null = null;
   private width: number = this.contentEl.offsetWidth;
+  private settingManager: PluginSettingManager;
 
   constructor(leaf: WorkspaceLeaf, plugin: ForceGraphPlugin) {
     super(leaf);
     this.plugin = plugin;
     this.currentFile = this.plugin.app.workspace.getActiveFile();
+
+    this.settingManager = this.plugin.settingManager;
+    eventBus.on("settings-updated", this.handleSettingsUpdate.bind(this));
   }
 
   getViewType() {
@@ -41,18 +47,32 @@ export class ReactForceGraphView extends ItemView {
     return "React Brainavigator";
   }
 
-  async onOpen() {
+  private handleSettingsUpdate() {
+    this.renderComponent();
+  }
+
+  private renderComponent() {
     const initGraph = this.getNewGraphData.bind(this);
     const expandNodeFun = this.expandNode.bind(this);
 
+    if (this.root) {
+      this.root.render(
+        <AppContext.Provider value={this.app}>
+          <ViewContext.Provider value={this}>
+            <ReactForceGraph
+              getInitialGraph={initGraph}
+              getExpandNode={expandNodeFun}
+              titleFontSize={this.settingManager.getSettings().pluginSetting.titleFontSize}
+            />
+          </ViewContext.Provider>
+        </AppContext.Provider>
+      );
+    }
+  }
+
+  async onOpen() {
     this.root = createRoot(this.containerEl.children[1]);
-    this.root.render(
-      <AppContext.Provider value={this.app}>
-        <ViewContext.Provider value={this}>
-          <ReactForceGraph getInitialGraph={initGraph} getExpandNode={expandNodeFun} />
-        </ViewContext.Provider>
-      </AppContext.Provider>
-    );
+    this.renderComponent();
   }
 
   // TODO unmount ??

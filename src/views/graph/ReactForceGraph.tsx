@@ -16,13 +16,18 @@ interface GraphComponentProps {
   data: Graph;
   getInitialGraph: () => Promise<Graph>;
   getExpandNode: () => Promise<Graph>;
+  titleFontSize: number;
 }
 
 export const useView = (): ReactForceGraphView | undefined => {
   return useContext(ViewContext);
 };
 
-const ReactForceGraph: React.FC<GraphComponentProps> = ({ getInitialGraph, getExpandNode }) => {
+const ReactForceGraph: React.FC<GraphComponentProps> = ({
+  getInitialGraph,
+  getExpandNode,
+  titleFontSize,
+}) => {
   const isFirstRun = useRef(true);
   const fgRef = useRef<ForceGraphMethods | undefined>(undefined);
 
@@ -80,11 +85,20 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({ getInitialGraph, getEx
   }, [getInitialGraph, setGraphData]);
 
   useEffect(() => {
+    graphData.nodes.forEach((node) => {
+      if (node.path === selectedNode.selectedPath) {
+        node.label = "selected";
+      } else {
+        node.label = undefined;
+      }
+    });
     graphData.links.forEach((link) => {
       if (link.target.path === selectedNode.selectedPath) {
         link.label = "parent";
+        link.source.label = "parent";
       } else if (link.source.path == selectedNode.selectedPath) {
         link.label = "child";
+        link.target.label = "child";
       } else {
         link.label = undefined;
       }
@@ -202,7 +216,7 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({ getInitialGraph, getEx
       cooldownTicks={50}
       onEngineStop={() => zoomToFitNodes(selectedNode.selectedPath)}
       nodeCanvasObject={(node: Node & Coords & NodeData, ctx, globalScale) =>
-        Drawing.drawNode(node, ctx, globalScale)
+        Drawing.drawNode(node, ctx, globalScale, titleFontSize)
       }
       nodePointerAreaPaint={(node: Node & Coords & NodeData, color, ctx) => {
         ctx.fillStyle = color;

@@ -3,6 +3,10 @@ import type { Link } from "@/graph/Link";
 import { TFile } from "obsidian";
 
 export class Drawing {
+  private static readonly SELECTED_COLOR = "21, 0, 158";
+  private static readonly PARENT_COLOR = "39, 85, 138";
+  private static readonly CHILD_COLOR = "103, 26, 120";
+
   static drawLink(link: Link, ctx: CanvasRenderingContext2D, globalScale: number) {
     if (link.color === "parent") {
       return;
@@ -40,9 +44,9 @@ export class Drawing {
     const gradient = ctx.createLinearGradient(0, 0, length, 0);
     const color =
       link.label === "parent"
-        ? "39, 85, 138"
+        ? this.PARENT_COLOR
         : link.label === "child"
-          ? "103, 26, 120"
+          ? this.CHILD_COLOR
           : "71, 30, 143";
     gradient.addColorStop(0, `rgba(${color}, 1)`); // Start color
     gradient.addColorStop(1, `rgba(${color}, 0.25)`); // End color
@@ -72,11 +76,20 @@ export class Drawing {
   static drawNode(
     node: Node & Coords & NodeData,
     ctx: CanvasRenderingContext2D,
-    globalScale: number
+    globalScale: number, titleFontSize: number,
   ) {
     const label = node.name.contains(".") ? node.name.substring(0, node.name.length - 3) : node.name;
-    const fontSize = 12 / globalScale; // Scale font size
+    const fontSize = titleFontSize / globalScale; // Scale font size
     ctx.font = `${fontSize}px Sans-Serif`;
+
+    const color =
+      node.label === "selected"
+        ? this.SELECTED_COLOR
+        : node.label === "parent"
+          ? this.PARENT_COLOR
+          : node.label === "child"
+            ? this.CHILD_COLOR
+            : "71, 30, 143";
 
     if (node.image) {
       const textWidth = ctx.measureText(label).width;
@@ -91,7 +104,7 @@ export class Drawing {
       ctx.beginPath();
       ctx.arc(node.x!, node.y!, imgRadius, 0, 2 * Math.PI);
       ctx.fillStyle = "white";
-      ctx.strokeStyle = "purple"; // Outline color
+      ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 0.5; /// globalScale;
       ctx.fill();
       ctx.stroke();
@@ -100,7 +113,7 @@ export class Drawing {
 
       // Draw a rounded rectangle around the node
       ctx.fillStyle = "white";
-      ctx.strokeStyle = "purple";
+      ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 0.5;
       Drawing.drawRoundedRect(ctx, node.x - totalWidth / 2, node.y - imgRadius, totalWidth, height, 2);
 
@@ -119,7 +132,7 @@ export class Drawing {
       const height = fontSize + padding * 2;
 
       ctx.fillStyle = "white";
-      ctx.strokeStyle = "purple";
+      ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 1;
       Drawing.drawRoundedRect(
         ctx,

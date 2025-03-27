@@ -132,10 +132,8 @@ export const DEFAULT_SETTING: Setting = {
   temporaryLocalGraphSetting: defaultLocalGraphSetting,
   pluginSetting: {
     baseFolder: "/",
+    titleFontSize: 12,
     maxNodeNumber: 1000,
     searchEngine: SearchEngineType.default,
-    rightClickToPan: false,
-    commandLeftClickNode: CommandClickNodeAction.openNodeInNewTab,
-    commandRightClickNode: CommandClickNodeAction.focusNode,
   },
 };

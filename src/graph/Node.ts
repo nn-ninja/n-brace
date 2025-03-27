@@ -18,6 +18,7 @@ export class Node {
   public image?: ImageBitmap;
   public zIndex: number = 10;
   public topped: boolean = false;
+  public label?: string | null = null;
 
   constructor(
     name: string,

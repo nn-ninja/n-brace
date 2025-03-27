@@ -87,7 +87,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
       return new ReactForceGraphView(leaf, this);
     });
 
-    // register hover link source TODO
+    // register hover link source  TODO
     this.registerHoverLinkSource("force-graph", {
       defaultMod: true,
       display: "Brainavigator Graph",
@@ -113,7 +113,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
         if (!file) return;
         menu.addItem((item) => {
           item
-            .setTitle("Open in Brainavigator Graph")
+            .setTitle("Pocket graph")
             .setIcon(config.icon)
             .onClick(() => this.openGraph(GraphType.local));
         });

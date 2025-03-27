@@ -2,6 +2,7 @@ import { atom } from "jotai/vanilla";
 import type { Link } from "@/graph/Link";
 import type { Node } from "@/graph/Node";
 import { atomWithReset } from "jotai/utils";
+import type { Graph } from "@/graph/Graph";
 
 export const dimensionsAtom = atom({ width: 0, height: 0 });
 
@@ -19,7 +20,7 @@ export const graphDataAtom = atom(
     nodes: get(nodesAtom),
     links: get(linksAtom),
   }),
-  (get, set, newGraph) => ({
+  (get, set, newGraph: Graph) => ({
     nodes: set(nodesAtom, newGraph.nodes),
     links: set(linksAtom, newGraph.links),
   })
