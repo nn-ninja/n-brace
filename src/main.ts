@@ -1,5 +1,5 @@
-import type { App, HoverParent, HoverPopover, PluginManifest } from "obsidian";
-import { MarkdownView, Plugin } from "obsidian";
+import type { App, HoverParent, HoverPopover, PluginManifest, WorkspaceLeaf } from "obsidian";
+import { Plugin, TFile } from "obsidian";
 import { State } from "@/util/State";
 import { Graph } from "@/graph/Graph";
 import type { LinkCache } from "@/graph/Link";
@@ -9,12 +9,11 @@ import "@total-typescript/ts-reset/dom";
 import { eventBus } from "@/util/EventBus";
 import { SettingTab } from "@/views/SettingTab";
 import { config } from "@/config";
-import { MyFileManager } from "@/FileManager";
 import { PluginSettingManager } from "@/SettingManager";
-import { GraphType } from "@/SettingsSchemas";
 import { ReactForceGraphView, VIEW_TYPE_REACT_FORCE_GRAPH } from "@/views/ReactForceGraphView";
 import { getDefaultStore } from "jotai/index";
-import { graphDataAtom, graphNavAtom } from "@/atoms/graphAtoms";
+import type { GraphSettings} from "@/atoms/graphAtoms";
+import { expandNodePathAtom, graphDataAtom, graphNavAtom, graphSettingsAtom, navIndexHistoryAtom, nodeIdxMaxAtom } from "@/atoms/graphAtoms";
 import { RESET } from "jotai/utils";
 
 export default class ForceGraphPlugin extends Plugin implements HoverParent {
@@ -29,7 +28,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
    */
   public globalGraph: Graph;
 
-  public fileManager: MyFileManager;
   public settingManager: PluginSettingManager;
   public baseFolder: string = "";
 
@@ -48,9 +46,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     this.onGraphCacheChanged();
 
     this.settingManager = new PluginSettingManager(this);
-
-    // this will be initialized in the onload function because we need to wait for the setting manager to initialize
-    this.fileManager = undefined as unknown as MyFileManager;
   }
 
   /**
@@ -62,9 +57,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
     // get the setting from setting manager
     // const setting = this.settingManager.getSetting("test");
-
-    // initalise the file manager
-    this.fileManager = new MyFileManager(this);
 
     // init the theme
     this.cacheIsReady.value =
@@ -83,14 +75,31 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
     this.addSettingTab(new SettingTab(this.app, this));
 
-    this.registerView(config.viewType.local, (leaf) => {
+    this.registerView(VIEW_TYPE_REACT_FORCE_GRAPH, (leaf) => {
       return new ReactForceGraphView(leaf, this);
     });
+
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", (leaf) => {
+        if (leaf && leaf.view.getViewType() === "markdown") {
+          const file = leaf.view.file;
+          if (file) {
+            console.debug(`File navigated to: ${file.path}`);
+            eventBus.trigger("focus-node", file.path);
+            this.store.set(expandNodePathAtom, file.path);
+          }
+        }
+      })
+    );
 
     // register hover link source  TODO
     this.registerHoverLinkSource("force-graph", {
       defaultMod: true,
-      display: "Brainavigator Graph",
+      display: "N-brace",
+    });
+
+    eventBus.on("open-file", (filePath: string) => {
+      this.openFileInFirstTab(filePath);
     });
   }
 
@@ -99,6 +108,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     // unregister the resolved cache listener
     this.app.metadataCache.off("resolved", this.onGraphCacheReady);
     this.app.metadataCache.off("resolve", this.onGraphCacheChanged);
+    this.app.workspace.detachLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH);
   }
 
   private initListeners() {
@@ -113,12 +123,102 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
         if (!file) return;
         menu.addItem((item) => {
           item
-            .setTitle("Pocket graph")
+            .setTitle("N-brace")
             .setIcon(config.icon)
-            .onClick(() => this.openGraph(GraphType.local));
+            .onClick(() => this.openGraph());
         });
       })
     );
+  }
+
+  async openFileInFirstTab(filePath: string) {
+    const { workspace } = this.app;
+
+    // Find the first Markdown leaf (Tab 1)
+    // const markdownLeaves = workspace.getLeavesOfType("markdown");
+    const file = this.app.vault.getAbstractFileByPath(filePath);
+    if (!file || !(file instanceof TFile)) {
+      return;
+    }
+    // if (markdownLeaves.length === 0) {
+    //   const rootLeaf = workspace.getMostRecentLeaf() || workspace.getLeaf();
+    //   const newLeaf = workspace.createLeafBySplit(rootLeaf, "vertical", true); // Split left
+    //   await newLeaf.openFile(file);
+    //   workspace.revealLeaf(newLeaf);
+    //   return;
+    // }
+    //
+    // // Use the first existing Markdown leaf
+    // const targetLeaf = markdownLeaves[markdownLeaves.length - 1];
+    // if (file) {
+    //   await targetLeaf.openFile(file as any); // Open the file in the leaf
+    //   workspace.revealLeaf(targetLeaf); // Ensure it’s visible
+    // } else {
+    //   console.error(`File not found: ${filePath}`);
+    // }
+
+    const graphLeaf = workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH)[0];
+    if (!graphLeaf) {
+      console.error("Graph view not found");
+      return;
+    }
+
+    // Get Markdown leaves in the left split relative to the graph view
+    const leftMarkdownLeaves = this.getLeftMarkdownLeaves(graphLeaf);
+
+    const targetLeaf = this.getRightmostLeaf(leftMarkdownLeaves);
+    if (targetLeaf !== undefined) {
+      if (filePath !== targetLeaf.view.file?.path) {
+        await targetLeaf.openFile(file);
+        workspace.revealLeaf(targetLeaf);
+      }
+    } else {
+      // No Markdown leaves in left split, create a new left tab
+      const newLeaf = workspace.createLeafBySplit(graphLeaf, "vertical", true); // Split left
+      await newLeaf.openFile(file);
+      workspace.revealLeaf(newLeaf);
+    }
+  }
+
+  private getLeftMarkdownLeaves(graphLeaf: WorkspaceLeaf): WorkspaceLeaf[] {
+    const { workspace } = this.app;
+    const markdownLeaves = workspace.getLeavesOfType("markdown");
+    const leftLeaves: WorkspaceLeaf[] = [];
+
+    // Get bounding rect of the graph leaf
+    const graphRect = graphLeaf.view.containerEl.getBoundingClientRect();
+
+    // Filter Markdown leaves that are to the left of the graph leaf
+    markdownLeaves.forEach((leaf) => {
+      const leafRect = leaf.view.containerEl.getBoundingClientRect();
+      if (leafRect.width > 0 && leafRect.right <= graphRect.left) {
+        leftLeaves.push(leaf);
+      }
+    });
+
+    return leftLeaves;
+  }
+
+  private getRightmostLeaf(leaves: WorkspaceLeaf[]): WorkspaceLeaf | undefined {
+    if (leaves.length === 0) {
+      return undefined;
+    }
+    if (leaves.length === 1) {
+      return leaves[0];
+    }
+
+    let rightmostLeaf = leaves[0];
+    let maxRight = -Infinity;
+
+    leaves.forEach((leaf) => {
+      const rect = leaf.view.containerEl.getBoundingClientRect();
+      if (rect.right > maxRight) {
+        maxRight = rect.right;
+        rightmostLeaf = leaf;
+      }
+    });
+
+    return rightmostLeaf;
   }
 
   /**
@@ -126,7 +226,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
    * And this will hit the else clause of the `onGraphCacheChanged` function
    */
   private onGraphCacheReady = () => {
-    // console.log("Graph cache is ready");
     this.cacheIsReady.value = true;
     this.onGraphCacheChanged();
   };
@@ -147,10 +246,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     ) {
       this._resolvedCache = structuredClone(this.app.metadataCache.resolvedLinks);
       const pluginSetting = this.settingManager.getSettings().pluginSetting;
-      this.baseFolder = pluginSetting.baseFolder;
-      this.baseFolder = (this.baseFolder.endsWith("/") ? this.baseFolder : this.baseFolder + "/").substring(1);
-      this.globalGraph = Graph.createFromApp(this.app, this.baseFolder);
-
+      this.resetGlobalGraph(pluginSetting.baseFolder);
     } else {
       this.isCacheReadyOnce = true;
     }
@@ -158,7 +254,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
   public resetGlobalGraph = async (baseFolder: string) => {
     this.baseFolder = (baseFolder.endsWith("/") ? baseFolder : baseFolder + "/").substring(1);
-    console.info(`resetGlobalGraph ${this.baseFolder}`);
+    console.debug(`resetGlobalGraph ${this.baseFolder}`);
     // currentFile = this.app.workspace.getActiveFile();
     this.globalGraph = Graph.createFromApp(this.app, this.baseFolder);
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH);
@@ -167,25 +263,45 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     }
     const view: ReactForceGraphView = leaves[0].view;
     const graph = await view.getNewGraphData();
+
+    let maxIdx = 0;
+    graph.nodes.forEach((n) => (n.idx = maxIdx++));
+    this.store.set(nodeIdxMaxAtom, maxIdx);
+
+    this.onGraphSettingAtomChanged({
+      graphSpan: this.settingManager.getSettings().pluginSetting.defaultGraphSpan,
+      linkColorIn: this.settingManager.getSettings().pluginSetting.linkColorIn,
+      linkColorOut: this.settingManager.getSettings().pluginSetting.linkColorOut,
+      linkColorOther: this.settingManager.getSettings().pluginSetting.linkColorOther,
+    });
+
+    console.debug(`Reset graph with max idx ${maxIdx - 1}`);
     this.store.set(graphDataAtom, graph);
-    this.store.set(graphNavAtom, RESET);
+    if (graph.rootPath) {
+      this.store.set(graphNavAtom, { selectedPath: graph.rootPath });
+    } else {
+      this.store.set(graphNavAtom, RESET);
+    }
+    this.store.set(navIndexHistoryAtom, RESET);
   };
 
-  /**
+  /**r
    * this function will open a graph view in the current leaf
    */
-  private openGraph = async (graphType: GraphType) => {
+  private openGraph = async () => {
     if (!this.app.workspace.lastActiveFile.path.startsWith(this.baseFolder)) {
       alert(`Your file isn't under mind map base path ${this.baseFolder}. You can set it up in settings.`);
       return;
     }
 
-    eventBus.trigger("open-graph");
-
     const leaf = this.app.workspace.getLeaf("split");
     await leaf.setViewState({
-      type: config.viewType.local,
+      type: VIEW_TYPE_REACT_FORCE_GRAPH,
       active: true,
     });
   };
+
+  onGraphSettingAtomChanged(settings: GraphSettings) {
+    this.store.set(graphSettingsAtom, settings);
+  }
 }

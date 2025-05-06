@@ -8,6 +8,7 @@ export class Node {
   public readonly val: number; // = weight, currently = 1 because scaling doesn't work well
   public readonly unresolved: boolean;
 
+  public idx: number;
   public readonly neighbors: Node[];
   // public readonly parents: Node[];
   public inlinkCount: number;
@@ -17,8 +18,8 @@ export class Node {
   public imagePath?: string;
   public image?: ImageBitmap;
   public zIndex: number = 10;
-  public topped: boolean = false;
   public label?: string | null = null;
+  public expanded: boolean = false;
 
   constructor(
     name: string,
@@ -42,8 +43,10 @@ export class Node {
     // this.parents = parents;
     this.links = links;
     this.unresolved = val == 0;
+    this.idx = -1;
     this.imagePath = imagePath;
     this.image = image;
+    this.expanded = outlinkCount == 0;
   }
 
   // Creates an array of nodes from an array of files (from the Obsidian API)
@@ -54,10 +57,7 @@ export class Node {
   }
 
   toggle(currMin: number, currMax: number) {
-    // this.topped = !this.topped;
-    // if (this.topped) {
     this.zIndex = currMax + 1;
-    // }
   }
 
   /**
@@ -104,6 +104,10 @@ export class Node {
   public isParentOf(nodePath: string) {
     // return this.parents.some((parent) => parent.path === nodePath);
     return this.path !== nodePath && this.links.some((link) => link.target.path === nodePath);
+  }
+
+  public isChildOf(nodePath: string) {
+    return this.path !== nodePath && this.links.some((link) => link.source.path === nodePath);
   }
 
   public static compare = (a: Node, b: Node) => {

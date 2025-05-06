@@ -15,13 +15,8 @@ main.js
 # Exclude sourcemaps
 *.map
 
-# obsidian
-data.json
-
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
 
 .obsidian
-obsidian-dataview.d.ts
-d3-force-3d.d.ts
 dist

@@ -1,12 +1,10 @@
 // copied from https://github.com/Fevol/obsidian-typings/blob/e1ff0b68a2d4e6d6ff42b23b5eb18f1e30a4054c/obsidian-ex.d.ts
-// import "obsidian";
-import type {
+import {
   App,
   CachedMetadata,
   Command,
   Constructor,
-  DataWriteOptions,
-  EditorPosition,
+  DataWriteOptions, EditorPosition,
   EditorRange,
   EditorSuggest,
   EventRef,
@@ -35,9 +33,9 @@ import type {
   WorkspaceTabs,
   WorkspaceWindow,
   WorkspaceWindowInitData,
-} from "obsidian";
-import type { EditorView } from "@codemirror/view";
-import type { EditorState, Extension } from "@codemirror/state";
+} from 'obsidian';
+import { EditorView } from '@codemirror/view';
+import { EditorState, Extension } from '@codemirror/state';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -65,7 +63,7 @@ interface Account {
   /**
    * The license available to the account
    */
-  license: "" | "insider";
+  license: '' | 'insider';
   /**
    * Profile name
    */
@@ -206,7 +204,7 @@ interface ThemeManifest {
    * Version of the theme
    * @remark Defaults to "0.0.0" if no theme manifest was provided in the repository
    */
-  version: "0.0.0" | string;
+  version: '0.0.0' | string;
 }
 
 interface CustomCSS extends Component {
@@ -259,7 +257,7 @@ interface CustomCSS extends Component {
    * Currently active theme, given by its name
    * @remark "" is the default Obsidian theme
    */
-  theme: "" | string;
+  theme: '' | string;
   /**
    * Mapping of theme names to their manifest
    */
@@ -368,6 +366,7 @@ interface CustomCSS extends Component {
   setTranslucency: (translucency: boolean) => void;
 }
 
+
 interface ObsidianDOM {
   /**
    * Root element of the application
@@ -387,6 +386,7 @@ interface ObsidianDOM {
   workspaceEl: HTMLElement;
 }
 
+
 // interface EmbedRegistry {
 // 	embedByExtension: Map<string, (e) => any>;
 // }
@@ -398,7 +398,7 @@ interface PositionedReference extends Reference {
   position: {
     start: Loc;
     end: Loc;
-  };
+  }
 }
 
 interface LinkUpdate {
@@ -507,36 +507,35 @@ interface HotkeyManager {
   save: () => void;
 }
 
-type InternalPlugin =
-  | "audio-recorder"
-  | "backlink"
-  | "bookmarks"
-  | "canvas"
-  | "command-palette"
-  | "daily-notes"
-  | "editor-status"
-  | "file-explorer"
-  | "file-recovery"
-  | "global-search"
-  | "graph"
-  | "markdown-importer"
-  | "note-composer"
-  | "outgoing-link"
-  | "outline"
-  | "page-preview"
-  | "properties"
-  | "publish"
-  | "random-note"
-  | "slash-command"
-  | "slides"
-  | "starred"
-  | "switcher"
-  | "sync"
-  | "tag-pane"
-  | "templates"
-  | "word-count"
-  | "workspaces"
-  | "zk-prefixer";
+type InternalPlugin = "audio-recorder" |
+  "backlink" |
+  "bookmarks" |
+  "canvas" |
+  "command-palette" |
+  "daily-notes" |
+  "editor-status" |
+  "file-explorer" |
+  "file-recovery" |
+  "global-search" |
+  "graph" |
+  "markdown-importer" |
+  "note-composer" |
+  "outgoing-link" |
+  "outline" |
+  "page-preview" |
+  "properties" |
+  "publish" |
+  "random-note" |
+  "slash-command" |
+  "slides" |
+  "starred" |
+  "switcher" |
+  "sync" |
+  "tag-pane" |
+  "templates" |
+  "word-count" |
+  "workspaces" |
+  "zk-prefixer"
 
 interface InternalPlugins extends Events {
   /**
@@ -582,7 +581,7 @@ interface InternalPlugins extends Events {
   /**
    * @internal
    */
-  loadPlugin: ({ id: string, name: string }) => string;
+  loadPlugin: ({id: string, name: string}) => string;
   /**
    * @internal
    */
@@ -619,6 +618,7 @@ interface KeyScope {
    */
   scope: EScope;
 }
+
 
 // interface KeymapManager {
 // 	/**
@@ -779,15 +779,14 @@ interface PropertyInfo {
   count: number;
 }
 
-type PropertyWidgetType =
-  | "aliases"
+type PropertyWidgetType = "aliases"
   | "checkbox"
   | "date"
   | "datetime"
   | "multitext"
   | "number"
   | "tags"
-  | "text";
+  | "text"
 
 interface PropertyWidget {
   /**
@@ -853,10 +852,7 @@ interface MetadataTypeManager extends Events {
   /**
    * @internal Get expected widget type for property and the one inferred from the property value
    */
-  getTypeInfo: ({ key: string, type: string, value: any }) => {
-    inferred: PropertyWidget;
-    expected: PropertyWidget;
-  };
+  getTypeInfo: ({key: string, type: string, value: any}) => { inferred: PropertyWidget, expected: PropertyWidget }
   /**
    * Get all properties with an assigned widget type
    */
@@ -982,6 +978,7 @@ interface MetadataTypeManager extends Events {
 // 	 */
 // 	show: () => void;
 // }
+
 
 interface PluginManifest {
   /**
@@ -1155,8 +1152,7 @@ interface WindowSelection {
   win: Window;
 }
 
-type ConfigItem =
-  | "accentColor"
+type ConfigItem = "accentColor"
   | "alwaysUpdateLinks"
   | "attachmentFolderPath"
   | "autoConvertHtml"
@@ -1207,13 +1203,13 @@ type ConfigItem =
   | "useMarkdownLinks"
   | "useTab"
   | "userIgnoreFilters"
-  | "vimMode";
+  | "vimMode"
 
 interface AppVaultConfig {
   /**
    * Appearance > Accent color
    */
-  accentColor: "" | string;
+  accentColor: '' | string;
   /**
    * Files & Links > Automatically update internal links
    */
@@ -1221,7 +1217,7 @@ interface AppVaultConfig {
   /**
    * Files & Links > Attachment folder path
    */
-  attachmentFolderPath?: "/" | string;
+  attachmentFolderPath?: '/' | string;
   /**
    * Editor > Auto convert HTML
    */
@@ -1245,20 +1241,20 @@ interface AppVaultConfig {
   /**
    * Community Plugins > Browse > Sort order
    */
-  communityPluginSortOrder: "download" | "update" | "release" | "alphabetical";
+  communityPluginSortOrder: 'download' | 'update' | 'release' | 'alphabetical';
   /**
    * Themes > Browse > Sort order
    */
-  communityThemeSortOrder: "download" | "update" | "release" | "alphabetical";
+  communityThemeSortOrder: 'download' | 'update' | 'release' | 'alphabetical';
   /**
    * Appearance > Theme
    * @remark "" is the default Obsidian theme
    */
-  cssTheme?: "" | string;
+  cssTheme?: '' | string;
   /**
    * Editor > Default view for new tabs
    */
-  defaultViewMode?: "source" | "preview";
+  defaultViewMode?: 'source' | 'preview';
   /**
    *
    */
@@ -1270,7 +1266,7 @@ interface AppVaultConfig {
   /**
    *
    */
-  fileSortOrder?: "alphabetical";
+  fileSortOrder?: 'alphabetical';
   /**
    * Editor > Always focus new tabs
    */
@@ -1291,7 +1287,7 @@ interface AppVaultConfig {
   /**
    * Appearance > Interface font
    */
-  interfaceFontFamily?: "" | string;
+  interfaceFontFamily?: '' | string;
   /**
    * Editor > Use legacy editor
    */
@@ -1303,7 +1299,7 @@ interface AppVaultConfig {
   /**
    * Mobile > Configure mobile Quick Action
    */
-  mobilePullAction?: "command-palette:open" | string;
+  mobilePullAction?: 'command-palette:open' | string;
   /**
    *
    */
@@ -1315,7 +1311,7 @@ interface AppVaultConfig {
   /**
    *
    */
-  monospaceFontFamily?: "" | string;
+  monospaceFontFamily?: '' | string;
   /**
    * Appearance > Native menus
    */
@@ -1323,22 +1319,22 @@ interface AppVaultConfig {
   /**
    * Files & Links > Default location for new notes | 'folder' > Folder to create new notes in
    */
-  newFileFolderPath?: "/" | string;
+  newFileFolderPath?: '/' | string;
   /**
    * Files & Links > Default location for new notes
    */
-  newFileLocation?: "root" | "current" | "folder";
+  newFileLocation?: 'root' | 'current' | 'folder';
   /**
    * Files & Links > New link format
    */
-  newLinkFormat?: "shortest" | "relative" | "absolute";
+  newLinkFormat?: 'shortest' | 'relative' | 'absolute';
   /**
    * Saved on executing 'Export to PDF' command
    */
   pdfExportSettings?: {
-    pageSize: "letter" | string;
+    pageSize: 'letter' | string;
     landscape: false | boolean;
-    margin: "0" | string;
+    margin: '0' | string;
     downscalePercent: 100 | number;
   };
   /**
@@ -1348,7 +1344,7 @@ interface AppVaultConfig {
   /**
    * Editor > Properties in document
    */
-  propertiesInDocument?: "visible" | "hidden" | "source";
+  propertiesInDocument?: 'visible' | 'hidden' | 'source'
   /**
    * Editor > Readable line length
    */
@@ -1408,13 +1404,13 @@ interface AppVaultConfig {
   /**
    * Appearance > Text font
    */
-  textFontFamily?: "" | string;
+  textFontFamily?: '' | string;
   /**
    * Appearance > Base color scheme
    * @remark Not be confused with cssTheme, this setting is for the light/dark mode
    * @remark "moonstone" is light theme, "obsidian" is dark theme
    */
-  theme?: "moonstone" | "obsidian";
+  theme?: 'moonstone' | 'obsidian';
   /**
    * Appearance > Translucent window
    */
@@ -1422,7 +1418,7 @@ interface AppVaultConfig {
   /**
    * Files & Links > Deleted files
    */
-  trashOption?: "system" | "local" | "none";
+  trashOption?: 'system' | 'local' | 'none';
   /**
    * @deprecated Probably left-over code from old properties type storage
    */
@@ -1466,7 +1462,7 @@ interface FileEntry {
   /**
    * Type of entry
    */
-  type: "file" | "folder";
+  type: 'file' | 'folder';
 }
 
 interface ViewRegistry extends Events {
@@ -1510,11 +1506,7 @@ interface ViewRegistry extends Events {
   /**
    * Register a view and its associated file extensions
    */
-  registerViewWithExtensions: (
-    extensions: string[],
-    type: string,
-    viewCreator: (leaf: WorkspaceLeaf) => View
-  ) => void;
+  registerViewWithExtensions: (extensions: string[], type: string, viewCreator: (leaf: WorkspaceLeaf) => View) => void;
   /**
    * @internal
    */
@@ -1559,13 +1551,7 @@ interface RecentFileTracker {
   /**
    * Get last n files of type (defaults to 10)
    */
-  getRecentFiles: ({
-    showMarkdown: boolean,
-    showCanvas: boolean,
-    showNonImageAttachments: boolean,
-    showImages: boolean,
-    maxCount: number,
-  }?) => string[];
+  getRecentFiles: ({showMarkdown: boolean, showCanvas: boolean, showNonImageAttachments: boolean, showImages: boolean, maxCount: number}?) => string[];
   /**
    * Set the last opened files
    */
@@ -1650,7 +1636,7 @@ interface SerializedWorkspace {
   /**
    * Left ribbon
    */
-  leftRibbon: { hiddenItems: Record<string, boolean> };
+  leftRibbon: {hiddenItems: Record<string, boolean>};
   /**
    * Main (center) workspace leaf
    */
@@ -1668,10 +1654,7 @@ interface ImportedAttachments {
   name: string;
 }
 
-declare module "obsidian" {
-  interface MarkdownView {
-    file: TFile;
-  }
+declare module 'obsidian' {
   interface App {
     /**
      * The account signed in to Obsidian
@@ -2034,11 +2017,7 @@ declare module "obsidian" {
      * @internal
      * @deprecated - Executes same functionality as `Scope.register`
      */
-    registerKey: (
-      modifiers: Modifier[],
-      key: string | null,
-      func: KeymapEventListener
-    ) => KeymapEventHandler;
+    registerKey: (modifiers: Modifier[], key: string | null, func: KeymapEventListener) => KeymapEventHandler;
     /**
      * @internal
      */
@@ -2057,7 +2036,7 @@ declare module "obsidian" {
     /**
      * @internal IndexedDB database
      */
-    db: IDBDatabase;
+    db: IDBDatabase
     /**
      * @internal File contents cache
      */
@@ -2118,11 +2097,11 @@ declare module "obsidian" {
     /**
      * Get all property infos of the vault
      */
-    getAllPropertyInfos: () => Record<string, PropertyInfo>;
+    getAllPropertyInfos: () => Record<string, PropertyInfo>
     /**
      * Get all backlink information for a file
      */
-    getBacklinksForFile: (file?: TFile) => CustomArrayDict<string, Reference>;
+    getBacklinksForFile: (file?: TFile) => CustomArrayDict<string, Reference>
     /**
      * Get paths of all files cached in the vault
      */
@@ -2138,7 +2117,7 @@ declare module "obsidian" {
     /**
      * Get all links (resolved or unresolved) in the vault
      */
-    getLinkSuggestions: () => { file: TFile | null; path: string }[];
+    getLinkSuggestions: () => { file: TFile | null, path: string }[];
     /**
      * Get destination of link path
      */
@@ -2303,12 +2282,7 @@ declare module "obsidian" {
      * @param extension - Extension of the file to create, defaults to "md"
      * @param contents - Contents of the file to create, defaults to empty string
      */
-    createNewFile: (
-      location: TFolder = null,
-      filename: string = null,
-      extension: string = "md",
-      contents: string = ""
-    ) => Promise<TFile>;
+    createNewFile: (location: TFolder = null, filename: string = null, extension: string = "md", contents: string = "") => Promise<TFile>;
     /**
      * Creates a new untitled folder in the vault at specified location
      * @param location - Location to create the folder in, defaults to root
@@ -2317,11 +2291,7 @@ declare module "obsidian" {
     /**
      * Creates a new Markdown file in the vault at specified location
      */
-    createNewMarkdownFile: (
-      location: TFolder = null,
-      filename: string = null,
-      contents: string = ""
-    ) => Promise<TFile>;
+    createNewMarkdownFile: (location: TFolder = null, filename: string = null, contents: string = "") => Promise<TFile>;
     /**
      * Creates a new Markdown file based on linktext and path
      * @param filename - Name of the file to create
@@ -2346,13 +2316,7 @@ declare module "obsidian" {
      * @param secondary_text - Text to insert (always inserted)
      * @param atStart - Whether to insert text at the start or end of the file
      */
-    insertTextIntoFile: (
-      file: TFile,
-      primary_text: string,
-      basename: string,
-      secondary_text: string,
-      atStart: boolean = true
-    ) => Promise<void>;
+    insertTextIntoFile: (file: TFile, primary_text: string, basename: string, secondary_text: string, atStart: boolean = true) => Promise<void>;
     /**
      * Iterate over all links in the vault with callback
      * @param callback - Callback to execute for each link
@@ -2485,6 +2449,7 @@ declare module "obsidian" {
     setTitle: (title: string) => this;
   }
 
+
   interface Setting extends Modal {
     /**
      * Current active tab of the settings modal
@@ -2571,7 +2536,7 @@ declare module "obsidian" {
     /**
      * @internal
      */
-    btime: { btime: (path: string, btime: number) => void };
+    btime: {btime: (path: string, btime: number) => void};
     /**
      * Mapping of file/folder path to vault entry, includes non-MD files
      */
@@ -2611,7 +2576,7 @@ declare module "obsidian" {
     /**
      * @internal
      */
-    watchers: Record<string, { resolvedPath: string; watcher: any }>;
+    watchers: Record<string, {resolvedPath: string, watcher: any}>;
 
     /**
      * @internal Apply data write options to file
@@ -2692,11 +2657,7 @@ declare module "obsidian" {
     /**
      * @internal
      */
-    reconcileFileCreation: (
-      normalizedPath: string,
-      normalizedNewPath: string,
-      option: boolean
-    ) => void;
+    reconcileFileCreation: (normalizedPath: string, normalizedNewPath: string, option: boolean) => void;
     /**
      * @internal
      */
@@ -2756,26 +2717,6 @@ declare module "obsidian" {
   }
 
   interface Workspace {
-    trigger(
-      name: "hover-link",
-      data: {
-        event: MouseEvent;
-        /**
-         * you need to register the link source in the `registerHoverLinkSource` function
-         */
-        source: string;
-        targetEl: HTMLElement;
-        /**
-         *  it can be any object, but you need to implements this interface
-         */
-        hoverParent: HoverParent;
-        /**
-         * it is the path of the file
-         */
-        linktext: string;
-        state?: EphemeralState;
-      }
-    ): void;
     /**
      * Currently active tab group
      */
@@ -2795,10 +2736,7 @@ declare module "obsidian" {
     /**
      * @internal
      */
-    editorSuggest: {
-      currentSuggest?: EditorSuggest<any>;
-      suggests: EditorSuggest<any>[];
-    };
+    editorSuggest: {currentSuggest?: EditorSuggest<any>, suggests: EditorSuggest<any>[]};
     /**
      * @internal
      */
@@ -2898,19 +2836,11 @@ declare module "obsidian" {
      * Get adjacent leaf in specified direction
      * @remark Potentially does not work
      */
-    getAdjacentLeafInDirection: (
-      leaf: WorkspaceLeaf,
-      direction: "top" | "bottom" | "left" | "right"
-    ) => WorkspaceLeaf | null;
+    getAdjacentLeafInDirection: (leaf: WorkspaceLeaf, direction: "top" | "bottom" | "left" | "right") => WorkspaceLeaf | null;
     /**
      * @internal Get the direction where the leaf should be dropped on dragevent
      */
-    getDropDirection: (
-      e: DragEvent,
-      rect: DOMRect,
-      directions: ["left", "right"],
-      leaf: WorkspaceLeaf
-    ) => "left" | "right" | "top" | "bottom" | "center";
+    getDropDirection: (e: DragEvent, rect: DOMRect, directions: ["left", "right"], leaf: WorkspaceLeaf) => "left" | "right" | "top" | "bottom" | "center";
     /**
      * @internal Get the leaf where the leaf should be dropped on dragevent
      * @param e Drag event
@@ -2923,22 +2853,13 @@ declare module "obsidian" {
     /**
      * Get n last opened files of type (defaults to 10)
      */
-    getRecentFiles: ({
-      showMarkdown: boolean,
-      showCanvas: boolean,
-      showNonImageAttachments: boolean,
-      showImages: boolean,
-      maxCount: number,
-    }?) => string[];
+    getRecentFiles: ({showMarkdown: boolean, showCanvas: boolean, showNonImageAttachments: boolean, showImages: boolean, maxCount: number}?) => string[];
     /**
      * Get leaf in the side ribbon/dock and split if necessary
      * @param sideRibbon Side ribbon to get leaf from
      * @param split Whether to split the leaf if it does not exist
      */
-    getSideLeaf: (
-      sideRibbon: WorkspaceSidedock | WorkspaceMobileDrawer,
-      split: boolean
-    ) => WorkspaceLeaf;
+    getSideLeaf: (sideRibbon: WorkspaceSidedock | WorkspaceMobileDrawer, split: boolean) => WorkspaceLeaf;
     /**
      * @internal
      */
@@ -3048,16 +2969,15 @@ declare module "obsidian" {
     /**
      * @internal Split leaves in specified direction
      */
-    splitLeaf: (
-      leaf: WorkspaceLeaf,
-      newleaf: WorkspaceLeaf,
-      direction?: SplitDirection,
-      before?: boolean
-    ) => void;
+    splitLeaf: (leaf: WorkspaceLeaf, newleaf: WorkspaceLeaf, direction?: SplitDirection, before?: boolean) => void;
     /**
      * Split provided leaf, or active leaf if none provided
      */
     splitLeafOrActive: (leaf?: WorkspaceLeaf, direction?: SplitDirection) => void;
+    /**
+     * @internal
+     */
+    trigger: (e: any) => void;
     /**
      * @internal Unregister a CodeMirror editor extension
      */
@@ -3089,6 +3009,7 @@ declare module "obsidian" {
     updateTitle: () => void;
   }
 
+
   interface Vault {
     /**
      * Low-level file system adapter for read and write operations
@@ -3114,7 +3035,8 @@ declare module "obsidian" {
      */
     fileMap: Record<string, TAbstractFile>;
 
-    on(name: "config-changed", callback: () => void, ctx?: any): EventRef;
+
+    on(name: 'config-changed', callback: () => void, ctx?: any): EventRef;
 
     /**
      * @internal Add file as child/parent to respective folders
@@ -3151,11 +3073,7 @@ declare module "obsidian" {
     /**
      * @internal Get path for attachment that does not conflict with other existing files
      */
-    getAvailablePathForAttachments: (
-      filename: string,
-      file: TAbstractFile,
-      extension: string
-    ) => string;
+    getAvailablePathForAttachments: (filename: string, file: TAbstractFile, extension: string) => string;
     /**
      * Get value from config by key
      * @remark Default value will be selected if config value was not manually changed
@@ -3275,6 +3193,8 @@ declare module "obsidian" {
     writePluginData: (path: string, data: object) => Promise<void>;
   }
 
+
+
   // TODO: Add missing elements to other Obsidian interfaces and classes
 
   interface Editor {
@@ -3290,21 +3210,13 @@ declare module "obsidian" {
     /**
      * Make ranges of text highlighted within the editor given specified class (style)
      */
-    addHighlights: (
-      ranges: { from: EditorPosition; to: EditorPosition }[],
-      style: "is-flashing" | "obsidian-search-match-highlight",
-      remove_previous: boolean,
-      x: boolean
-    ) => void;
+    addHighlights: (ranges: {from: EditorPosition, to: EditorPosition}[], style: "is-flashing" | "obsidian-search-match-highlight", remove_previous: boolean, x: boolean) => void;
     /**
      * Convert editor position to screen position
      * @param pos Editor position
      * @param mode Relative to the editor or the application window
      */
-    coordsAtPos: (
-      pos: EditorPosition,
-      relative_to_editor = false
-    ) => { left: number; top: number; bottom: number; right: number };
+    coordsAtPos: (pos: EditorPosition, relative_to_editor = false) => {left: number, top: number, bottom: number, right: number};
     /**
      * Unfolds all folded lines one level up
      * @remark If level 1 and 2 headings are folded, level 2 headings will be unfolded
@@ -3318,16 +3230,11 @@ declare module "obsidian" {
     /**
      * Get all ranges that can be folded away in the editor
      */
-    getAllFoldableLines: () => { from: number; to: number }[];
+    getAllFoldableLines: () => { from:number, to:number }[];
     /**
      * Get a clickable link - if it exists - at specified position
      */
-    getClickableTokenAt: (pos: EditorPosition) => {
-      start: EditorPosition;
-      end: EditorPosition;
-      text: string;
-      type: string;
-    } | null;
+    getClickableTokenAt: (pos: EditorPosition) => { start: EditorPosition, end: EditorPosition, text: string, type: string } | null;
     /**
      * Get all blocks that were folded by their starting character position
      */
@@ -3345,7 +3252,7 @@ declare module "obsidian" {
     /**
      * Get the closest character position to the specified coordinates
      */
-    posAtCoords: (coords: { left: number; top: number }) => EditorPosition;
+    posAtCoords: (coords: {left: number, top: number}) => EditorPosition;
     /**
      * Removes all highlights of specified class
      */
@@ -3354,19 +3261,17 @@ declare module "obsidian" {
      * Adds a search cursor to the editor
      */
     searchCursor: (searchString: string) => {
-      current: () => { from: EditorPosition; to: EditorPosition };
-      findAll: () => { from: EditorPosition; to: EditorPosition }[];
-      findNext: () => { from: EditorPosition; to: EditorPosition };
-      findPrevious: () => { from: EditorPosition; to: EditorPosition };
+      current: () => {from: EditorPosition, to: EditorPosition};
+      findAll: () => {from: EditorPosition, to: EditorPosition}[];
+      findNext: () => {from: EditorPosition, to: EditorPosition};
+      findPrevious: () => {from: EditorPosition, to: EditorPosition};
       replace: (replacement?: string, origin: string) => void;
       replaceAll: (replacement?: string, origin: string) => void;
-    };
+    }
     /**
      * Applies specified markdown syntax to selected text or word under cursor
      */
-    toggleMarkdownFormatting: (
-      syntax: "bold" | "italic" | "strikethrough" | "highlight" | "code" | "math" | "comment"
-    ) => void;
+    toggleMarkdownFormatting: (syntax: "bold" | "italic" | "strikethrough" | "highlight" | "code" | "math" | "comment") => void;
 
     /**
      * Clean-up function executed after indenting lists
@@ -3473,6 +3378,7 @@ declare module "obsidian" {
     renderer: ReadViewRenderer;
   }
 
+
   interface EventRef {
     /**
      * Context applied to the event callback
@@ -3495,6 +3401,9 @@ declare module "obsidian" {
     name: string;
   }
 }
+
+
+
 
 interface RendererSection {
   el: HTMLElement;
@@ -3519,45 +3428,43 @@ interface ReadViewRenderer {
   asyncSections: any[];
   recycledSections: any[];
   rendered: any[];
+
 }
 
 interface CMState extends EditorState {
   vim: {
     inputState: {
-      changeQueue: null;
-      keyBuffer: [];
-      motion: null;
-      motionArgs: null;
-      motionRepeat: [];
-      operator: null;
-      operatorArgs: null;
-      prefixRepeat: [];
-      registerName: null;
-    };
-    insertMode: false;
-    insertModeRepeat: undefined;
-    lastEditActionCommand: undefined;
-    lastEditInputState: undefined;
-    lastHPos: number;
-    lastHSPos: number;
+      changeQueue: null,
+      keyBuffer: [],
+      motion: null,
+      motionArgs: null,
+      motionRepeat: [],
+      operator: null,
+      operatorArgs: null,
+      prefixRepeat: [],
+      registerName: null,
+    },
+    insertMode: false,
+    insertModeRepeat: undefined,
+    lastEditActionCommand: undefined,
+    lastEditInputState: undefined,
+    lastHPos: number,
+    lastHSPos: number,
     lastMotion: {
-      name?: string;
-    };
-    lastPastedText: null;
-    lastSelection: null;
-  };
+      name?: string,
+    },
+    lastPastedText: null,
+    lastSelection: null,
+  },
   vimPlugin: {
-    lastKeydown: string;
-  };
+    lastKeydown: string,
+  }
 }
-
-// interface MarkdownView {
-//   file: TFile;
-// }
 
 interface CMView extends EditorView {
   state: CMState;
 }
+
 
 interface EditorViewI extends EditorView {
   cm?: CMView;

@@ -84,11 +84,11 @@ const traverseNode = (
 };
 
 export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph) => {
-  console.info("Loading images...");
+  console.debug("Loading images...");
   const imageLoad = graph.nodes.map(async (node) => {
     // console.info(`try image ${node.path}... ${node.imagePath}`);
     if (node.imagePath && !node.image) {
-      console.info(`Loading ${node.imagePath} image for ${node.path}`);
+      console.debug(`Loading ${node.imagePath} image for ${node.path}`);
       const file = plugin.app.vault.getAbstractFileByPath(node.imagePath);
       if (file instanceof TFile) {
         const arrayBuffer = await plugin.app.vault.readBinary(file);
@@ -123,7 +123,7 @@ export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph)
         plugin.globalGraph.nodes.find((n) => n.path == node.path).image = node.image;
       }
     } else if (node.imagePath) {
-      console.info(`Image ${node.imagePath} for ${node.path} already loaded!`);
+      console.debug(`Image ${node.imagePath} for ${node.path} already loaded!`);
     }
     return node;
   });
@@ -193,16 +193,10 @@ export const getNewLocalGraph = (
       return true;
     });
 
-  const parentNodes = graph.filterNodes((node: Node) => {
-    return node.isParentOf(centerFilePath);
-  });
-
-  function applyToConsecutivePairs<T>(arr: T[], func: (a: T, b: T) => void): void {
-    for (let i = 0; i < arr.length - 1; i++) {
-      func(arr[i], arr[i + 1]);
-    }
-  }
-
+  // const parentNodes = graph.filterNodes((node: Node) => {
+  //   return node.isParentOf(centerFilePath);
+  // });
+  //
   // parents linked together
   // if (parentNodes.length > 1) {
   //   applyToConsecutivePairs(parentNodes, (n1, n2) => {

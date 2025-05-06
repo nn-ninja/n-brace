@@ -1,19 +1,7 @@
 import type { ISettingManager } from "@/Interfaces";
 import { AsyncQueue } from "@/util/AsyncQueue";
-import type {
-  Setting,
-  LocalGraphSettings,
-  MarkdownPostProcessorGraphSettings,
-  GraphSetting,
-} from "@/SettingsSchemas";
-import {
-  SettingSchema,
-  GraphType,
-  SearchEngineType,
-  CommandClickNodeAction,
-  defaultLocalGraphSetting,
-  defaultMarkdownPostProcessorGraphSetting,
-} from "@/SettingsSchemas";
+import type { GraphSetting, LocalGraphSettings, MarkdownPostProcessorGraphSettings, Setting } from "@/SettingsSchemas";
+import { defaultLocalGraphSetting, defaultMarkdownPostProcessorGraphSetting, GraphType, SearchEngineType, SettingSchema } from "@/SettingsSchemas";
 import { createNotice } from "@/util/createNotice";
 import { State } from "@/util/State";
 import type { Plugin } from "obsidian";
@@ -66,8 +54,6 @@ export class PluginSettingManager implements ISettingManager<Setting> {
     // load the data, this can be null if the plugin is used for the first time
     const loadedData = (await this.plugin.loadData()) as unknown | null;
 
-    // console.log("loaded: ", loadedData);
-
     // if the data is null, then we need to initialize the data
     if (!loadedData) {
       this.setting.value = DEFAULT_SETTING;
@@ -85,8 +71,6 @@ export class PluginSettingManager implements ISettingManager<Setting> {
       this.setting.value = DEFAULT_SETTING;
       return this.setting.value;
     }
-
-    // console.log("parsed loaded data successfully");
 
     this.setting.value = result.data;
     return this.setting.value;
@@ -107,12 +91,8 @@ export class PluginSettingManager implements ISettingManager<Setting> {
       }
 
       this.isLoaded = true;
-      // console.log("parsed loaded data successfully");
     }
     await this.plugin.saveData(this.setting.value);
-
-    // debug
-    // console.log("saved: ", this.setting.value);
   }
 
   static getNewSetting(type: GraphType.local): LocalGraphSettings;
@@ -132,7 +112,12 @@ export const DEFAULT_SETTING: Setting = {
   temporaryLocalGraphSetting: defaultLocalGraphSetting,
   pluginSetting: {
     baseFolder: "/",
-    titleFontSize: 12,
+    titleFontSize: 16,
+    defaultGraphSpan: 5,
+    linkColorTheme: "dark",
+    linkColorIn: "122, 41, 143",
+    linkColorOut: "13, 91, 130",
+    linkColorOther: "71, 30, 143",
     maxNodeNumber: 1000,
     searchEngine: SearchEngineType.default,
   },

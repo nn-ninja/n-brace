@@ -179,6 +179,11 @@ export const SettingSchema = z.object({
   pluginSetting: z.object({
     baseFolder: z.string(),
     titleFontSize: z.number(),
+    defaultGraphSpan: z.number(),
+    linkColorTheme: z.string(),
+    linkColorIn: z.string(),
+    linkColorOut: z.string(),
+    linkColorOther: z.string(),
     maxNodeNumber: z.number(),
     searchEngine: z.nativeEnum(SearchEngineType),
   }),

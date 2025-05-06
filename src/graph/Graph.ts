@@ -3,9 +3,9 @@ import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
 import { copy } from "copy-anything";
 import type { App, TAbstractFile } from "obsidian";
-import { node } from "prop-types";
 
 export class Graph {
+  public rootPath: string | undefined;
   public readonly nodes: Node[];
   public readonly links: Link[];
 
@@ -14,11 +14,13 @@ export class Graph {
   private readonly linkIndex: Map<string, Map<string, number>>;
 
   constructor(
+    rootPath: string | undefined,
     nodes: Node[],
     links: Link[],
     nodeIndex: Map<string, number>,
     linkIndex: Map<string, Map<string, number>>
   ) {
+    this.rootPath = rootPath;
     this.nodes = nodes;
     this.links = links;
     this.nodeIndex = nodeIndex || new Map<string, number>();
@@ -95,6 +97,7 @@ export class Graph {
   // Clones the graph
   public clone = (): Graph => {
     return new Graph(
+      this.rootPath,
       copy(this.nodes),
       copy(this.links),
       copy(this.nodeIndex),
@@ -103,12 +106,12 @@ export class Graph {
   };
 
   public static createEmpty = (): Graph => {
-    return new Graph([], [], new Map(), new Map());
+    return new Graph(undefined, [], [], new Map(), new Map());
   };
 
   // Creates a graph using the Obsidian API
   public static createFromApp = (app: App, baseFolder: string): Graph => {
-    console.info(`Create mind map from path ${baseFolder}`);
+    console.debug(`Create mind map from path ${baseFolder}`);
     const map = getMapFromMetaCache(
       baseFolder,
       app.metadataCache.resolvedLinks,
@@ -168,7 +171,7 @@ export class Graph {
       });
     });
 
-    return new Graph(newNodes, links, Node.createNodeIndex(newNodes), Link.createLinkIndex(links));
+    return new Graph(undefined, newNodes, links, Node.createNodeIndex(newNodes), Link.createLinkIndex(links));
   }
 
   /**

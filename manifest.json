@@ -1,11 +1,11 @@
 {
-	"id": "brainavigator-plugin",
-	"name": "Brainavigator",
+	"id": "n-brace-plugin",
+	"name": "N-brace",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Brainavigator plugin helping with exploring notes and better orientate in node view.",
+	"description": "The N-brace plugin enhances navigation and clarity in the local graph view.",
 	"author": "Rafael Hazan",
-	"authorUrl": "https://hayio.github.io/brainavigator/",
-	"fundingUrl": "https://hayio.github.io/brainavigator/buymeacoffeetodo",
+	"authorUrl": "https://hayio.github.io/n-brace/",
+	"fundingUrl": "https://buymeacoffee.com/nbrace",
 	"isDesktopOnly": false
 }

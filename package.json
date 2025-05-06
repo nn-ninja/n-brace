@@ -1,7 +1,7 @@
 {
-  "name": "brainavigator",
+  "name": "n-brace",
   "version": "1.1.11",
-  "description": "A 3D graph for Obsidian",
+  "description": "A graph navigation and visualization for Obsidian",
   "main": "main.js",
   "scripts": {
     "dev": "bun esbuild.config.mjs",
@@ -10,14 +10,14 @@
     "release": "bash ./release.sh",
     "prepare": "husky install",
     "typecheck": "tsc -noEmit -skipLibCheck &&  bunx dpdm -T --exit-code circular:1 --warning false --tree false src/main.ts",
-    "lint": "eslint . --ext .ts --fix"
+    "lint": "eslint . --ext .ts,.tsx --fix"
   },
   "keywords": [
     "obsidian",
     "plugin",
-    "3D",
+    "n-brace",
+    "navigation",
     "D3",
-    "3D graph",
     "graph"
   ],
   "author": "Rafael Hazan",
@@ -53,6 +53,7 @@
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "18.3.1",
+    "lucide-react": "^0.511.0",
     "jotai": "^2.9.1",
     "force-graph": "^1.43.5",
     "@tweenjs/tween.js": "^21.0.0",

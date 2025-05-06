@@ -1,9 +1,9 @@
 export const config = {
   icon: "orbit",
   viewType: {
-    local: "force-graph-view-local",
+    local: "n-brace-view",
   },
   displayText: {
-    local: "Brainavigator Graph",
+    local: "N-brace your brain",
   },
 };

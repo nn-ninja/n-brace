@@ -1,15 +1,13 @@
 import { createContext } from "react";
-import type { App, TAbstractFile, WorkspaceLeaf } from "obsidian";
+import type { App, WorkspaceLeaf } from "obsidian";
 import { ItemView } from "obsidian";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import ReactForceGraph from "@/views/graph/ReactForceGraph";
-import type { Graph } from "@/graph/Graph";
+import { Graph } from "@/graph/Graph";
 import type ForceGraphPlugin from "@/main";
 import { dimensionsAtom } from "@/atoms/graphAtoms";
 import { getDefaultStore } from "jotai";
-import { Link } from "@/graph/Link";
-import type { Node } from "@/graph/Node";
 import { getNewLocalGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
 import { eventBus } from "@/util/EventBus";
 import { PluginSettingManager } from "@/SettingManager";
@@ -22,10 +20,6 @@ export const ViewContext = createContext<ReactForceGraphView | undefined>(undefi
 export class ReactForceGraphView extends ItemView {
   readonly plugin: ForceGraphPlugin;
   readonly store = getDefaultStore();
-  /**
-   * when the app is just open, this can be null
-   */
-  currentFile: TAbstractFile | null;
   root: Root | null = null;
   private width: number = this.contentEl.offsetWidth;
   private settingManager: PluginSettingManager;
@@ -33,7 +27,6 @@ export class ReactForceGraphView extends ItemView {
   constructor(leaf: WorkspaceLeaf, plugin: ForceGraphPlugin) {
     super(leaf);
     this.plugin = plugin;
-    this.currentFile = this.plugin.app.workspace.getActiveFile();
 
     this.settingManager = this.plugin.settingManager;
     eventBus.on("settings-updated", this.handleSettingsUpdate.bind(this));
@@ -44,7 +37,7 @@ export class ReactForceGraphView extends ItemView {
   }
 
   getDisplayText() {
-    return "React Brainavigator";
+    return "N-brace your brain";
   }
 
   private handleSettingsUpdate() {
@@ -83,13 +76,16 @@ export class ReactForceGraphView extends ItemView {
       width: this.contentEl.offsetWidth,
       height: this.contentEl.offsetHeight,
     });
-    // useSetAtom(dimensionsAtom)({width: this.contentEl.offsetWidth, height: this.contentEl.offsetHeight});
   }
 
-  protected async expandNode(node): Promise<Graph> {
-    console.info("node to expand ", node);
+  protected async expandNode(nodePath: string | undefined): Promise<Graph> {
+    console.debug("node to expand ", nodePath);
+    if (!nodePath || !this.plugin.globalGraph) {
+      console.debug("Returning empty graph.");
+      return Promise.resolve(Graph.createEmpty());
+    }
     const graph = getNewLocalGraph(this.plugin, {
-      centerFilePath: node?.path ?? undefined,
+      centerFilePath: nodePath,
       searchResults: [],
       filterSetting: {
         searchQuery: "",
@@ -100,11 +96,18 @@ export class ReactForceGraphView extends ItemView {
       },
     });
     await loadImagesForGraph(this.plugin, graph);
+    graph.rootPath = nodePath;
+    graph.nodes.forEach((n) => {
+      if (n.path === nodePath) {
+        n.expanded = true;
+      }
+    });
+    console.debug(`Graph loaded ${nodePath}`);
     return graph;
   }
 
   public async getNewGraphData(): Promise<Graph> {
-    return this.expandNode(this.currentFile);
+    return this.expandNode(this.plugin.app.workspace.getActiveFile()?.path ?? undefined);
   }
 
   async onClose() {

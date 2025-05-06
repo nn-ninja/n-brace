@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import type { ForceGraphMethods } from "react-force-graph-2d";
 import ForceGraph2D from "react-force-graph-2d";
 import type { Graph } from "@/graph/Graph";
@@ -7,15 +7,26 @@ import { Node } from "@/graph/Node";
 import type { ReactForceGraphView } from "@/views/ReactForceGraphView";
 import { ViewContext } from "@/views/ReactForceGraphView";
 import { useAtom, useAtomValue } from "jotai/react";
-import { useResetAtom } from "jotai/utils";
-import { dimensionsAtom, graphDataAtom, graphNavAtom } from "@/atoms/graphAtoms";
+import {
+  dimensionsAtom,
+  expandNodePathAtom,
+  graphDataAtom,
+  graphNavAtom,
+  graphSettingsAtom,
+  navHistoryAtom,
+  navIndexHistoryAtom,
+  nodeIdxMaxAtom,
+} from "@/atoms/graphAtoms";
 import * as d3 from "d3";
 import { Link } from "@/graph/Link";
+import { eventBus } from "@/util/EventBus";
+import { GraphControls } from "@/views/graph/GraphControls";
+import { calcNodeAngle, getNavBackward, getNavForward, getNavIndexBackward, getNavIndexForward, stackOnHistory, stackOnIndexHistory } from "@/atoms/graphOps";
 
 interface GraphComponentProps {
   data: Graph;
   getInitialGraph: () => Promise<Graph>;
-  getExpandNode: () => Promise<Graph>;
+  getExpandNode: (nodePath: string | undefined) => Promise<Graph>;
   titleFontSize: number;
 }
 
@@ -28,20 +39,58 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
   getExpandNode,
   titleFontSize,
 }) => {
-  const isFirstRun = useRef(true);
   const fgRef = useRef<ForceGraphMethods | undefined>(undefined);
+  const containerRef = useRef<HTMLDivElement>(undefined);
+  const [nodeIdxMax, setNodeIdxMax] = useAtom(nodeIdxMaxAtom);
+  const graphSettings = useAtomValue(graphSettingsAtom);
+  // whether the graph exploration parent->child directed
+  const [isDescending, setIsDescending] = useState(true);
+  const [maxPathLength, setMaxPathLength] = useState(9);
+  const changedDescendingDuringCtrl = useRef(false);
 
   const dimensions = useAtomValue(dimensionsAtom);
   const [selectedNode, setSelectedNode] = useAtom(graphNavAtom);
-  const resetSelectedNode = useResetAtom(graphNavAtom);
+  const [expandNodePath, setExpandNodePath] = useAtom(expandNodePathAtom);
+  const [navHistory, setNavHistory] = useAtom(navHistoryAtom);
+  const [navIndexHistory, setNavIndexHistory] = useAtom(navIndexHistoryAtom);
   const [graphData, setGraphData] = useAtom(graphDataAtom);
+  const [filteredGraphData, setFilteredGraphData] = useState<{
+    nodes: Node[];
+    links: Link[];
+  }>({ nodes: [], links: [] });
+
+  function assignIdx(nodes: Node[]) {
+    let maxIdx = nodeIdxMax;
+    nodes.forEach((n) => {
+      n.idx = maxIdx++;
+      console.debug(`Node ${n.path} idx = ${n.idx}`);
+    });
+    setNodeIdxMax(maxIdx);
+    return nodes;
+  }
+
+  useEffect(() => {
+    const fg = fgRef.current;
+
+    const initGraph = async () => {
+      const graph = await getInitialGraph();
+      console.debug(`Init Graph data starting with ${graph.rootPath}`);
+      assignIdx(graph.nodes);
+      setGraphData(graph);
+      setSelectedNode({ selectedPath: graph.rootPath });
+    };
+    initGraph();
+
+    // navigation will be instantly ready
+    containerRef.current?.focus();
+  }, []);
 
   // directional forces depending on if a screen is vertical or horizontal
   useEffect(() => {
     const fg = fgRef.current;
     // TODO change forces only if dimensions changed a lot
     if (fg) {
-      console.info("Setting Graph forces");
+      console.debug("Setting Graph forces");
       // fg.d3Force("link", d3.forceLink()
         // .strength((link) => {
         //   return 1 / Math.min(link.target.inlinkCount, link.source.outlinkCount);
@@ -73,16 +122,51 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
   }, [dimensions]);
 
   useEffect(() => {
-    const fg = fgRef.current;
+    if (!selectedNode.selectedIndex || maxPathLength >= 99) {
+      setFilteredGraphData(graphData); // Show all if no selection or max
+      return;
+    }
 
-    const initGraph = async () => {
-      const graph = await getInitialGraph();
-      console.info("Init Graph data");
-      setGraphData(graph);
-      resetSelectedNode();
-    };
-    initGraph();
-  }, [getInitialGraph, setGraphData]);
+    // BFS to find nodes within maxPathLength
+    const distances = new Map<number, number>();
+    const queue: number[] = [selectedNode.selectedIndex];
+    distances.set(selectedNode.selectedIndex, 0);
+
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const currentDistance = distances.get(currentId)!;
+
+      if (currentDistance >= maxPathLength) continue;
+
+      // Find neighbors
+      graphData.links.forEach((link) => {
+        let neighborId: number | undefined;
+        if (link.source.idx === currentId && !distances.has(link.target.idx)) {
+          link.distance = currentDistance;
+          neighborId = link.target.idx;
+        } else if (link.target.idx === currentId && !distances.has(link.source.idx)) {
+          link.distance = currentDistance;
+          neighborId = link.source.idx;
+        }
+
+        if (neighborId !== undefined) {
+          distances.set(neighborId, currentDistance + 1);
+          queue.push(neighborId);
+        }
+      });
+    }
+
+    // Filter nodes within maxPathLength
+    const validNodeIds = new Set(distances.keys());
+    const filteredNodes = graphData.nodes.filter((node) =>
+      validNodeIds.has(node.idx)
+    );
+    const filteredLinks = graphData.links.filter(
+      (link) => validNodeIds.has(link.source.idx) && validNodeIds.has(link.target.idx)
+    );
+
+    setFilteredGraphData({ nodes: filteredNodes, links: filteredLinks });
+  }, [selectedNode, maxPathLength, graphData]);
 
   useEffect(() => {
     graphData.nodes.forEach((node) => {
@@ -105,21 +189,184 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
     });
   }, [selectedNode]);
 
-  function updateAttributeDeep<T extends object, K extends keyof T>(
-    original: T,
-    key: K,
-    newValue: T[K]
-  ): T {
-    const deepCopy = structuredClone(original); // Deep copy
-    deepCopy[key] = newValue; // Update the attribute
-    return deepCopy;
-  }
+  useEffect(() => {
+    if (expandNodePath) {
+      expandNodeOp(expandNodePath, undefined).then(() => {
+        setExpandNodePath(undefined);
+      });
+    }
+  }, [expandNodePath]);
 
-  function partition<T>(array: T[], predicate: (item: T) => boolean): [T[], T[]] {
-    const matches = array.filter(predicate);
-    const nonMatches = array.filter(item => !predicate(item));
-    return [matches, nonMatches];
-  }
+  const expandNode = (node: Node) => {
+    if (!node.expanded) {
+      expandNodeOp(node.path, node.idx);
+      node.expanded = true;
+    } else {
+      signalSelectedNode(node);
+    }
+  };
+
+  const expandNodeOp = async (nodePath: string | undefined, nodeIndex: number | undefined) => {
+
+    const fullConns = false;
+
+    const { nodes, links } = await getExpandNode(nodePath);
+    const expandedNode: Node & NodeData = graphData.nodes.find((n) =>
+      nodeIndex ? n.idx === nodeIndex : n.path === nodePath
+    );
+    if (!expandedNode) {
+      // when opening file totally ouf of visible graph scope
+      setGraphData({ nodes: assignIdx(nodes), links: links });
+      signalSelectedNode(nodes.find((n) =>
+        nodeIndex ? n.idx === nodeIndex : n.path === nodePath
+      ));
+      return;
+    }
+
+    let newNodes;
+    let newLinks;
+    if (fullConns) {
+      newNodes = nodes.filter((n) => {
+        return !graphData.nodes.find((existingNode) => {
+          const exists = Node.compare(n, existingNode);
+          if (exists) {
+            links.forEach((l) => {
+              if (l.source.path === existingNode.path) {
+                l.source = existingNode;
+              } else if (l.target.path === existingNode.path) {
+                l.target = existingNode;
+              }
+            });
+            existingNode.links = [
+              ...existingNode.links,
+              ...n.links.filter(
+                (l) =>
+                  !existingNode.links.find(
+                    (existingLink) =>
+                      l.source.path === existingLink.source.path &&
+                      l.target.path === existingLink.target.path
+                  )
+              ),
+            ];
+          }
+          return exists;
+        });
+      });
+      newLinks = links.filter((l) => {
+        return !graphData.links.find((existingLink) => {
+          return Link.compare(l, existingLink);
+        });
+      });
+    } else {
+      const nodeDuplicates = new Set<string>();
+      newLinks = links.filter((l) => {
+        // const exists = graphData.links.find((existingLink) => {
+        //   return Link.compare(l, existingLink);
+        // });
+        const exists = graphData.links.find((existingLink) => {
+          return (existingLink.source.idx === expandedNode.idx || existingLink.target.idx === expandedNode.idx) &&
+            Link.compare(l, existingLink);
+        });
+        if (exists) {
+          nodeDuplicates.add(l.source.path);
+          nodeDuplicates.add(l.target.path);
+        }
+        return !exists;
+      });
+      newNodes = nodes.filter((n) => {
+        const isItExpanded = n.path === expandedNode.path;
+        if (isItExpanded) {
+          const existingNode = expandedNode;
+          links.forEach((l) => {
+            if (l.source.path === existingNode.path) {
+              l.source = existingNode;
+            } else if (l.target.path === existingNode.path) {
+              l.target = existingNode;
+            }
+          });
+          existingNode.links = [
+            ...existingNode.links,
+            ...n.links.filter(
+              (l) =>
+                !existingNode.links.find(
+                  (existingLink) =>
+                    l.source.path === existingLink.source.path &&
+                    l.target.path === existingLink.target.path
+                )
+            ),
+          ];
+          return false;
+        }
+        return !nodeDuplicates.has(n.path);
+        // const isItParentOfExpanded = n.links.find((l) => l.target.path === expandedNode.path);
+        // if (isItParentOfExpanded) {
+        //   return !graphData.nodes.find((existingNode) => {
+        //     const exists = Node.compare(n, existingNode);
+        //     // const hasLink = exists && existingNode.links.find((l) => l.tar)
+        //     if (exists) {
+        //       links.forEach((l) => {
+        //         if (l.source.path === existingNode.path) {
+        //           l.source = existingNode;
+        //         } else if (l.target.path === existingNode.path) {
+        //           l.target = existingNode;
+        //         }
+        //       });
+        //       existingNode.links = [
+        //         ...existingNode.links,
+        //         ...n.links.filter(
+        //           (l) =>
+        //             !existingNode.links.find(
+        //               (existingLink) =>
+        //                 l.source.path === existingLink.source.path &&
+        //                 l.target.path === existingLink.target.path
+        //             )
+        //         ),
+        //       ];
+        //     }
+        //     return exists;
+        //   });
+        // }
+        // return true;
+      });
+    }
+
+    graphData.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+
+    // const simplifiedNodes = [...graphData.nodes, ...newNodes].map(node => ({
+    //   path: node.path,
+    //   links: node.links.map((link) => link.source.path + "->" + link.target.path),
+    // }));
+    // console.debug(`Nodes after expand: ${JSON.stringify(simplifiedNodes)}`);
+
+    setGraphData({
+      nodes: [...graphData.nodes, ...assignIdx(newNodes)],
+      links: [...graphData.links, ...newLinks],
+    });
+
+    signalSelectedNode(expandedNode);
+    console.debug(`New graph data after expansion: ${graphData.nodes.length + newNodes.length} 
+      nodes and ${graphData.links.length + newLinks.length} links`);
+  };
+
+  const signalSelectedNode = (node: Node) => {
+    if (!node) {
+      console.debug("Signal undefined node selected!!!");
+      return;
+    }
+    setSelectedNode({ selectedPath: node.path, selectedIndex: node.idx });
+    const newHistory = stackOnHistory(navHistory,
+      graphData.nodes.find((n) => n.path === selectedNode.selectedPath), node);
+    // console.info(`HISTORY: ${JSON.stringify(newHistory)}`);
+    setNavHistory(newHistory);
+    if (selectedNode.selectedIndex !== undefined) {
+      const newIndexHistory = stackOnIndexHistory(navIndexHistory,
+        graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex), node);
+      setNavIndexHistory(newIndexHistory);
+    }
+
+    zoomToFitNodes(node.path, node.idx);
+    eventBus.trigger("open-file", node.path);
+  };
 
   const hoverNode = (node: Node) => {
     if (!node) {
@@ -139,62 +386,16 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
     graphData.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   };
 
-  const expandNode = async (node: Node) => {
-    const { nodes, links } = await getExpandNode(node);
-    const expandedNode = graphData.nodes.find((n) => n.path === node.path);
-    if (!expandedNode) {
-      return;
-    }
-
-    // const [newNodes, existingNodes] = partition(nodes, (n) => {
-    //   return !graphData.nodes.find((existingNode) => {
-    //     return Node.compare(n, existingNode);
-    //   });
-    // });
-    const newNodes = nodes.filter((n) => {
-      return !graphData.nodes.find((existingNode) => {
-        const exists = Node.compare(n, existingNode);
-        if (exists) {
-          links.forEach((l) => {
-            if (l.source.path === existingNode.path) {
-              l.source = existingNode;
-            } else if (l.target.path === existingNode.path) {
-              l.target = existingNode;
-            }
-          });
-          existingNode.links = n.links;
-        }
-        return exists;
-      });
-    });
-    const newLinks = links.filter((l) => {
-      return !graphData.links.find((existingLink) => {
-        return Link.compare(l, existingLink);
-      });
-    });
-    // newLinks
-    // .filter((l) => l.source.path == expandedNode.path)
-    // .forEach((l) => {
-    //   if (l.source.)
-    //   l.source = expandedNode;
-    // });
-
-    setSelectedNode({ selectedPath: node.path });
-
-    graphData.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
-    console.info("Expand Setting Graph data");
-    setGraphData({
-      nodes: [...graphData.nodes, ...newNodes],
-      links: [...graphData.links, ...newLinks],
-    });
-
-    zoomToFitNodes(node.path);
-
-    console.log(`New graph data after expansion: ${graphData.nodes.length} nodes and ${graphData.links.length} links`);
-  };
-
-  const zoomToFitNodes = (selectedPath: string | undefined) => {
+  const zoomToFitNodes = (selectedPath: string | undefined, selectedIndex: number | undefined) => {
     if (fgRef.current) {
+      if (selectedIndex !== undefined) {
+        return fgRef.current.zoomToFit(200, 50, (node: Node) => {
+          const res = !!node.links.find(
+            (l) => l.source.idx === selectedIndex || l.target.idx === selectedIndex
+          );
+          return res;
+        });
+      }
       if (!selectedPath) {
         return fgRef.current.zoomToFit(200, 50);
       }
@@ -207,39 +408,224 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
     }
   };
 
-  return (
-    <ForceGraph2D
-      ref={fgRef}
-      graphData={graphData}
-      width={dimensions.width}
-      height={dimensions.height}
-      cooldownTicks={50}
-      onEngineStop={() => zoomToFitNodes(selectedNode.selectedPath)}
-      nodeCanvasObject={(node: Node & Coords & NodeData, ctx, globalScale) =>
-        Drawing.drawNode(node, ctx, globalScale, titleFontSize)
+  const handlePanRight = () => handlePanRightLeftByIndex(true, isDescending);
+  const handlePanLeft = () => handlePanRightLeftByIndex(false, isDescending);
+  const handlePanRightLeft = (clockwise: boolean, lookChildSiblings: boolean) => {
+    const selected = selectedNode.selectedPath;
+    if (!selected) {
+      return;
+    }
+
+    const node = graphData.nodes.find((n) => n.path === selected);
+    const relPath = lookChildSiblings ? getNavBackward(navHistory, node) : getNavForward(navHistory, node);
+    if (!relPath) {
+      return;
+    }
+    const rel: Node = graphData.nodes.find((n) => n.path === relPath);
+
+    const siblings = lookChildSiblings ?
+      rel.links.filter((l) => l.source.path === relPath && l.target.path !== node.path).map((l) => l.target):
+      rel.links.filter((l) => l.target.path === relPath && l.source.path !== node.path).map((l) => l.source);
+    if (!siblings.length) {
+      return;
+    }
+
+    const nodeAngle = calcNodeAngle(rel, node);
+
+    const angles = siblings.map((sibling) => {
+      const angle = calcNodeAngle(rel, sibling);
+      const angleDiff = (360 - nodeAngle + angle) % 360;
+      return { n: sibling, angle: angleDiff };
+    });
+
+    const closest = angles.reduce((best, angle) => {
+      return (best.angle < angle.angle && clockwise) || (best.angle > angle.angle && !clockwise) ? best : angle;
+    });
+
+    signalSelectedNode(closest.n);
+  };
+  const handlePanRightLeftByIndex = (clockwise: boolean, lookChildSiblings: boolean) => {
+    let node: Node;
+    if (selectedNode.selectedIndex !== undefined) {
+      node = graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex);
+    } else {
+      if (!selectedNode.selectedPath) {
+        return;
       }
-      nodePointerAreaPaint={(node: Node & Coords & NodeData, color, ctx) => {
-        ctx.fillStyle = color;
-        const bckgDimensions = node.nodeDims;
-        bckgDimensions &&
-          bckgDimensions[0] &&
-          bckgDimensions[1] &&
-          ctx.fillRect(
-            node.x - bckgDimensions[0] / 2,
-            node.y - bckgDimensions[1] / 2,
-            bckgDimensions[0],
-            bckgDimensions[1]
-          );
-      }}
-      linkCanvasObject={(link: Link, ctx, globalScale) => Drawing.drawLink(link, ctx, globalScale)}
-      nodeLabel="name"
-      nodeAutoColorBy="group"
-      linkDirectionalParticles={4}
-      linkDirectionalParticleColor={"rgba(71, 30, 143, 0.25)"}
-      onNodeClick={expandNode}
-      onNodeHover={hoverNode}
-      onLinkClick={(link) => alert(`Clicked link: ${link.source.name} -> ${link.target.name}`)}
-    />
+      node = graphData.nodes.find((n) => n.path === selectedNode.selectedPath);
+    }
+
+    const relIndex = lookChildSiblings ? getNavIndexBackward(navIndexHistory, node) : getNavIndexForward(navIndexHistory, node);
+    if (relIndex === undefined) {
+      return;
+    }
+    const rel: Node = graphData.nodes.find((n) => n.idx === relIndex);
+
+    const siblings = lookChildSiblings ?
+      rel.links.filter((l) => l.source.idx === relIndex && l.target.idx !== node.idx).map((l) => l.target):
+      rel.links.filter((l) => l.target.idx === relIndex && l.source.idx !== node.idx).map((l) => l.source);
+    if (!siblings.length) {
+      return;
+    }
+
+    const nodeAngle = calcNodeAngle(rel, node);
+
+    const angles = siblings.map((sibling) => {
+      const angle = calcNodeAngle(rel, sibling);
+      const angleDiff = (360 - nodeAngle + angle) % 360;
+      return { n: sibling, angle: angleDiff };
+    });
+
+    const closest = angles.reduce((best, angle) => {
+      return (best.angle < angle.angle && clockwise) || (best.angle > angle.angle && !clockwise) ? best : angle;
+    });
+
+    signalSelectedNode(closest.n);
+  };
+  const handlePanUp = () => handlePanUpDownByIndex(isDescending);
+  const handlePanDown = () => handlePanUpDownByIndex(!isDescending);
+  const handlePanUpDown = (dirDescend: boolean) => {
+    const selected = selectedNode.selectedPath;
+    if (!selected) {
+      return;
+    }
+
+    const node = graphData.nodes.find((n) => n.path === selected);
+    const nextInLine = dirDescend ? getNavForward(navHistory, node) : getNavBackward(navHistory, node);
+    if (!nextInLine) {
+      if (!node?.expanded) {
+        expandNode(node);
+      }
+      return;
+    }
+    const parent: Node = graphData.nodes.find((n) => n.path === nextInLine);
+    signalSelectedNode(parent);
+  };
+  const handleDirectionToggle = () => {
+    setIsDescending(!isDescending);
+  };
+  const handlePanUpDownByIndex = (dirDescend: boolean) => {
+    let node: Node;
+    if (selectedNode.selectedIndex !== undefined) {
+      node = graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex);
+    } else {
+      if (!selectedNode.selectedPath) {
+        return;
+      }
+      node = graphData.nodes.find((n) => n.path === selectedNode.selectedPath);
+    }
+
+    const nextInLine = dirDescend ? getNavIndexForward(navIndexHistory, node) : getNavIndexBackward(navIndexHistory, node);
+    if (nextInLine === undefined) {
+      if (!node?.expanded) {
+        expandNode(node);
+      }
+      return;
+    }
+    const parent: Node = graphData.nodes.find((n) => n.idx === nextInLine);
+    signalSelectedNode(parent);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case "Control":
+        handleDirectionToggle();
+        event.preventDefault();
+        break;
+      case "ArrowUp":
+        handlePanUp();
+        event.preventDefault(); // Prevent scrolling
+        break;
+      case "ArrowDown":
+        handlePanDown();
+        event.preventDefault();
+        break;
+      case "ArrowLeft":
+        handlePanLeft();
+        event.preventDefault();
+        break;
+      case "ArrowRight":
+        handlePanRight();
+        event.preventDefault();
+        break;
+      default:
+        break;
+    }
+    if (event.ctrlKey) {
+      switch (event.key) {
+        case "ArrowUp":
+        case "ArrowDown":
+        case "ArrowLeft":
+        case "ArrowRight":
+          changedDescendingDuringCtrl.current = true;
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  const handleKeyUp = (event: KeyboardEvent) => {
+    if (changedDescendingDuringCtrl.current) {
+      switch (event.key) {
+        case "Control":
+          changedDescendingDuringCtrl.current = false;
+          handleDirectionToggle();
+          event.preventDefault();
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  return (
+    <div id="pocket-memory" ref={containerRef} onKeyUp={handleKeyUp} onKeyDown={handleKeyDown} tabIndex={0}>
+      <ForceGraph2D
+        ref={fgRef}
+        graphData={filteredGraphData}
+        width={dimensions.width}
+        height={dimensions.height}
+        cooldownTicks={50}
+        onEngineStop={() => zoomToFitNodes(selectedNode.selectedPath, selectedNode.selectedIndex)}
+        nodeCanvasObject={(node: Node & Coords & NodeData, ctx, globalScale) =>
+          Drawing.drawNode(node, ctx, globalScale, titleFontSize, graphSettings)
+        }
+        nodePointerAreaPaint={(node: Node & Coords & NodeData, color, ctx) => {
+          ctx.fillStyle = color;
+          const bckgDimensions = node.nodeDims;
+          bckgDimensions &&
+            bckgDimensions[0] &&
+            bckgDimensions[1] &&
+            ctx.fillRect(
+              node.x - bckgDimensions[0] / 2,
+              node.y - bckgDimensions[1] / 2,
+              bckgDimensions[0],
+              bckgDimensions[1]
+            );
+        }}
+        linkCanvasObject={(link: Link, ctx, globalScale) =>
+          Drawing.drawLink(link, ctx, globalScale, isDescending, graphSettings)
+        }
+        nodeLabel="name"
+        nodeAutoColorBy="group"
+        // linkDirectionalParticles={4}
+        // linkDirectionalParticleSpeed={0.01}
+        // linkDirectionalParticleColor={"rgba(r, g, b, 0.25)"}
+        onNodeClick={expandNode}
+        onNodeHover={hoverNode}
+        // onLinkClick={(link) => }
+      />
+      <GraphControls
+        onPanLeft={handlePanLeft}
+        onPanRight={handlePanRight}
+        onPanUp={handlePanUp}
+        onPanDown={handlePanDown}
+        onDirectionToggle={handleDirectionToggle}
+        isDescending={isDescending}
+        onMaxPathLengthChange={setMaxPathLength}
+      />
+    </div>
   );
 };
 

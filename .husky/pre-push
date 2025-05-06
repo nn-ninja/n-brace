@@ -4,3 +4,5 @@
 bun run typecheck
 bun run lint
 bun run build
+npm run lint
+npm run lint

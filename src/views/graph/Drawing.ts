@@ -1,19 +1,18 @@
 import type { Node } from "@/graph/Node";
 import type { Link } from "@/graph/Link";
-import { TFile } from "obsidian";
+import type { GraphSettings } from "@/atoms/graphAtoms";
 
 export class Drawing {
   private static readonly SELECTED_COLOR = "21, 0, 158";
-  private static readonly PARENT_COLOR = "39, 85, 138";
-  private static readonly CHILD_COLOR = "103, 26, 120";
 
-  static drawLink(link: Link, ctx: CanvasRenderingContext2D, globalScale: number) {
+  static drawLink(link: Link, ctx: CanvasRenderingContext2D, globalScale: number, navDescending: boolean,
+                  graphSettings: GraphSettings) {
     if (link.color === "parent") {
       return;
     }
     // Destructure the source and target coordinates
-    let { x: x1, y: y1 } = link.source;
-    let { x: x2, y: y2 } = link.target;
+    let { x: x1, y: y1 } = navDescending ? link.source : link.target;
+    let { x: x2, y: y2 } = navDescending ? link.target : link.source;
     if (!x1) {
       x1 = 0;
       y1 = 0;
@@ -29,7 +28,6 @@ export class Drawing {
 
     // Calculate the length of the link
     const length = Math.hypot(x2 - x1, y2 - y1);
-    // console.info(`LENNNNN ${x1} ${x2} ${y1} ${y2}`);
 
     // Save the current canvas state
     ctx.save();
@@ -40,18 +38,19 @@ export class Drawing {
     // Rotate the canvas to align with the link direction
     ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
 
-    // Create a gradient for the line width
-    const gradient = ctx.createLinearGradient(0, 0, length, 0);
+    // const intensity = Math.pow(link.distance + 2, -0.6);
     const color =
       link.label === "parent"
-        ? this.PARENT_COLOR
+        ? graphSettings.linkColorIn
         : link.label === "child"
-          ? this.CHILD_COLOR
-          : "71, 30, 143";
-    gradient.addColorStop(0, `rgba(${color}, 1)`); // Start color
-    gradient.addColorStop(1, `rgba(${color}, 0.25)`); // End color
+          ? graphSettings.linkColorOut
+          : graphSettings.linkColorOther;
+    // Create a gradient for the line width
+    const gradient = ctx.createLinearGradient(0, 0, length, 0);
+    gradient.addColorStop(0, `rgba(${color}, 1`); // Start color 1
+    gradient.addColorStop(1, `rgba(${color}, 0.5`); // End color 0.25
 
-    // Set the stroke style to the gradient
+    // ctx.strokeStyle = `rgba(${color}, 1)`; // gradient;
     ctx.strokeStyle = gradient;
 
     // Create a pattern for widening the link
@@ -77,6 +76,7 @@ export class Drawing {
     node: Node & Coords & NodeData,
     ctx: CanvasRenderingContext2D,
     globalScale: number, titleFontSize: number,
+    graphSettings: GraphSettings
   ) {
     const label = node.name.contains(".") ? node.name.substring(0, node.name.length - 3) : node.name;
     const fontSize = titleFontSize / globalScale; // Scale font size
@@ -86,10 +86,18 @@ export class Drawing {
       node.label === "selected"
         ? this.SELECTED_COLOR
         : node.label === "parent"
-          ? this.PARENT_COLOR
+          ? graphSettings.linkColorIn
           : node.label === "child"
-            ? this.CHILD_COLOR
-            : "71, 30, 143";
+            ? graphSettings.linkColorOut
+            : graphSettings.linkColorOther;
+
+    function setupExpandedStyle() {
+      if (node.expanded) {
+        ctx.setLineDash([]);
+      } else {
+        ctx.setLineDash([8, 4]);
+      }
+    }
 
     if (node.image) {
       const textWidth = ctx.measureText(label).width;
@@ -106,6 +114,7 @@ export class Drawing {
       ctx.fillStyle = "white";
       ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 0.5; /// globalScale;
+      setupExpandedStyle();
       ctx.fill();
       ctx.stroke();
 
@@ -134,6 +143,7 @@ export class Drawing {
       ctx.fillStyle = "white";
       ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 1;
+      setupExpandedStyle();
       Drawing.drawRoundedRect(
         ctx,
         node.x - totalWidth / 2,

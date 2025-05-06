@@ -1,136 +1,54 @@
-.force-graph-view .tree-item.is-collapsed > .tree-item-children {
-  display: none;
-  visibility: hidden;
-}
-
-.force-graph-view {
-  padding: 0 !important;
-  position: relative;
-  overflow: hidden !important;
-}
-
-.force-graph-view .graph-controls.is-collapsed > .graph-control-section {
-  display: none;
-  visibility: hidden;
-}
-
-.graph-control-section .tree-item-inner {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.force-graph-view .graph-control-section.is-collapsed .tree-item-inner::before {
-  content: "▶";
-  margin-right: 0.5em;
-}
-
-.force-graph-view .graph-control-section:not(.is-collapsed) .tree-item-inner::before {
-  content: "▼";
-  margin-right: 0.5em;
-}
-
-.force-graph-view .graph-controls:hover > .control-buttons {
-  opacity: 0.5;
-}
-
-.force-graph-view .graph-controls > .control-buttons:hover {
-  opacity: 1;
-}
-
-.force-graph-view .graph-controls > .control-buttons {
-  float: right;
-  margin-right: 0;
-  opacity: 0;
-}
-
-.force-graph-view .hidden {
-  display: none;
-  visibility: hidden;
-}
-
-.force-graph-view .control-buttons {
-  display: block;
-}
-
-.force-graph-view .control-buttons > * {
-  display: inline-block;
-  margin: 0;
-}
-
-.force-graph-view .graph-settings-view > .clickable-icon {
+/* src/views/graph/GraphControls.css */
+.pm-graph-controls {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 50px;
+  right: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-
-.force-graph-view .node-label {
-  color: var(--text-normal);
+.pm-graph-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-base-40);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
 }
-
-.force-graph-view .scene-nav-info {
-  display: block;
-  visibility: visible;
+.pm-graph-controls button:hover {
+  background: var(--color-base-60);
 }
-
-.mod-search-input {
-  width: 100%;
-  padding: 0.5em;
-  border: 1px solid var(--border-color);
-  border-radius: 0.25em;
-  background-color: var(--background-color);
-  color: var(--text-normal);
+.slider-control {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: var(--color-base-00);
 }
-
-.force-graph-view .graph-controls:not(.is-close) {
-  max-height: calc(90% - var(--size-4-4));
+.slider-control input[type=range] {
+  width: 100px;
+  cursor: pointer;
 }
-
-.workspace-leaf-content:has(.search-result-container.is-loading) .graph-controls {
-  /* border color purple */
-  border-color: var(--color-purple);
-
-  /* create the animation */
-  animation: color-oscillation 2s ease infinite;
+.slider-value {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-
-@keyframes color-oscillation {
-  0% {
-    border: 1px solid var(--color-purple);
-  }
-  50% {
-    border: 1px solid var(--background-modifier-border);
-  }
-  100% {
-    border: 1px solid var(--color-purple);
-  }
-}
-
-.workspace-leaf-content:has(.search-result-container.is-loading) .search-input-container input {
-  animation: outline-gradient-animation 2s linear infinite;
-}
-
-@keyframes outline-gradient-animation {
-  0% {
-    box-shadow: 0 2px 0 var(--color-purple);
-  }
-  50% {
-    box-shadow: 0 2px 0 var(--background-modifier-border);
-  }
-  100% {
-    box-shadow: 0 2px 0 var(--color-purple);
-  }
-}
-
-/* section: setting tab */
-.graph-3d-setting-tab {
-  > h2 {
-    color: var(--color-purple);
-    font-size: var(--h2-size);
-  }
-
-  > h2 + .setting-item {
-    border-top: 0px;
-  }
-}
+/*# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsic3JjL3ZpZXdzL2dyYXBoL0dyYXBoQ29udHJvbHMuY3NzIl0sCiAgInNvdXJjZXNDb250ZW50IjogWyIucG0tZ3JhcGgtY29udHJvbHMge1xuICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gIHRvcDogNTBweDtcbiAgcmlnaHQ6IDEwcHg7XG4gIGRpc3BsYXk6IGdyaWQ7XG4gIGdyaWQtdGVtcGxhdGUtY29sdW1uczogMWZyIDFmcjsgLyogMiBjb2x1bW5zICovXG4gIGdhcDogNXB4O1xuICBiYWNrZ3JvdW5kOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuOCk7IC8qIFNlbWktdHJhbnNwYXJlbnQgYmFja2dyb3VuZCAqL1xuICBwYWRkaW5nOiA1cHg7XG4gIGJvcmRlci1yYWRpdXM6IDVweDtcbiAgYm94LXNoYWRvdzogMCAycHggNHB4IHJnYmEoMCwgMCwgMCwgMC4yKTtcbn1cblxuLnBtLWdyYXBoLWNvbnRyb2xzIGJ1dHRvbiB7XG4gIGRpc3BsYXk6IGZsZXg7XG4gIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1jb2xvci1iYXNlLTQwKTtcbiAgYm9yZGVyOiBub25lO1xuICBib3JkZXItcmFkaXVzOiA0cHg7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgZm9udC1zaXplOiAxNnB4O1xufVxuXG4ucG0tZ3JhcGgtY29udHJvbHMgYnV0dG9uOmhvdmVyIHtcbiAgYmFja2dyb3VuZDogdmFyKC0tY29sb3ItYmFzZS02MCk7XG59XG5cbi5zbGlkZXItY29udHJvbCB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiA1MHB4O1xuICBsZWZ0OiAxMHB4O1xuICBkaXNwbGF5OiBncmlkO1xuICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDFmcjtcbiAgZ2FwOiA1cHg7XG4gIGJhY2tncm91bmQ6IHJnYmEoMjU1LCAyNTUsIDI1NSwgMC44KTsgLyogU2VtaS10cmFuc3BhcmVudCBiYWNrZ3JvdW5kICovXG4gIHBhZGRpbmc6IDVweDtcbiAgYm9yZGVyLXJhZGl1czogNXB4O1xuICBib3gtc2hhZG93OiAwIDJweCA0cHggcmdiYSgwLCAwLCAwLCAwLjIpO1xuICBjb2xvcjogdmFyKC0tY29sb3ItYmFzZS0wMCk7XG59XG5cbi5zbGlkZXItY29udHJvbCBpbnB1dFt0eXBlPVwicmFuZ2VcIl0ge1xuICB3aWR0aDogMTAwcHg7XG4gIGN1cnNvcjogcG9pbnRlcjtcbn1cblxuLnNsaWRlci12YWx1ZSB7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgdG9wOiAtMjBweDsgLyogQWJvdmUgdGhlIHNsaWRlciAqL1xuICBsZWZ0OiA1MCU7XG4gIHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTtcbiAgZm9udC1zaXplOiAxMnB4O1xuICBwYWRkaW5nOiAycHggNXB4O1xuICBib3JkZXItcmFkaXVzOiAzcHg7XG4gIGJveC1zaGFkb3c6IDAgMXB4IDJweCByZ2JhKDAsIDAsIDAsIDAuMSk7XG59XG4iXSwKICAibWFwcGluZ3MiOiAiO0FBQUE7QUFDRTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUFBO0FBR0Y7QUFDRTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQUE7QUFHRjtBQUNFO0FBQUE7QUFHRjtBQUNFO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFBQTtBQUdGO0FBQ0U7QUFDQTtBQUFBO0FBR0Y7QUFDRTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQUE7IiwKICAibmFtZXMiOiBbXQp9Cg== */

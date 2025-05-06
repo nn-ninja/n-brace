@@ -7,6 +7,7 @@ export class Link {
   public target: Node;
   public color: string = "green";
   public label?: string;
+  public distance: number = 0;
 
   constructor(source: Node, target: Node) {
     this.source = source;
