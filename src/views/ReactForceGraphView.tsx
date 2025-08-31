@@ -1,16 +1,17 @@
 import { createContext } from "react";
-import type { App, WorkspaceLeaf } from "obsidian";
+import type { App, IconName, WorkspaceLeaf } from "obsidian";
 import { ItemView } from "obsidian";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
-import ReactForceGraph from "@/views/graph/ReactForceGraph";
+import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
 import { Graph } from "@/graph/Graph";
 import type ForceGraphPlugin from "@/main";
 import { dimensionsAtom } from "@/atoms/graphAtoms";
 import { getDefaultStore } from "jotai";
 import { getNewLocalGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
 import { eventBus } from "@/util/EventBus";
-import { PluginSettingManager } from "@/SettingManager";
+import type { PluginSettingManager } from "@/SettingManager";
+import { config } from "@/config";
 
 export const VIEW_TYPE_REACT_FORCE_GRAPH = "react-force-graph-view";
 
@@ -37,7 +38,11 @@ export class ReactForceGraphView extends ItemView {
   }
 
   getDisplayText() {
-    return "N-brace your brain";
+    return config.displayText.local;
+  }
+
+  getIcon(): IconName {
+    return config.icon;
   }
 
   private handleSettingsUpdate() {
@@ -64,11 +69,9 @@ export class ReactForceGraphView extends ItemView {
   }
 
   async onOpen() {
-    this.root = createRoot(this.containerEl.children[1]);
+    this.root = createRoot(this.containerEl.children[1]!);
     this.renderComponent();
   }
-
-  // TODO unmount ??
 
   onResize() {
     super.onResize();
@@ -86,7 +89,6 @@ export class ReactForceGraphView extends ItemView {
     }
     const graph = getNewLocalGraph(this.plugin, {
       centerFilePath: nodePath,
-      searchResults: [],
       filterSetting: {
         searchQuery: "",
         showOrphans: true,

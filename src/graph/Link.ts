@@ -3,14 +3,16 @@ import { type Node } from "@/graph/Node";
 export type LinkCache = Record<string, Record<string, number>>;
 
 export class Link {
-  public source: Node;
-  public target: Node;
+  public source: Node & Coords;
+  public target: Node & Coords;
   public color: string = "green";
   public label?: string;
   public distance: number = 0;
 
   constructor(source: Node, target: Node) {
+    // @ts-ignore
     this.source = source;
+    // @ts-ignore
     this.target = target;
   }
 

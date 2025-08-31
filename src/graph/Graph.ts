@@ -138,8 +138,18 @@ export class Graph {
     isGlobal: boolean = false
   ) {
     // Create new instances of nodes
-    const newNodes = nodes.map((node) => new Node(node.name, node.path,
-      node.inlinkCount, node.outlinkCount, node.imagePath, node.image, node.val));
+    const newNodes = nodes.map(
+      (node) =>
+        new Node(
+          node.name,
+          node.path,
+          node.inlinkCount,
+          node.outlinkCount,
+          node.imagePath,
+          node.image,
+          node.val
+        )
+    );
     const nodeMap = new Map<string, Node>();
     newNodes.forEach((node) => nodeMap.set(node.id, node));
 
@@ -171,7 +181,13 @@ export class Graph {
       });
     });
 
-    return new Graph(undefined, newNodes, links, Node.createNodeIndex(newNodes), Link.createLinkIndex(links));
+    return new Graph(
+      undefined,
+      newNodes,
+      links,
+      Node.createNodeIndex(newNodes),
+      Link.createLinkIndex(links)
+    );
   }
 
   /**
@@ -304,13 +320,30 @@ function isAvatarImg(nodePath: string) {
   return nodePath.startsWith("avatars/");
 }
 
-const getMapFromMetaCache = (baseFolder: string, resolvedLinks: LinkCache, unresolvedLinks: LinkCache) => {
+const getMapFromMetaCache = (
+  baseFolder: string,
+  resolvedLinks: LinkCache,
+  unresolvedLinks: LinkCache
+) => {
   const result: Record<string, string[]> = {};
-  Object.keys(resolvedLinks).filter((nodeId) => nodeId.startsWith(baseFolder)).map((nodeId) => {
-      result[nodeId] = ((Object.keys(resolvedLinks[nodeId]!).map((nodePath) => { return nodePath; }) ?? [])
-        .concat(Object.keys(unresolvedLinks[nodeId]!).map((nodePath) => { return nodePath; }) ?? []))
-        .filter((nodePath) => nodePath.startsWith(baseFolder) && (nodePath.endsWith(".md") || isAvatarImg(nodePath)));
-  });
+  Object.keys(resolvedLinks)
+    .filter((nodeId) => nodeId.startsWith(baseFolder))
+    .map((nodeId) => {
+      result[nodeId] = (
+        Object.keys(resolvedLinks[nodeId]!).map((nodePath) => {
+          return nodePath;
+        }) ?? []
+      )
+        .concat(
+          Object.keys(unresolvedLinks[nodeId]!).map((nodePath) => {
+            return nodePath;
+          }) ?? []
+        )
+        .filter(
+          (nodePath) =>
+            nodePath.startsWith(baseFolder) && (nodePath.endsWith(".md") || isAvatarImg(nodePath))
+        );
+    });
 
   // remove self links
   Object.keys(result).forEach((nodeId) => {

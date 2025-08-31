@@ -1,5 +1,5 @@
 export const config = {
-  icon: "orbit",
+  icon: "braces",
   viewType: {
     local: "n-brace-view",
   },

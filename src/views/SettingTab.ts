@@ -5,8 +5,9 @@ import { DEFAULT_SETTING } from "@/SettingManager";
 import { eventBus } from "@/util/EventBus";
 import type { GraphSettings } from "@/atoms/graphAtoms";
 import { rgb } from "d3";
+import type { Setting as SettingPlugin } from "@/SettingsSchemas";
+import type { State } from "@/util/State";
 
-const DEFAULT_NUMBER = DEFAULT_SETTING.pluginSetting.maxNodeNumber;
 const DEFAULT_BASE_FOLDER = DEFAULT_SETTING.pluginSetting.baseFolder;
 const DEFAULT_TITLE_FONT_SIZE = DEFAULT_SETTING.pluginSetting.titleFontSize;
 const DEFAULT_GRAPH_SPAN = DEFAULT_SETTING.pluginSetting.defaultGraphSpan;
@@ -18,6 +19,7 @@ export const LINK_OTHER_DARK_COLOR = DEFAULT_SETTING.pluginSetting.linkColorOthe
 export const LINK_IN_LIGHT_COLOR = "84, 168, 214";
 export const LINK_OUT_LIGHT_COLOR = "220, 220, 0";
 export const LINK_OTHER_LIGHT_COLOR = "119, 84, 168";
+
 // let colorMode: "light" | "dark" | "custom" = "dark";
 
 export class SettingTab extends PluginSettingTab {
@@ -36,58 +38,6 @@ export class SettingTab extends PluginSettingTab {
     containerEl.addClasses(["n-brace-setting-tab"]);
 
     containerEl.createEl("h2", { text: "Settings" });
-
-    // new Setting(containerEl)
-    //   .setName("Maximum node number in graph")
-    //   .setDesc(
-    //     "The maximum number of nodes in the graph. Graphs that has more than this number will not be rendered so that your computer is protected from hanging."
-    //   )
-    //   .addText((text) => {
-    //     text
-    //       .setPlaceholder(`${DEFAULT_NUMBER}`)
-    //       .setValue(String(pluginSetting.maxNodeNumber ?? DEFAULT_NUMBER))
-    //       .onChange(async (value) => {
-    //         // check if value is a number
-    //         if (isNaN(Number(value)) || Number(value) === 0) {
-    //           // set the error to the input
-    //           text.inputEl.setCustomValidity("Please enter a non-zero number");
-    //           this.plugin.settingManager.updateSettings((setting) => {
-    //             setting.value.pluginSetting.maxNodeNumber = DEFAULT_NUMBER;
-    //           });
-    //         } else {
-    //           // remove the error
-    //           text.inputEl.setCustomValidity("");
-    //           this.plugin.settingManager.updateSettings((setting) => {
-    //             setting.value.pluginSetting.maxNodeNumber = Number(value);
-    //           });
-    //         }
-    //         text.inputEl.reportValidity();
-    //       });
-    //     text.inputEl.setAttribute("type", "number");
-    //     text.inputEl.setAttribute("min", "10");
-    //     return text;
-    //   });
-
-    // new Setting(containerEl)
-    //   .setName("Search Engine")
-    //   .setDesc("Search engine determine how to parse the query string and return results.")
-    //   .addDropdown((dropdown) => {
-    //     dropdown
-    //       .addOptions({
-    //         [SearchEngineType.default]: SearchEngineType.default,
-    //       })
-    //       // you need to add options before set value
-    //       .setValue(pluginSetting.searchEngine)
-    //       .onChange(async (value: SearchEngineType) => {
-    //         // update the json
-    //         this.plugin.settingManager.updateSettings((setting) => {
-    //           setting.value.pluginSetting.searchEngine = value;
-    //         });
-    //
-    //         // update the plugin file manager
-    //         this.plugin.fileManager.setSearchEngine();
-    //       });
-    //   });
 
     new Setting(containerEl)
       .setName("Base Folder")
@@ -252,12 +202,9 @@ export class SettingTab extends PluginSettingTab {
             });
           });
       });
-
-    // create an H2 element called "Controls"
-    // containerEl.createEl("h2", { text: "Controls" });
   }
 
-  private buildGraphSettings(setting): GraphSettings {
+  private buildGraphSettings(setting: State<SettingPlugin>): GraphSettings {
     return {
       graphSpan: setting.value.pluginSetting.defaultGraphSpan,
       linkColorIn: setting.value.pluginSetting.linkColorIn,

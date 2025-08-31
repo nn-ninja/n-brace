@@ -22,7 +22,11 @@ export const stackOnHistory = (navHistory: NavHistory, soFarSelected: Node, newS
   return navHistory;
 };
 
-export const stackOnIndexHistory = (navHistory: NavIndexHistory, soFarSelected: Node, newSelected: Node) => {
+export const stackOnIndexHistory = (
+  navHistory: NavIndexHistory,
+  soFarSelected: Node,
+  newSelected: Node
+) => {
   if (!soFarSelected) {
     return navHistory;
   }
@@ -54,7 +58,10 @@ export const getNavBackward = (navHistory: NavHistory, node: Node): string | und
   return navHistory.backward[node.path] ?? getFirstParent();
 };
 
-export const getNavIndexBackward = (navHistory: NavIndexHistory, node: Node): number | undefined => {
+export const getNavIndexBackward = (
+  navHistory: NavIndexHistory,
+  node: Node
+): number | undefined => {
   function getFirstParent() {
     const firstParent = node.links.find((l) => l.target.idx === node.idx);
     if (firstParent) {
@@ -91,7 +98,7 @@ export const getNavIndexForward = (navHistory: NavIndexHistory, node: Node): num
 };
 
 const consecutivePairs = <T>(arr: T[]): [T, T][] =>
-  arr.slice(0, -1).map((item, index) => [item, arr[index + 1]]);
+  arr.slice(0, -1).map((item, index) => [item, arr[index + 1]!]);
 
 const getShortestPath = (node1: Node, node2: Node) => {
   const visited = new Set<Node>();
@@ -120,6 +127,6 @@ const getShortestPath = (node1: Node, node2: Node) => {
   return null;
 };
 
-export const calcNodeAngle = (parent: Node & Coords, node: Node & Coords) => {
+export const calcNodeAngle = (parent: Coords, node: Coords) => {
   return ((Math.PI + Math.atan2(-node.x + parent.x, node.y - parent.y)) * 180) / Math.PI;
 };

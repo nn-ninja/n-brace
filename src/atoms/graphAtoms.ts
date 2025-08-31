@@ -29,8 +29,10 @@ export type NavIndexHistory = {
   forward: Record<number, number>;
 };
 
-export const graphNavAtom = atomWithReset<GraphNavState>(
-  { selectedPath: undefined, selectedIndex: undefined });
+export const graphNavAtom = atomWithReset<GraphNavState>({
+  selectedPath: undefined,
+  selectedIndex: undefined,
+});
 
 export const nodeIdxMaxAtom = atom(0);
 

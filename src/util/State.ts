@@ -66,13 +66,16 @@ export class State<T> {
    */
   public createSubState<S>(key: T extends object ? `value.${NestedKeyof<T>}` : string): State<S> {
     const subStateKeys = key.split(".");
-    const subStateValue: S = subStateKeys.reduce((obj: Record<string, unknown>, key: string) => {
-      const val = obj[key];
-      if (val !== undefined) {
-        return val as Record<string, unknown>;
-      }
-      throw new InvalidStateKeyError(key, this);
-    }, this as Record<string, unknown>) as S;
+    const subStateValue: S = subStateKeys.reduce(
+      (obj: Record<string, unknown>, key: string) => {
+        const val = obj[key];
+        if (val !== undefined) {
+          return val as Record<string, unknown>;
+        }
+        throw new InvalidStateKeyError(key, this);
+      },
+      this as Record<string, unknown>
+    ) as S;
 
     // if this is a primitive type, we cannot create a substate
     if (typeof subStateValue !== "object") {

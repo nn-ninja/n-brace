@@ -6,6 +6,8 @@ type Coords = {
   y: number;
 };
 
+ CoordNode = Node & Coords;
+
 type NodeData = {
   index: number;
   nodeDims: number[];

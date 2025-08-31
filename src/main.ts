@@ -12,8 +12,15 @@ import { config } from "@/config";
 import { PluginSettingManager } from "@/SettingManager";
 import { ReactForceGraphView, VIEW_TYPE_REACT_FORCE_GRAPH } from "@/views/ReactForceGraphView";
 import { getDefaultStore } from "jotai/index";
-import type { GraphSettings} from "@/atoms/graphAtoms";
-import { expandNodePathAtom, graphDataAtom, graphNavAtom, graphSettingsAtom, navIndexHistoryAtom, nodeIdxMaxAtom } from "@/atoms/graphAtoms";
+import type { GraphSettings } from "@/atoms/graphAtoms";
+import {
+  expandNodePathAtom,
+  graphDataAtom,
+  graphNavAtom,
+  graphSettingsAtom,
+  navIndexHistoryAtom,
+  nodeIdxMaxAtom,
+} from "@/atoms/graphAtoms";
 import { RESET } from "jotai/utils";
 
 export default class ForceGraphPlugin extends Plugin implements HoverParent {
@@ -92,7 +99,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
       })
     );
 
-    // register hover link source  TODO
     this.registerHoverLinkSource("force-graph", {
       defaultMod: true,
       display: "N-brace",
@@ -261,7 +267,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     if (!leaves || !leaves.length) {
       return;
     }
-    const view: ReactForceGraphView = leaves[0].view;
+    const view = leaves[0]!.view as ReactForceGraphView;
     const graph = await view.getNewGraphData();
 
     let maxIdx = 0;
@@ -290,7 +296,9 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
    */
   private openGraph = async () => {
     if (!this.app.workspace.lastActiveFile.path.startsWith(this.baseFolder)) {
-      alert(`Your file isn't under mind map base path ${this.baseFolder}. You can set it up in settings.`);
+      alert(
+        `Your file isn't under mind map base path ${this.baseFolder}. You can set it up in settings.`
+      );
       return;
     }
 

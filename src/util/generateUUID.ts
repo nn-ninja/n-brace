@@ -1,6 +1,3 @@
-/**
- * a simple function to generate a UUID
- */
 export function generateUUID() {
   let d = new Date().getTime();
   if (typeof performance !== "undefined" && typeof performance.now === "function") {

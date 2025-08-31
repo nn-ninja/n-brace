@@ -5,8 +5,13 @@ import type { GraphSettings } from "@/atoms/graphAtoms";
 export class Drawing {
   private static readonly SELECTED_COLOR = "21, 0, 158";
 
-  static drawLink(link: Link, ctx: CanvasRenderingContext2D, globalScale: number, navDescending: boolean,
-                  graphSettings: GraphSettings) {
+  static drawLink(
+    link: Link,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number,
+    navDescending: boolean,
+    graphSettings: GraphSettings
+  ) {
     if (link.color === "parent") {
       return;
     }
@@ -75,10 +80,13 @@ export class Drawing {
   static drawNode(
     node: Node & Coords & NodeData,
     ctx: CanvasRenderingContext2D,
-    globalScale: number, titleFontSize: number,
+    globalScale: number,
+    titleFontSize: number,
     graphSettings: GraphSettings
   ) {
-    const label = node.name.contains(".") ? node.name.substring(0, node.name.length - 3) : node.name;
+    const label = node.name.contains(".")
+      ? node.name.substring(0, node.name.length - 3)
+      : node.name;
     const fontSize = titleFontSize / globalScale; // Scale font size
     ctx.font = `${fontSize}px Sans-Serif`;
 
@@ -118,13 +126,26 @@ export class Drawing {
       ctx.fill();
       ctx.stroke();
 
-      ctx.drawImage(node.image, node.x - imgRadius, node.y - imgRadius, imgRadius * 2, imgRadius * 2);
+      ctx.drawImage(
+        node.image,
+        node.x - imgRadius,
+        node.y - imgRadius,
+        imgRadius * 2,
+        imgRadius * 2
+      );
 
       // Draw a rounded rectangle around the node
       ctx.fillStyle = "white";
       ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 0.5;
-      Drawing.drawRoundedRect(ctx, node.x - totalWidth / 2, node.y - imgRadius, totalWidth, height, 2);
+      Drawing.drawRoundedRect(
+        ctx,
+        node.x - totalWidth / 2,
+        node.y - imgRadius,
+        totalWidth,
+        height,
+        2
+      );
 
       ctx.fillStyle = "black";
       ctx.textAlign = "center";

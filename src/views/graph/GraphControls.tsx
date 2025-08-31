@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp } from "react-icons/fa";
-import "./GraphControls.css";
+import "@/views/graph/GraphControls.css";
 import { RiFlipVerticalFill, RiFlipVerticalLine } from "react-icons/ri";
 import { PiSunHorizonBold } from "react-icons/pi";
 import { IoSunny } from "react-icons/io5";

@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { ForceGraphMethods } from "react-force-graph-2d";
 import ForceGraph2D from "react-force-graph-2d";
 import type { Graph } from "@/graph/Graph";
 import { Drawing } from "@/views/graph/Drawing";
 import { Node } from "@/graph/Node";
-import type { ReactForceGraphView } from "@/views/ReactForceGraphView";
-import { ViewContext } from "@/views/ReactForceGraphView";
 import { useAtom, useAtomValue } from "jotai/react";
 import {
   dimensionsAtom,
@@ -21,26 +20,28 @@ import * as d3 from "d3";
 import { Link } from "@/graph/Link";
 import { eventBus } from "@/util/EventBus";
 import { GraphControls } from "@/views/graph/GraphControls";
-import { calcNodeAngle, getNavBackward, getNavForward, getNavIndexBackward, getNavIndexForward, stackOnHistory, stackOnIndexHistory } from "@/atoms/graphOps";
+import {
+  calcNodeAngle,
+  getNavIndexBackward,
+  getNavIndexForward,
+  stackOnHistory,
+  stackOnIndexHistory,
+} from "@/atoms/graphOps";
 
 interface GraphComponentProps {
-  data: Graph;
+  data?: Graph;
   getInitialGraph: () => Promise<Graph>;
   getExpandNode: (nodePath: string | undefined) => Promise<Graph>;
   titleFontSize: number;
 }
 
-export const useView = (): ReactForceGraphView | undefined => {
-  return useContext(ViewContext);
-};
-
-const ReactForceGraph: React.FC<GraphComponentProps> = ({
+export const ReactForceGraph: React.FC<GraphComponentProps> = ({
   getInitialGraph,
   getExpandNode,
   titleFontSize,
 }) => {
   const fgRef = useRef<ForceGraphMethods | undefined>(undefined);
-  const containerRef = useRef<HTMLDivElement>(undefined);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [nodeIdxMax, setNodeIdxMax] = useAtom(nodeIdxMaxAtom);
   const graphSettings = useAtomValue(graphSettingsAtom);
   // whether the graph exploration parent->child directed
@@ -70,8 +71,6 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
   }
 
   useEffect(() => {
-    const fg = fgRef.current;
-
     const initGraph = async () => {
       const graph = await getInitialGraph();
       console.debug(`Init Graph data starting with ${graph.rootPath}`);
@@ -88,19 +87,19 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
   // directional forces depending on if a screen is vertical or horizontal
   useEffect(() => {
     const fg = fgRef.current;
-    // TODO change forces only if dimensions changed a lot
+    // TODO optimize: change forces only if dimensions changed a lot
     if (fg) {
       console.debug("Setting Graph forces");
       // fg.d3Force("link", d3.forceLink()
-        // .strength((link) => {
-        //   return 1 / Math.min(link.target.inlinkCount, link.source.outlinkCount);
-        // })
-        // .distance((link) => {
-        //     return Math.max(
-        //       30,
-        //       6 * Math.min(10, link.source.outlinkCount) + 1.8 * Math.min(10, link.target.outlinkCount)
-        //     );
-        // })
+      // .strength((link) => {
+      //   return 1 / Math.min(link.target.inlinkCount, link.source.outlinkCount);
+      // })
+      // .distance((link) => {
+      //     return Math.max(
+      //       30,
+      //       6 * Math.min(10, link.source.outlinkCount) + 1.8 * Math.min(10, link.target.outlinkCount)
+      //     );
+      // })
       // );
       fg.d3Force("collide", d3.forceCollide(12));
       // fg.d3Force("collide", d3.forceCollide((node: NodeData) => {
@@ -111,13 +110,19 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
       const ratio = dimensions.width / dimensions.height;
       console.debug("change to ratio Y " + ratio);
       const dir_power = 0.03;
-      fg.d3Force("x", d3.forceX(dimensions.width / 2).strength((1/ratio > 1 ? 1/ratio : 0) * dir_power));
-      fg.d3Force("y", d3.forceY(dimensions.height / 2).strength((ratio > 1 ? ratio : 0) * dir_power));
+      fg.d3Force(
+        "x",
+        d3.forceX(dimensions.width / 2).strength((1 / ratio > 1 ? 1 / ratio : 0) * dir_power)
+      );
+      fg.d3Force(
+        "y",
+        d3.forceY(dimensions.height / 2).strength((ratio > 1 ? ratio : 0) * dir_power)
+      );
 
       setGraphData({
         nodes: [...graphData.nodes],
         links: [...graphData.links],
-      });
+      } as Graph);
     }
   }, [dimensions]);
 
@@ -158,9 +163,7 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
 
     // Filter nodes within maxPathLength
     const validNodeIds = new Set(distances.keys());
-    const filteredNodes = graphData.nodes.filter((node) =>
-      validNodeIds.has(node.idx)
-    );
+    const filteredNodes = graphData.nodes.filter((node) => validNodeIds.has(node.idx));
     const filteredLinks = graphData.links.filter(
       (link) => validNodeIds.has(link.source.idx) && validNodeIds.has(link.target.idx)
     );
@@ -207,19 +210,18 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
   };
 
   const expandNodeOp = async (nodePath: string | undefined, nodeIndex: number | undefined) => {
-
     const fullConns = false;
 
     const { nodes, links } = await getExpandNode(nodePath);
     const expandedNode: Node & NodeData = graphData.nodes.find((n) =>
       nodeIndex ? n.idx === nodeIndex : n.path === nodePath
-    );
+    ) as Node & NodeData;
     if (!expandedNode) {
       // when opening file totally ouf of visible graph scope
-      setGraphData({ nodes: assignIdx(nodes), links: links });
-      signalSelectedNode(nodes.find((n) =>
-        nodeIndex ? n.idx === nodeIndex : n.path === nodePath
-      ));
+      setGraphData({ nodes: assignIdx(nodes), links: links } as Graph);
+      signalSelectedNode(
+        nodes.find((n) => (nodeIndex ? n.idx === nodeIndex : n.path === nodePath)) as Node
+      );
       return;
     }
 
@@ -232,9 +234,9 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
           if (exists) {
             links.forEach((l) => {
               if (l.source.path === existingNode.path) {
-                l.source = existingNode;
+                l.source = existingNode as Node & Coords;
               } else if (l.target.path === existingNode.path) {
-                l.target = existingNode;
+                l.target = existingNode as Node & Coords;
               }
             });
             existingNode.links = [
@@ -264,8 +266,11 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
         //   return Link.compare(l, existingLink);
         // });
         const exists = graphData.links.find((existingLink) => {
-          return (existingLink.source.idx === expandedNode.idx || existingLink.target.idx === expandedNode.idx) &&
-            Link.compare(l, existingLink);
+          return (
+            (existingLink.source.idx === expandedNode.idx ||
+              existingLink.target.idx === expandedNode.idx) &&
+            Link.compare(l, existingLink)
+          );
         });
         if (exists) {
           nodeDuplicates.add(l.source.path);
@@ -279,9 +284,9 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
           const existingNode = expandedNode;
           links.forEach((l) => {
             if (l.source.path === existingNode.path) {
-              l.source = existingNode;
+              l.source = existingNode as Node & NodeData & Coords;
             } else if (l.target.path === existingNode.path) {
-              l.target = existingNode;
+              l.target = existingNode as Node & NodeData & Coords;
             }
           });
           existingNode.links = [
@@ -341,7 +346,7 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
     setGraphData({
       nodes: [...graphData.nodes, ...assignIdx(newNodes)],
       links: [...graphData.links, ...newLinks],
-    });
+    } as Graph);
 
     signalSelectedNode(expandedNode);
     console.debug(`New graph data after expansion: ${graphData.nodes.length + newNodes.length} 
@@ -354,13 +359,19 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
       return;
     }
     setSelectedNode({ selectedPath: node.path, selectedIndex: node.idx });
-    const newHistory = stackOnHistory(navHistory,
-      graphData.nodes.find((n) => n.path === selectedNode.selectedPath), node);
+    const newHistory = stackOnHistory(
+      navHistory,
+      graphData.nodes.find((n) => n.path === selectedNode.selectedPath) as Node,
+      node
+    );
     // console.info(`HISTORY: ${JSON.stringify(newHistory)}`);
     setNavHistory(newHistory);
     if (selectedNode.selectedIndex !== undefined) {
-      const newIndexHistory = stackOnIndexHistory(navIndexHistory,
-        graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex), node);
+      const newIndexHistory = stackOnIndexHistory(
+        navIndexHistory,
+        graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex)!,
+        node
+      );
       setNavIndexHistory(newIndexHistory);
     }
 
@@ -410,60 +421,32 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
 
   const handlePanRight = () => handlePanRightLeftByIndex(true, isDescending);
   const handlePanLeft = () => handlePanRightLeftByIndex(false, isDescending);
-  const handlePanRightLeft = (clockwise: boolean, lookChildSiblings: boolean) => {
-    const selected = selectedNode.selectedPath;
-    if (!selected) {
-      return;
-    }
-
-    const node = graphData.nodes.find((n) => n.path === selected);
-    const relPath = lookChildSiblings ? getNavBackward(navHistory, node) : getNavForward(navHistory, node);
-    if (!relPath) {
-      return;
-    }
-    const rel: Node = graphData.nodes.find((n) => n.path === relPath);
-
-    const siblings = lookChildSiblings ?
-      rel.links.filter((l) => l.source.path === relPath && l.target.path !== node.path).map((l) => l.target):
-      rel.links.filter((l) => l.target.path === relPath && l.source.path !== node.path).map((l) => l.source);
-    if (!siblings.length) {
-      return;
-    }
-
-    const nodeAngle = calcNodeAngle(rel, node);
-
-    const angles = siblings.map((sibling) => {
-      const angle = calcNodeAngle(rel, sibling);
-      const angleDiff = (360 - nodeAngle + angle) % 360;
-      return { n: sibling, angle: angleDiff };
-    });
-
-    const closest = angles.reduce((best, angle) => {
-      return (best.angle < angle.angle && clockwise) || (best.angle > angle.angle && !clockwise) ? best : angle;
-    });
-
-    signalSelectedNode(closest.n);
-  };
   const handlePanRightLeftByIndex = (clockwise: boolean, lookChildSiblings: boolean) => {
-    let node: Node;
+    let node: Node & Coords;
     if (selectedNode.selectedIndex !== undefined) {
-      node = graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex);
+      node = graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex) as Node & Coords;
     } else {
       if (!selectedNode.selectedPath) {
         return;
       }
-      node = graphData.nodes.find((n) => n.path === selectedNode.selectedPath);
+      node = graphData.nodes.find((n) => n.path === selectedNode.selectedPath) as Node & Coords;
     }
 
-    const relIndex = lookChildSiblings ? getNavIndexBackward(navIndexHistory, node) : getNavIndexForward(navIndexHistory, node);
+    const relIndex = lookChildSiblings
+      ? getNavIndexBackward(navIndexHistory, node)
+      : getNavIndexForward(navIndexHistory, node);
     if (relIndex === undefined) {
       return;
     }
-    const rel: Node = graphData.nodes.find((n) => n.idx === relIndex);
+    const rel: Node & Coords = graphData.nodes.find((n) => n.idx === relIndex) as Node & Coords;
 
-    const siblings = lookChildSiblings ?
-      rel.links.filter((l) => l.source.idx === relIndex && l.target.idx !== node.idx).map((l) => l.target):
-      rel.links.filter((l) => l.target.idx === relIndex && l.source.idx !== node.idx).map((l) => l.source);
+    const siblings = lookChildSiblings
+      ? rel.links
+          .filter((l) => l.source.idx === relIndex && l.target.idx !== node.idx)
+          .map((l) => l.target)
+      : rel.links
+          .filter((l) => l.target.idx === relIndex && l.source.idx !== node.idx)
+          .map((l) => l.source);
     if (!siblings.length) {
       return;
     }
@@ -477,52 +460,39 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
     });
 
     const closest = angles.reduce((best, angle) => {
-      return (best.angle < angle.angle && clockwise) || (best.angle > angle.angle && !clockwise) ? best : angle;
+      return (best.angle < angle.angle && clockwise) || (best.angle > angle.angle && !clockwise)
+        ? best
+        : angle;
     });
 
     signalSelectedNode(closest.n);
   };
   const handlePanUp = () => handlePanUpDownByIndex(isDescending);
   const handlePanDown = () => handlePanUpDownByIndex(!isDescending);
-  const handlePanUpDown = (dirDescend: boolean) => {
-    const selected = selectedNode.selectedPath;
-    if (!selected) {
-      return;
-    }
-
-    const node = graphData.nodes.find((n) => n.path === selected);
-    const nextInLine = dirDescend ? getNavForward(navHistory, node) : getNavBackward(navHistory, node);
-    if (!nextInLine) {
-      if (!node?.expanded) {
-        expandNode(node);
-      }
-      return;
-    }
-    const parent: Node = graphData.nodes.find((n) => n.path === nextInLine);
-    signalSelectedNode(parent);
-  };
   const handleDirectionToggle = () => {
     setIsDescending(!isDescending);
   };
   const handlePanUpDownByIndex = (dirDescend: boolean) => {
     let node: Node;
     if (selectedNode.selectedIndex !== undefined) {
-      node = graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex);
+      node = graphData.nodes.find((n) => n.idx === selectedNode.selectedIndex) as Node;
     } else {
       if (!selectedNode.selectedPath) {
         return;
       }
-      node = graphData.nodes.find((n) => n.path === selectedNode.selectedPath);
+      node = graphData.nodes.find((n) => n.path === selectedNode.selectedPath) as Node;
     }
 
-    const nextInLine = dirDescend ? getNavIndexForward(navIndexHistory, node) : getNavIndexBackward(navIndexHistory, node);
+    const nextInLine = dirDescend
+      ? getNavIndexForward(navIndexHistory, node)
+      : getNavIndexBackward(navIndexHistory, node);
     if (nextInLine === undefined) {
       if (!node?.expanded) {
         expandNode(node);
       }
       return;
     }
-    const parent: Node = graphData.nodes.find((n) => n.idx === nextInLine);
+    const parent: Node = graphData.nodes.find((n) => n.idx === nextInLine) as Node;
     signalSelectedNode(parent);
   };
 
@@ -580,7 +550,13 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
   };
 
   return (
-    <div id="pocket-memory" ref={containerRef} onKeyUp={handleKeyUp} onKeyDown={handleKeyDown} tabIndex={0}>
+    <div
+      id="pocket-memory"
+      ref={containerRef}
+      onKeyUp={handleKeyUp}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
       <ForceGraph2D
         ref={fgRef}
         graphData={filteredGraphData}
@@ -628,5 +604,3 @@ const ReactForceGraph: React.FC<GraphComponentProps> = ({
     </div>
   );
 };
-
-export default ReactForceGraph;

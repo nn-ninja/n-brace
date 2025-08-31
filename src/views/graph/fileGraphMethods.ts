@@ -1,9 +1,9 @@
 import { Graph } from "@/graph/Graph";
 import type { Node } from "@/graph/Node";
-import { Link } from "@/graph/Link";
-import { SearchResult, TFile } from "obsidian";
-import ForceGraphPlugin from "@/main";
-import { LocalGraphSettings } from "@/SettingsSchemas";
+import type { Link } from "@/graph/Link";
+import { TFile } from "obsidian";
+import type ForceGraphPlugin from "@/main";
+import type { LocalGraphSettings } from "@/SettingsSchemas";
 
 /**
  *
@@ -120,7 +120,7 @@ export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph)
         const circularBlob = await offscreenCanvas.convertToBlob();
         node.image = await createImageBitmap(circularBlob);
 
-        plugin.globalGraph.nodes.find((n) => n.path == node.path).image = node.image;
+        plugin.globalGraph.nodes.find((n) => n.path == node.path)!.image = node.image;
       }
     } else if (node.imagePath) {
       console.debug(`Image ${node.imagePath} for ${node.path} already loaded!`);
@@ -138,7 +138,6 @@ export const getNewLocalGraph = (
   plugin: ForceGraphPlugin,
   config?: {
     centerFilePath: string | null;
-    searchResults: SearchResult["filter"]["files"];
     filterSetting: LocalGraphSettings["filter"];
   }
 ) => {
@@ -149,7 +148,7 @@ export const getNewLocalGraph = (
   // get the current show attachments and show orphans from graph setting
 
   // compose a new graph
-  const centerFilePath = config?.centerFilePath ?? plugin.app.workspace.getActiveFile().path;
+  const centerFilePath = config?.centerFilePath ?? plugin.app.workspace.getActiveFile()?.path;
 
   if (!centerFilePath || !config) return Graph.createEmpty();
 
@@ -181,9 +180,9 @@ export const getNewLocalGraph = (
       // the center file, which must be shown
       if (node.path === centerFilePath) return true;
       //  if the search query is not empty and the search result is empty, then we don't need to filter the search result
-      if (config.searchResults.length === 0 && config.filterSetting.searchQuery === "") return true;
+      if (config.filterSetting.searchQuery === "") return true;
       // if the node is not in the files, then we will not show it, except
-      return config.searchResults.some((file) => file.path === node.path);
+      return true;
     })
     .filter(plugin.app, (node) => {
       // the center file, which must be shown
