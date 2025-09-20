@@ -1,11 +1,11 @@
 ---
 layout: page
-title: projects
+title: install
 permalink: /projects/
-description: A growing collection of your cool projects.
+description: Projects belonging to the N-brace
 nav: true
 nav_order: 3
-display_categories: [work, fun]
+display_categories: [learning]
 horizontal: false
 ---
 
