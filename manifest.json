@@ -1,11 +1,11 @@
 {
-	"id": "n-brace-plugin",
+	"id": "n-brace",
 	"name": "N-brace",
 	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "The N-brace plugin enhances navigation and clarity in the local graph view.",
+	"minAppVersion": "1.9.14",
+	"description": "Altered local graph's visual layout. Quick graph navigation.",
 	"author": "Rafael Hazan",
-	"authorUrl": "https://hayio.github.io/n-brace/",
+	"authorUrl": "https://nn-ninja.github.io/n-brace",
 	"fundingUrl": "https://buymeacoffee.com/nbrace",
 	"isDesktopOnly": false
 }

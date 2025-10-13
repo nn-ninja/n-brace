@@ -22,7 +22,6 @@ export class ReactForceGraphView extends ItemView {
   readonly plugin: ForceGraphPlugin;
   readonly store = getDefaultStore();
   root: Root | null = null;
-  private width: number = this.contentEl.offsetWidth;
   private settingManager: PluginSettingManager;
 
   constructor(leaf: WorkspaceLeaf, plugin: ForceGraphPlugin) {
@@ -85,7 +84,7 @@ export class ReactForceGraphView extends ItemView {
     console.debug("node to expand ", nodePath);
     if (!nodePath || !this.plugin.globalGraph) {
       console.debug("Returning empty graph.");
-      return Promise.resolve(Graph.createEmpty());
+      return Graph.createEmpty();
     }
     const graph = getNewLocalGraph(this.plugin, {
       centerFilePath: nodePath,

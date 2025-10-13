@@ -1,8 +1,7 @@
 import type { LinkCache } from "@/graph/Link";
 import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
-import { copy } from "copy-anything";
-import type { App, TAbstractFile } from "obsidian";
+import type { App } from "obsidian";
 
 export class Graph {
   public rootPath: string | undefined;
@@ -31,31 +30,10 @@ export class Graph {
     this.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   }
 
-  public getNodeByPath = (path: string): Node | null => {
-    const index = this.nodeIndex.get(path);
-    if (typeof index === "number") {
-      return this.nodes[index] ?? null;
-    }
-    return null;
-  };
-
   public getNodeById(id: string): Node | null {
     const index = this.nodeIndex.get(id);
     if (typeof index === "number") {
       return this.nodes[index] ?? null;
-    }
-    return null;
-  }
-
-  // Returns a link by its source and target node ids
-  public getLinkByIds(sourceNodeId: string, targetNodeId: string): Link | null {
-    const sourceLinkMap = this.linkIndex.get(sourceNodeId);
-    if (sourceLinkMap) {
-      const index = sourceLinkMap.get(targetNodeId);
-      if (index !== undefined) {
-        // @ts-ignore
-        return this.links[index];
-      }
     }
     return null;
   }
@@ -69,41 +47,6 @@ export class Graph {
     }
     return [];
   }
-
-  /**
-   * given a node id, return all the links that contains this node
-   */
-  public getLinksWithNode(nodeId: string): Link[] {
-    const links: Link[] = [];
-
-    this.linkIndex.forEach((targetMap, sourceId) => {
-      if (sourceId === nodeId) {
-        links.push(
-          // @ts-ignore
-          ...Array.from(targetMap.values()).map((index) => this.links[index])
-        );
-      } else if (targetMap.has(nodeId)) {
-        const index = targetMap.get(nodeId);
-        if (typeof index === "number") {
-          // @ts-ignore
-          links.push(this.links[index]);
-        }
-      }
-    });
-
-    return links;
-  }
-
-  // Clones the graph
-  public clone = (): Graph => {
-    return new Graph(
-      this.rootPath,
-      copy(this.nodes),
-      copy(this.links),
-      copy(this.nodeIndex),
-      copy(this.linkIndex)
-    );
-  };
 
   public static createEmpty = (): Graph => {
     return new Graph(undefined, [], [], new Map(), new Map());
@@ -229,64 +172,6 @@ export class Graph {
 
   public applyNodes = (fun: (node: Node) => void): void => {
     this.nodes.forEach(fun);
-  };
-
-  public static compare = (graph1: Graph, graph2: Graph): boolean => {
-    // Quick checks for lengths
-    if (graph1.nodes.length !== graph2.nodes.length) {
-      return false;
-    }
-    if (graph1.links.length !== graph2.links.length) {
-      return false;
-    }
-
-    // Compare nodes
-    for (const node1 of graph1.nodes) {
-      const node2Index = graph2.nodeIndex.get(node1.id);
-      // @ts-ignore
-      if (node2Index === undefined || graph2.nodes[node2Index].id !== node1.id) {
-        return false;
-      }
-    }
-
-    // Compare links
-    for (const link1 of graph1.links) {
-      const graph2SourceLinkMap = graph2.linkIndex.get(link1.source.id);
-      if (!graph2SourceLinkMap) {
-        return false;
-      }
-
-      const graph2LinkIndex = graph2SourceLinkMap.get(link1.target.id);
-      if (graph2LinkIndex === undefined) {
-        return false;
-      }
-
-      const link2 = graph2.links[graph2LinkIndex];
-      if (!link2 || link2.source.id !== link1.source.id || link2.target.id !== link1.target.id) {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  /**
-   * get the files from the graph
-   */
-  public static getFiles(app: App, graph: Graph): TAbstractFile[] {
-    return graph.nodes.map((node) => app.vault.getAbstractFileByPath(node.path)).filter(Boolean);
-  }
-
-  public isAcyclic = (): boolean => {
-    const visited = new Set<string>();
-    const recStack = new Set<string>();
-
-    for (const node of this.nodes) {
-      if (this.isCyclicUtil(node.id, visited, recStack)) {
-        return false;
-      }
-    }
-    return true;
   };
 
   private isCyclicUtil = (nodeId: string, visited: Set<string>, recStack: Set<string>): boolean => {

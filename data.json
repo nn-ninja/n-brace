@@ -21,8 +21,7 @@
       "showExtension": false,
       "showFullPath": false,
       "showLinkArrow": true,
-      "dontMoveWhenDrag": false,
-      "dagOrientation": "null"
+      "dontMoveWhenDrag": false
     }
   },
   "pluginSetting": {

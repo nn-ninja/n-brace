@@ -1,18 +1,7 @@
 import type { ISettingManager } from "@/Interfaces";
 import { AsyncQueue } from "@/util/AsyncQueue";
-import type {
-  GraphSetting,
-  LocalGraphSettings,
-  MarkdownPostProcessorGraphSettings,
-  Setting,
-} from "@/SettingsSchemas";
-import {
-  defaultLocalGraphSetting,
-  defaultMarkdownPostProcessorGraphSetting,
-  GraphType,
-  SearchEngineType,
-  SettingSchema,
-} from "@/SettingsSchemas";
+import type { Setting } from "@/SettingsSchemas";
+import { defaultLocalGraphSetting, SearchEngineType, SettingSchema } from "@/SettingsSchemas";
 import { createNotice } from "@/util/createNotice";
 import { State } from "@/util/State";
 import type { Plugin } from "obsidian";
@@ -104,17 +93,6 @@ export class PluginSettingManager implements ISettingManager<Setting> {
       this.isLoaded = true;
     }
     await this.plugin.saveData(this.setting.value);
-  }
-
-  static getNewSetting(type: GraphType.local): LocalGraphSettings;
-  static getNewSetting(type: GraphType.postProcessor): MarkdownPostProcessorGraphSettings;
-  static getNewSetting(type: GraphType): GraphSetting;
-  static getNewSetting(type: GraphType) {
-    if (type === GraphType.local) {
-      return defaultLocalGraphSetting;
-    } else {
-      return defaultMarkdownPostProcessorGraphSetting;
-    }
   }
 }
 

@@ -37,11 +37,11 @@ export class SettingTab extends PluginSettingTab {
     containerEl.empty();
     containerEl.addClasses(["n-brace-setting-tab"]);
 
-    containerEl.createEl("h2", { text: "Settings" });
-
     new Setting(containerEl)
       .setName("Base Folder")
-      .setDesc("Base folder, within which the mind map can navigate.")
+      .setDesc(
+        "The base directory where your notes for exploration live — navigation builds from here."
+      )
       .addText((text) => {
         text
           .setPlaceholder(`${DEFAULT_BASE_FOLDER}`)
@@ -66,35 +66,6 @@ export class SettingTab extends PluginSettingTab {
             text.inputEl.reportValidity();
           });
         text.inputEl.setAttribute("type", "string");
-      });
-
-    new Setting(containerEl)
-      .setName("Note title font size")
-      .setDesc("The font size of the title displayed on a graph node.")
-      .addText((text) => {
-        text
-          .setPlaceholder(`${DEFAULT_TITLE_FONT_SIZE}`)
-          .setValue(String(pluginSetting.titleFontSize ?? DEFAULT_TITLE_FONT_SIZE))
-          .onChange(async (value) => {
-            // check if value is a number
-            if (isNaN(Number(value)) || Number(value) <= 3) {
-              // set the error to the input
-              text.inputEl.setCustomValidity("Please enter a number higher than 3");
-              this.plugin.settingManager.updateSettings((setting) => {
-                setting.value.pluginSetting.titleFontSize = DEFAULT_TITLE_FONT_SIZE;
-              });
-            } else {
-              text.inputEl.setCustomValidity("");
-              this.plugin.settingManager.updateSettings((setting) => {
-                setting.value.pluginSetting.titleFontSize = Number(value);
-                eventBus.trigger("settings-updated");
-              });
-            }
-            text.inputEl.reportValidity();
-          });
-        text.inputEl.setAttribute("type", "number");
-        text.inputEl.setAttribute("min", "4");
-        return text;
       });
 
     new Setting(containerEl)
@@ -123,6 +94,37 @@ export class SettingTab extends PluginSettingTab {
           });
         text.inputEl.setAttribute("type", "number");
         text.inputEl.setAttribute("min", "1");
+        return text;
+      });
+
+    new Setting(containerEl).setName("Appearance").setHeading();
+
+    new Setting(containerEl)
+      .setName("Note title font size")
+      .setDesc("The font size of the title displayed on a graph node.")
+      .addText((text) => {
+        text
+          .setPlaceholder(`${DEFAULT_TITLE_FONT_SIZE}`)
+          .setValue(String(pluginSetting.titleFontSize ?? DEFAULT_TITLE_FONT_SIZE))
+          .onChange(async (value) => {
+            // check if value is a number
+            if (isNaN(Number(value)) || Number(value) <= 3) {
+              // set the error to the input
+              text.inputEl.setCustomValidity("Please enter a number higher than 3");
+              this.plugin.settingManager.updateSettings((setting) => {
+                setting.value.pluginSetting.titleFontSize = DEFAULT_TITLE_FONT_SIZE;
+              });
+            } else {
+              text.inputEl.setCustomValidity("");
+              this.plugin.settingManager.updateSettings((setting) => {
+                setting.value.pluginSetting.titleFontSize = Number(value);
+                eventBus.trigger("settings-updated");
+              });
+            }
+            text.inputEl.reportValidity();
+          });
+        text.inputEl.setAttribute("type", "number");
+        text.inputEl.setAttribute("min", "4");
         return text;
       });
 
@@ -157,7 +159,7 @@ export class SettingTab extends PluginSettingTab {
                 setting.value.pluginSetting.linkColorTheme = value;
               });
             }
-            this.display();
+            await this.display();
           })
       )
       .addColorPicker((color) => {

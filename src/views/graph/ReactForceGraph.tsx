@@ -87,7 +87,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
   // directional forces depending on if a screen is vertical or horizontal
   useEffect(() => {
     const fg = fgRef.current;
-    // TODO optimize: change forces only if dimensions changed a lot
+    // TODO optimize: change forces only if dimensions changed many times
     if (fg) {
       console.debug("Setting Graph forces");
       // fg.d3Force("link", d3.forceLink()
@@ -262,9 +262,6 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
     } else {
       const nodeDuplicates = new Set<string>();
       newLinks = links.filter((l) => {
-        // const exists = graphData.links.find((existingLink) => {
-        //   return Link.compare(l, existingLink);
-        // });
         const exists = graphData.links.find((existingLink) => {
           return (
             (existingLink.source.idx === expandedNode.idx ||
@@ -303,40 +300,12 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
           return false;
         }
         return !nodeDuplicates.has(n.path);
-        // const isItParentOfExpanded = n.links.find((l) => l.target.path === expandedNode.path);
-        // if (isItParentOfExpanded) {
-        //   return !graphData.nodes.find((existingNode) => {
-        //     const exists = Node.compare(n, existingNode);
-        //     // const hasLink = exists && existingNode.links.find((l) => l.tar)
-        //     if (exists) {
-        //       links.forEach((l) => {
-        //         if (l.source.path === existingNode.path) {
-        //           l.source = existingNode;
-        //         } else if (l.target.path === existingNode.path) {
-        //           l.target = existingNode;
-        //         }
-        //       });
-        //       existingNode.links = [
-        //         ...existingNode.links,
-        //         ...n.links.filter(
-        //           (l) =>
-        //             !existingNode.links.find(
-        //               (existingLink) =>
-        //                 l.source.path === existingLink.source.path &&
-        //                 l.target.path === existingLink.target.path
-        //             )
-        //         ),
-        //       ];
-        //     }
-        //     return exists;
-        //   });
-        // }
-        // return true;
       });
     }
 
     graphData.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
 
+    //// debug code
     // const simplifiedNodes = [...graphData.nodes, ...newNodes].map(node => ({
     //   path: node.path,
     //   links: node.links.map((link) => link.source.path + "->" + link.target.path),
@@ -364,7 +333,6 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
       graphData.nodes.find((n) => n.path === selectedNode.selectedPath) as Node,
       node
     );
-    // console.info(`HISTORY: ${JSON.stringify(newHistory)}`);
     setNavHistory(newHistory);
     if (selectedNode.selectedIndex !== undefined) {
       const newIndexHistory = stackOnIndexHistory(

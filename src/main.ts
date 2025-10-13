@@ -114,7 +114,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     // unregister the resolved cache listener
     this.app.metadataCache.off("resolved", this.onGraphCacheReady);
     this.app.metadataCache.off("resolve", this.onGraphCacheChanged);
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH);
   }
 
   private initListeners() {
@@ -129,7 +128,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
         if (!file) return;
         menu.addItem((item) => {
           item
-            .setTitle("N-brace")
+            .setTitle("use N-brace")
             .setIcon(config.icon)
             .onClick(() => this.openGraph());
         });
@@ -146,22 +145,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     if (!file || !(file instanceof TFile)) {
       return;
     }
-    // if (markdownLeaves.length === 0) {
-    //   const rootLeaf = workspace.getMostRecentLeaf() || workspace.getLeaf();
-    //   const newLeaf = workspace.createLeafBySplit(rootLeaf, "vertical", true); // Split left
-    //   await newLeaf.openFile(file);
-    //   workspace.revealLeaf(newLeaf);
-    //   return;
-    // }
-    //
-    // // Use the first existing Markdown leaf
-    // const targetLeaf = markdownLeaves[markdownLeaves.length - 1];
-    // if (file) {
-    //   await targetLeaf.openFile(file as any); // Open the file in the leaf
-    //   workspace.revealLeaf(targetLeaf); // Ensure it’s visible
-    // } else {
-    //   console.error(`File not found: ${filePath}`);
-    // }
 
     const graphLeaf = workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH)[0];
     if (!graphLeaf) {

@@ -1,6 +1,6 @@
 # Obsidian N-brace Plugin
 
-![Obsidian N-brace Plugin](https://github.com/nn-ninja/n-brace)
+[Obsidian N-brace Plugin](https://nn-ninja.github.io/n-brace/) Homepage
 
 A more intuitive Graph navigation and visualization for Obsidian.
 
@@ -13,7 +13,7 @@ https://buymeacoffee.com/nbrace
 
 ### Through community plugin store
 
-You can install this on community plugin store (not yet).
+You can install this on community plugin store.
 
 ### Manual installation
 
@@ -22,11 +22,34 @@ You can install this on community plugin store (not yet).
 3. `cd obsidian-n-brace && bun install && bun run build`
 4. there you go 🎉
 
+## Usage
+
+![graph.png](docs/graph.png)
+
+In a note tab context menu (right click), click on `use N-brace` to open a local graph of viewed note.
+![menu.png](docs/menu.png)
+
+The graph appears in the right-hand view and is designed to be used alongside the note on the left. Its purpose is to help you quickly understand how the current note connects to others and to visualize its overall structure.
+
+G-span defines how large a portion of the graph is displayed. When the number of visible nodes reaches this limit, the view automatically shrinks by hiding the most distant nodes.
+
+### Navigation
+
+You can navigate using the keyboard arrow keys. Notes that haven’t been expanded yet in the local graph are shown with a dotted border.
+
+If you need to explore the parent notes, hold Ctrl to reverse the navigation direction — the link directions will swap accordingly. 
+
+## Notes
+
+At present, the n-brace graph model is initialized during application startup, which may result in longer loading times.
+
+I have in my plans to optimize this process.
+
 ## Features
 
 ### Local Graph
 
-In a note tab context menu (right click), click on `N-brace` to open a local graph of viewed note.
+It is designed to rather operate on a local graph, not on huge and unclear global graph. 
 
 ### Save Setting
 

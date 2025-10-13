@@ -49,23 +49,6 @@ export enum SearchEngineType {
   builtIn = "builtIn",
 }
 
-export enum DagOrientation {
-  td = "td",
-  bu = "bu",
-  lr = "lr",
-  rl = "rl",
-  zout = "zout",
-  zin = "zin",
-  radialout = "radialout",
-  radialin = "radialin",
-  null = "null",
-}
-
-export enum CommandClickNodeAction {
-  openNodeInNewTab = "openNodeInNewTab",
-  focusNode = "focusNode",
-}
-
 const commonSetting = {
   display: {
     nodeSize: nodeSize.default,
@@ -101,7 +84,6 @@ export const BaseDisplaySettingsSchema = z.object({
   showFullPath: z.boolean().default(commonSetting.display.showFullPath),
   showLinkArrow: z.boolean().default(commonSetting.display.showLinkArrow),
   dontMoveWhenDrag: z.boolean().default(commonSetting.display.dontMoveWhenDrag),
-  dagOrientation: z.undefined().or(z.nativeEnum(DagOrientation)).default(DagOrientation.null),
 });
 
 export const LocalDisplaySettingsSchema = z.object({
@@ -189,23 +171,11 @@ export const SettingSchema = z.object({
   }),
 });
 
-export type BaseFilterSettings = Prettify<z.TypeOf<typeof BaseFilterSettingsSchema>>;
-
-export type LocalFilterSetting = Prettify<z.TypeOf<typeof LocalFilterSettingSchema>>;
-
-export type GroupSettings = Prettify<z.TypeOf<typeof GroupSettingsSchema>>;
-
-export type BaseDisplaySettings = Prettify<z.TypeOf<typeof BaseDisplaySettingsSchema>>;
-
-export type LocalDisplaySettings = Prettify<z.TypeOf<typeof LocalDisplaySettingsSchema>>;
-
 export type LocalGraphSettings = Prettify<z.TypeOf<typeof LocalGraphSettingsSchema>>;
 
 export type MarkdownPostProcessorGraphSettings = Prettify<
   z.TypeOf<typeof MarkdownPostProcessorGraphSettingSchema>
 >;
-
-export type SavedSetting = Prettify<z.TypeOf<typeof SavedSettingSchema>>;
 
 export type Setting = Prettify<z.TypeOf<typeof SettingSchema>>;
 
@@ -225,7 +195,6 @@ export const defaultLocalGraphSetting: LocalGraphSettings = {
   groups: [],
   display: {
     ...commonSetting.display,
-    dagOrientation: DagOrientation.null,
   },
 };
 
@@ -240,6 +209,5 @@ export const defaultMarkdownPostProcessorGraphSetting: MarkdownPostProcessorGrap
   groups: [],
   display: {
     ...commonSetting.display,
-    dagOrientation: DagOrientation.null,
   },
 };
