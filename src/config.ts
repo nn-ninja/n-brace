@@ -4,6 +4,6 @@ export const config = {
     local: "n-brace-view",
   },
   displayText: {
-    local: "N-brace your brain",
+    local: "N-brace view",
   },
 };

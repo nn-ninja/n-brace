@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp } from "react-icons/fa";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  FlipVertical,
+  FlipVertical2,
+  Sun,
+  Sunrise,
+} from "lucide-react";
 import "@/views/graph/GraphControls.css";
-import { RiFlipVerticalFill, RiFlipVerticalLine } from "react-icons/ri";
-import { PiSunHorizonBold } from "react-icons/pi";
-import { IoSunny } from "react-icons/io5";
 import { useAtomValue } from "jotai/react";
 import { graphSettingsAtom } from "@/atoms/graphAtoms";
 
@@ -73,24 +79,24 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
       )}
       <div className="pm-graph-controls">
         <button onClick={handleToggle} title="Flip direction (Ctrl)">
-          {isDescending ? <RiFlipVerticalLine /> : <RiFlipVerticalFill />}
+          {isDescending ? <FlipVertical /> : <FlipVertical2 />}
         </button>
         <button onClick={handleHidden} title={isHidden ? "Show" : "Hide"}>
-          {isHidden ? <IoSunny /> : <PiSunHorizonBold />}
+          {isHidden ? <Sun /> : <Sunrise />}
         </button>
         {!isHidden && (
           <>
             <button onClick={onPanUp} title="Descend">
-              <FaArrowUp />
+              <ArrowUp />
             </button>
             <button onClick={onPanDown} title="Go Back">
-              <FaArrowDown />
+              <ArrowDown />
             </button>
             <button onClick={onPanLeft} title="Anti Clockwise">
-              <FaArrowLeft />
+              <ArrowLeft />
             </button>
             <button onClick={onPanRight} title="Clockwise">
-              <FaArrowRight />
+              <ArrowRight />
             </button>
           </>
         )}

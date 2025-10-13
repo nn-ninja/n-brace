@@ -1,6 +1,6 @@
 {
   "name": "n-brace",
-  "version": "1.1.11",
+  "version": "1.0.0",
   "description": "A graph navigation and visualization for Obsidian",
   "main": "main.js",
   "scripts": {
@@ -55,7 +55,7 @@
     "react-dom": "18.3.1",
     "lucide-react": "^0.511.0",
     "jotai": "^2.9.1",
-    "force-graph": "^1.43.5",
+    "react-force-graph-2d": "^1.29.0",
     "@tweenjs/tween.js": "^21.0.0",
     "copy-anything": "^3.0.5",
     "d3": "^7.9.0",

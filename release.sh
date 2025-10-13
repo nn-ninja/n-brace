@@ -63,4 +63,4 @@ echo "Created tag $NEW_VERSION"
 git push origin "$NEW_VERSION"
 echo "Pushed tag $NEW_VERSION to the origin branch $NEW_VERSION"
 git push
-echo "Pushed to the origin master branch"
+echo "Pushed to the origin main branch"

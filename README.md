@@ -1,6 +1,6 @@
 # Obsidian N-brace Plugin
 
-![Obsidian N-brace Plugin](https://github.com/nn-ninja/n-brace)
+![Obsidian N-brace Plugin](https://nn-ninja.github.io/n-brace/) Homepage
 
 A more intuitive Graph navigation and visualization for Obsidian.
 

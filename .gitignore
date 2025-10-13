@@ -20,3 +20,7 @@ main.js
 
 .obsidian
 dist
+
+# gh-pages
+_site
+.tweet-cache
