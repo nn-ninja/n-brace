@@ -37,7 +37,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
   public settingManager: PluginSettingManager;
   public baseFolder: string = "";
-
   public mousePosition = { x: 0, y: 0 };
 
   public hoverPopover: HoverPopover | null = null;
@@ -244,8 +243,11 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
   public resetGlobalGraph = async (baseFolder: string) => {
     this.baseFolder = (baseFolder.endsWith("/") ? baseFolder : baseFolder + "/").substring(1);
     console.debug(`resetGlobalGraph ${this.baseFolder}`);
-    // currentFile = this.app.workspace.getActiveFile();
+
+    const loadingOverlay: HTMLDivElement | undefined = this.prepLoadingOverlay();
     this.globalGraph = Graph.createFromApp(this.app, this.baseFolder);
+    loadingOverlay?.remove();
+
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH);
     if (!leaves || !leaves.length) {
       return;
@@ -294,5 +296,28 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
   onGraphSettingAtomChanged(settings: GraphSettings) {
     this.store.set(graphSettingsAtom, settings);
+  }
+
+  private prepLoadingOverlay() {
+    const graphView = this.app.workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH);
+    let loadingOverlay: HTMLDivElement | undefined = undefined;
+    if (graphView.length > 0) {
+      loadingOverlay = graphView[0]?.view.containerEl.createDiv({
+        cls: "loading-overlay",
+        attr: {
+          style:
+            "position: absolute; top: 0; left: 0; width: 100%; height: 100%; " +
+            "background: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; align-items: center;",
+        },
+      });
+      loadingOverlay?.createEl("h2", {
+        text: "...loading...",
+        attr: {
+          style:
+            "color: white; font-family: Arial, sans-serif; font-size: 24px; text-align: center;",
+        },
+      });
+    }
+    return loadingOverlay;
   }
 }
