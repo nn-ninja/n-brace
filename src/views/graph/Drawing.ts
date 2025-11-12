@@ -1,6 +1,6 @@
-import type { Node } from "@/graph/Node";
-import type { Link } from "@/graph/Link";
 import type { GraphSettings } from "@/atoms/graphAtoms";
+import type { Link } from "@/graph/Link";
+import type { Node } from "@/graph/Node";
 
 export class Drawing {
   private static readonly SELECTED_COLOR = "21, 0, 158";

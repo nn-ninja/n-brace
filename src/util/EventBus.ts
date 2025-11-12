@@ -1,6 +1,8 @@
-import { AsyncQueue } from "@/util/AsyncQueue";
-import type { EventRef } from "obsidian";
 import { Events } from "obsidian";
+
+import type { EventRef } from "obsidian";
+
+import { AsyncQueue } from "@/util/AsyncQueue";
 
 /**
  *  Event bus for internal Plugin communication

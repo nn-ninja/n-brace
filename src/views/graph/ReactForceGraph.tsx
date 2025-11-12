@@ -1,11 +1,14 @@
-import type { KeyboardEvent } from "react";
-import React, { useEffect, useRef, useState } from "react";
-import type { ForceGraphMethods } from "react-force-graph-2d";
-import ForceGraph2D from "react-force-graph-2d";
-import type { Graph } from "@/graph/Graph";
-import { Drawing } from "@/views/graph/Drawing";
-import { Node } from "@/graph/Node";
+import * as d3 from "d3";
 import { useAtom, useAtomValue } from "jotai/react";
+import React, { useEffect, useRef, useState } from "react";
+import ForceGraph2D from "react-force-graph-2d";
+
+import type { Graph } from "@/graph/Graph";
+import type { KeyboardEvent } from "react";
+import type { ForceGraphMethods } from "react-force-graph-2d";
+
+
+
 import {
   dimensionsAtom,
   expandNodePathAtom,
@@ -16,10 +19,6 @@ import {
   navIndexHistoryAtom,
   nodeIdxMaxAtom,
 } from "@/atoms/graphAtoms";
-import * as d3 from "d3";
-import { Link } from "@/graph/Link";
-import { eventBus } from "@/util/EventBus";
-import { GraphControls } from "@/views/graph/GraphControls";
 import {
   calcNodeAngle,
   getNavIndexBackward,
@@ -27,6 +26,11 @@ import {
   stackOnHistory,
   stackOnIndexHistory,
 } from "@/atoms/graphOps";
+import { Link } from "@/graph/Link";
+import { Node } from "@/graph/Node";
+import { eventBus } from "@/util/EventBus";
+import { Drawing } from "@/views/graph/Drawing";
+import { GraphControls } from "@/views/graph/GraphControls";
 
 interface GraphComponentProps {
   data?: Graph;
@@ -385,6 +389,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         return res;
       });
     }
+    return undefined;
   };
 
   const handlePanRight = () => handlePanRightLeftByIndex(true, isDescending);
@@ -535,18 +540,16 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         nodeCanvasObject={(node: Node & Coords & NodeData, ctx, globalScale) =>
           Drawing.drawNode(node, ctx, globalScale, titleFontSize, graphSettings)
         }
-        nodePointerAreaPaint={(node: Node & Coords & NodeData, color, ctx) => {
+        nodePointerAreaPaint={(node: Node & Coords & NodeData, color, ctx): void => {
           ctx.fillStyle = color;
-          const bckgDimensions = node.nodeDims;
-          bckgDimensions &&
-            bckgDimensions[0] &&
-            bckgDimensions[1] &&
-            ctx.fillRect(
-              node.x - bckgDimensions[0] / 2,
-              node.y - bckgDimensions[1] / 2,
-              bckgDimensions[0],
-              bckgDimensions[1]
-            );
+          const bckgDims = node.nodeDims;
+          if (!bckgDims || !bckgDims[0] || !bckgDims[1]) return;
+          ctx.fillRect(
+            node.x - bckgDims[0] / 2,
+            node.y - bckgDims[1] / 2,
+            bckgDims[0],
+            bckgDims[1]
+          );
         }}
         linkCanvasObject={(link: Link, ctx, globalScale) =>
           Drawing.drawLink(link, ctx, globalScale, isDescending, graphSettings)

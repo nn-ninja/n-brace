@@ -1,10 +1,12 @@
 import type { ISettingManager } from "@/Interfaces";
-import { AsyncQueue } from "@/util/AsyncQueue";
 import type { Setting } from "@/SettingsSchemas";
+import type { Plugin } from "obsidian";
+
 import { defaultLocalGraphSetting, SearchEngineType, SettingSchema } from "@/SettingsSchemas";
+import { AsyncQueue } from "@/util/AsyncQueue";
 import { createNotice } from "@/util/createNotice";
 import { State } from "@/util/State";
-import type { Plugin } from "obsidian";
+
 
 const corruptedMessage =
   "The setting is corrupted. You will not be able to save the setting. Please backup your data.json, remove it and reload the plugin. Then migrate your old setting back.";

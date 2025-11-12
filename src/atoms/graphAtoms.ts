@@ -1,8 +1,10 @@
+import { atomWithReset } from "jotai/utils";
 import { atom } from "jotai/vanilla";
+
+import type { Graph } from "@/graph/Graph";
 import type { Link } from "@/graph/Link";
 import type { Node } from "@/graph/Node";
-import { atomWithReset } from "jotai/utils";
-import type { Graph } from "@/graph/Graph";
+
 import { DEFAULT_SETTING } from "@/SettingManager";
 
 export const dimensionsAtom = atom({ width: 0, height: 0 });

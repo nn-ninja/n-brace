@@ -1,7 +1,8 @@
 import type { LinkCache } from "@/graph/Link";
+import type { App } from "obsidian";
+
 import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
-import type { App } from "obsidian";
 
 export class Graph {
   public rootPath: string | undefined;

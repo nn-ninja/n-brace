@@ -1,12 +1,15 @@
-import type { App } from "obsidian";
-import { PluginSettingTab, Setting } from "obsidian";
-import type ForceGraphPlugin from "@/main";
-import { DEFAULT_SETTING } from "@/SettingManager";
-import { eventBus } from "@/util/EventBus";
-import type { GraphSettings } from "@/atoms/graphAtoms";
 import { rgb } from "d3";
+import { PluginSettingTab, Setting } from "obsidian";
+
+import type { GraphSettings } from "@/atoms/graphAtoms";
+import type ForceGraphPlugin from "@/main";
 import type { Setting as SettingPlugin } from "@/SettingsSchemas";
 import type { State } from "@/util/State";
+import type { App } from "obsidian";
+
+import { DEFAULT_SETTING } from "@/SettingManager";
+import { eventBus } from "@/util/EventBus";
+
 
 const DEFAULT_BASE_FOLDER = DEFAULT_SETTING.pluginSetting.baseFolder;
 const DEFAULT_TITLE_FONT_SIZE = DEFAULT_SETTING.pluginSetting.titleFontSize;

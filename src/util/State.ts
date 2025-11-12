@@ -45,7 +45,8 @@ export class State<T> {
         currentPath: "",
         jsonPointer: "",
         target: this.val,
-        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         proxy: (this.val as never).__getProxy,
         previousValue,
         newValue: this.val,
@@ -82,7 +83,8 @@ export class State<T> {
       throw new Error("SubStates of properties that are Primitives are not supported yet.");
     }
 
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     return new State(subStateValue?.__getTarget);
 
     // if (typeof subStateValue === "object" && type) {
@@ -95,7 +97,8 @@ export class State<T> {
 
   public getRawValue(): T {
     if (typeof this.val === "object") {
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       return (this.val as unknown as ProxyConstructor).__getTarget;
     }
     return this.val as T;

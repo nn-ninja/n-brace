@@ -1,17 +1,25 @@
-import { createContext } from "react";
-import type { App, IconName, WorkspaceLeaf } from "obsidian";
-import { ItemView } from "obsidian";
-import type { Root } from "react-dom/client";
-import { createRoot } from "react-dom/client";
-import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
-import { Graph } from "@/graph/Graph";
-import type ForceGraphPlugin from "@/main";
-import { dimensionsAtom } from "@/atoms/graphAtoms";
 import { getDefaultStore } from "jotai";
-import { getNewLocalGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
-import { eventBus } from "@/util/EventBus";
+import { ItemView } from "obsidian";
+import { createContext } from "react";
+import { createRoot } from "react-dom/client";
+
+import type ForceGraphPlugin from "@/main";
 import type { PluginSettingManager } from "@/SettingManager";
+import type { App, IconName, WorkspaceLeaf } from "obsidian";
+import type { Root } from "react-dom/client";
+
+
+import { dimensionsAtom } from "@/atoms/graphAtoms";
 import { config } from "@/config";
+import { Graph } from "@/graph/Graph";
+import { eventBus } from "@/util/EventBus";
+import { getNewLocalGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
+import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
+
+
+
+
+
 
 export const VIEW_TYPE_REACT_FORCE_GRAPH = "react-force-graph-view";
 

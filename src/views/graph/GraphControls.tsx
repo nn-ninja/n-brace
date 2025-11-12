@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -9,8 +8,10 @@ import {
   Sun,
   Sunrise,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import "@/views/graph/GraphControls.css";
 import { useAtomValue } from "jotai/react";
+
 import { graphSettingsAtom } from "@/atoms/graphAtoms";
 
 interface GraphControlsProps {

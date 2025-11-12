@@ -1,18 +1,8 @@
-import type { App, HoverParent, HoverPopover, PluginManifest, WorkspaceLeaf } from "obsidian";
 import { Plugin, TFile } from "obsidian";
-import { State } from "@/util/State";
-import { Graph } from "@/graph/Graph";
+
 import type { LinkCache } from "@/graph/Link";
-import { deepCompare } from "@/util/deepCompare";
-import "@total-typescript/ts-reset";
-import "@total-typescript/ts-reset/dom";
-import { eventBus } from "@/util/EventBus";
-import { SettingTab } from "@/views/SettingTab";
-import { config } from "@/config";
-import { PluginSettingManager } from "@/SettingManager";
-import { ReactForceGraphView, VIEW_TYPE_REACT_FORCE_GRAPH } from "@/views/ReactForceGraphView";
-import { getDefaultStore } from "jotai/index";
-import type { GraphSettings } from "@/atoms/graphAtoms";
+import type { App, HoverParent, HoverPopover, PluginManifest, WorkspaceLeaf } from "obsidian";
+
 import {
   expandNodePathAtom,
   graphDataAtom,
@@ -21,6 +11,24 @@ import {
   navIndexHistoryAtom,
   nodeIdxMaxAtom,
 } from "@/atoms/graphAtoms";
+import { config } from "@/config";
+import { Graph } from "@/graph/Graph";
+import { PluginSettingManager } from "@/SettingManager";
+import { deepCompare } from "@/util/deepCompare";
+import { eventBus } from "@/util/EventBus";
+import { State } from "@/util/State";
+
+
+import "@total-typescript/ts-reset";
+import "@total-typescript/ts-reset/dom";
+import { ReactForceGraphView, VIEW_TYPE_REACT_FORCE_GRAPH } from "@/views/ReactForceGraphView";
+import { SettingTab } from "@/views/SettingTab";
+
+import { getDefaultStore } from "jotai/index";
+
+import type { GraphSettings } from "@/atoms/graphAtoms";
+
+
 import { RESET } from "jotai/utils";
 
 export default class ForceGraphPlugin extends Plugin implements HoverParent {

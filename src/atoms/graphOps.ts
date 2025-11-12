@@ -1,5 +1,5 @@
-import type { Node } from "@/graph/Node";
 import type { NavHistory, NavIndexHistory } from "@/atoms/graphAtoms";
+import type { Node } from "@/graph/Node";
 
 export const stackOnHistory = (navHistory: NavHistory, soFarSelected: Node, newSelected: Node) => {
   if (!soFarSelected) {

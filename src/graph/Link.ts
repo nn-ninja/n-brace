@@ -10,9 +10,11 @@ export class Link {
   public distance: number = 0;
 
   constructor(source: Node, target: Node) {
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     this.source = source;
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     this.target = target;
   }
 
@@ -31,17 +33,6 @@ export class Link {
     });
 
     return linkIndex;
-  }
-
-  static checkLinksValid(links: Link[]) {
-    // if there are duplicate links, then throw an error
-    links.forEach((link, index) => {
-      links.forEach((link2, index2) => {
-        if (index !== index2 && Link.compare(link, link2)) {
-          throw new Error("graph duplicate links");
-        }
-      });
-    });
   }
 
   public static compare = (a: Link, b: Link) => {

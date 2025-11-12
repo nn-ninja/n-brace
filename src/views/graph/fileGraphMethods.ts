@@ -1,9 +1,11 @@
-import { Graph } from "@/graph/Graph";
-import type { Node } from "@/graph/Node";
-import type { Link } from "@/graph/Link";
 import { TFile } from "obsidian";
+
+import type { Link } from "@/graph/Link";
+import type { Node } from "@/graph/Node";
 import type ForceGraphPlugin from "@/main";
 import type { LocalGraphSettings } from "@/SettingsSchemas";
+
+import { Graph } from "@/graph/Graph";
 
 /**
  *

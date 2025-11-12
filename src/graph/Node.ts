@@ -1,5 +1,6 @@
-import { type Link } from "@/graph/Link";
 import type { TAbstractFile } from "obsidian";
+
+import { type Link } from "@/graph/Link";
 
 export class Node {
   public readonly id: string;
