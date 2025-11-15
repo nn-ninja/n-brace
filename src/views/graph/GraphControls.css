@@ -1,14 +1,22 @@
 .pm-graph-controls {
   position: absolute;
-  top: 50px;
-  right: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columns */
   gap: 5px;
   background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.right-grid {
+  top: 50px;
+  right: 10px;
+  grid-template-columns: 1fr 1fr; /* 2 columns */
+}
+
+.first-row {
+  top: 50px;
+  left: 130px;
 }
 
 .pm-graph-controls button {

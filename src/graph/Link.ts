@@ -1,4 +1,4 @@
-import { type Node } from "@/graph/Node";
+import { type Node, type ElemType } from "@/graph/Node";
 
 export type LinkCache = Record<string, Record<string, number>>;
 
@@ -6,6 +6,7 @@ export class Link {
   public source: Node & Coords;
   public target: Node & Coords;
   public color: string = "green";
+  public type: ElemType = "note";
   public label?: string;
   public distance: number = 0;
 

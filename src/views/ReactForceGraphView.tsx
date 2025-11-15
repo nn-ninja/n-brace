@@ -1,6 +1,6 @@
 import { getDefaultStore } from "jotai";
 import { ItemView } from "obsidian";
-import { createContext } from "react";
+import { StrictMode, createContext } from "react";
 import { createRoot } from "react-dom/client";
 
 import type ForceGraphPlugin from "@/main";
@@ -13,7 +13,7 @@ import { dimensionsAtom } from "@/atoms/graphAtoms";
 import { config } from "@/config";
 import { Graph } from "@/graph/Graph";
 import { eventBus } from "@/util/EventBus";
-import { getNewLocalGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
+import { getNewLocalGraph, implodeGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
 import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
 
 
@@ -59,18 +59,22 @@ export class ReactForceGraphView extends ItemView {
   private renderComponent() {
     const initGraph = this.getNewGraphData.bind(this);
     const expandNodeFun = this.expandNode.bind(this);
+    const implodeFun = this.implodeNode.bind(this);
 
     if (this.root) {
       this.root.render(
-        <AppContext.Provider value={this.app}>
-          <ViewContext.Provider value={this}>
-            <ReactForceGraph
-              getInitialGraph={initGraph}
-              getExpandNode={expandNodeFun}
-              titleFontSize={this.settingManager.getSettings().pluginSetting.titleFontSize}
-            />
-          </ViewContext.Provider>
-        </AppContext.Provider>
+        <StrictMode>
+          <AppContext.Provider value={this.app}>
+            <ViewContext.Provider value={this}>
+              <ReactForceGraph
+                getInitialGraph={initGraph}
+                getExpandNode={expandNodeFun}
+                implodeNode={implodeFun}
+                titleFontSize={this.settingManager.getSettings().pluginSetting.titleFontSize}
+              />
+            </ViewContext.Provider>
+          </AppContext.Provider>
+        </StrictMode>
       );
     }
   }
@@ -114,6 +118,10 @@ export class ReactForceGraphView extends ItemView {
     console.debug(`Graph loaded ${nodePath}`);
     return graph;
   }
+
+  private async implodeNode(nodePath: string): Promise<Graph> {
+    return implodeGraph(this.app, this.plugin, nodePath);
+  };
 
   public async getNewGraphData(): Promise<Graph> {
     return this.expandNode(this.plugin.app.workspace.getActiveFile()?.path ?? undefined);

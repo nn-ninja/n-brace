@@ -5,7 +5,7 @@ import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
 
 export class Graph {
-  public rootPath: string | undefined;
+  public rootPath: string | undefined = undefined;
   public readonly nodes: Node[];
   public readonly links: Link[];
 

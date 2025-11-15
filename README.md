@@ -13,7 +13,17 @@ https://buymeacoffee.com/nbrace
 
 ### Through community plugin store
 
-You can install this on community plugin store.
+Not yet available. Easiest option of installation is through BRAT plugin (below).
+
+### Using BRAT
+
+1. Install the Brat Plugin in Settings → Community plugins → Browse BRAT → push the Install button
+2. Enable BRAT in Settings → Community plugins
+3. Open BRAT settings and click "Add Beta plugin"
+4. Enter the repository URL: `nn-ninja/n-brace`
+5. Click "Add Plugin" and enable N-brace in your community plugins
+
+BRAT will automatically check for updates and notify you when new versions are available.
 
 ### Manual installation
 

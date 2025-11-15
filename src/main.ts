@@ -52,6 +52,8 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
 
+    console.debug('Main construct start.');
+
     // this will be initialized in the on cache changed function
     this._resolvedCache = undefined as unknown as LinkCache;
     // this will be initialized in the on cache changed function
@@ -66,7 +68,8 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
    * initialize all the things here
    */
   async onload() {
-    // load the setting using setting manager
+
+    console.debug('Main onload start.');
     await this.settingManager.loadSettings();
 
     // get the setting from setting manager
@@ -112,7 +115,11 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     });
 
     eventBus.on("open-file", (filePath: string) => {
-      this.openFileInFirstTab(filePath);
+      if (filePath.contains("#")) {
+        this.openParaInFirstTab(filePath);
+      } else {
+        this.openFileInFirstTab(filePath);
+      }
     });
   }
 
@@ -174,6 +181,53 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
       await newLeaf.openFile(file);
       workspace.revealLeaf(newLeaf);
     }
+  }
+
+  async openParaInFirstTab(rawPath: string) {
+    const { workspace, vault } = this.app;
+
+    const [rawFilePath, paragraph] = rawPath.split("#");
+    if (!rawFilePath) return;
+
+    // --- 2) Ensure .md extension ---
+    const filePath = rawFilePath.endsWith(".md")
+      ? rawFilePath
+      : rawFilePath + ".md";
+    const file = vault.getAbstractFileByPath(filePath);
+
+    if (!file || !(file instanceof TFile)) {
+      console.error("File not found:", filePath);
+      return;
+    }
+
+    const graphLeaf = workspace.getLeavesOfType(VIEW_TYPE_REACT_FORCE_GRAPH)[0];
+    if (!graphLeaf) {
+      console.error("Graph view not found");
+      return;
+    }
+
+    // 3. Wybierz właściwy leaf (tak jak u Ciebie)
+    const leftMarkdownLeaves = this.getLeftMarkdownLeaves(graphLeaf);
+    const targetLeaf = this.getRightmostLeaf(leftMarkdownLeaves);
+
+    let leafToUse: WorkspaceLeaf;
+
+    if (targetLeaf !== undefined) {
+      leafToUse = targetLeaf;
+
+      if (filePath !== targetLeaf.view.file?.path) {
+        await targetLeaf.openFile(file);
+      }
+    } else {
+      leafToUse = workspace.createLeafBySplit(graphLeaf, "vertical", true);
+      await leafToUse.openFile(file);
+    }
+
+    if (paragraph) {
+      await workspace.openLinkText(`${filePath}#${paragraph}`, filePath, false);
+    }
+
+    workspace.setActiveLeaf(graphLeaf, { focus: true });
   }
 
   private getLeftMarkdownLeaves(graphLeaf: WorkspaceLeaf): WorkspaceLeaf[] {

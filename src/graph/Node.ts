@@ -1,6 +1,9 @@
+import type { SectionData } from "@/views/graph/fileGraphMethods";
 import type { TAbstractFile } from "obsidian";
 
 import { type Link } from "@/graph/Link";
+
+export type ElemType = "note" | "para";
 
 export class Node {
   public readonly id: string;
@@ -19,8 +22,13 @@ export class Node {
   public imagePath?: string;
   public image?: ImageBitmap;
   public zIndex: number = 10;
+  public type: ElemType = "note";
   public label?: string | null = null;
+  public selected: boolean = false;
   public expanded: boolean = false;
+  public imploded: boolean = false;
+
+  public paras: Record<string, SectionData> = {};
 
   constructor(
     name: string,

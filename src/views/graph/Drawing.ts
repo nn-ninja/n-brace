@@ -15,6 +15,9 @@ export class Drawing {
     if (link.color === "parent") {
       return;
     }
+    if (link.label === "para") {
+      return Drawing.drawPara(link, ctx, navDescending);
+    }
     // Destructure the source and target coordinates
     let { x: x1, y: y1 } = navDescending ? link.source : link.target;
     let { x: x2, y: y2 } = navDescending ? link.target : link.source;
@@ -49,7 +52,9 @@ export class Drawing {
         ? graphSettings.linkColorIn
         : link.label === "child"
           ? graphSettings.linkColorOut
-          : graphSettings.linkColorOther;
+          : link.label === "para"
+            ? this.SELECTED_COLOR
+            : graphSettings.linkColorOther;
     // Create a gradient for the line width
     const gradient = ctx.createLinearGradient(0, 0, length, 0);
     gradient.addColorStop(0, `rgba(${color}, 1`); // Start color 1
@@ -71,6 +76,33 @@ export class Drawing {
     ctx.restore();
   }
 
+  static drawPara(
+    link: Link,
+    ctx: CanvasRenderingContext2D,
+    navDescending: boolean,
+  ) {
+    // Destructure the source and target coordinates
+    const { x: x1, y: y1 } = navDescending ? link.source : link.target;
+    const { x: x2, y: y2 } = navDescending ? link.target : link.source;
+    if (!x1) {
+      return;
+    }
+    if (!x2) {
+      return;
+    }
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(150, 150, 150, 0.6)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
   /**
    * Draw a custom node
    * @param node The node data
@@ -84,6 +116,11 @@ export class Drawing {
     titleFontSize: number,
     graphSettings: GraphSettings
   ) {
+
+    if (node.label === 'para') {
+      return Drawing.drawParagraphNode(node, ctx, globalScale, titleFontSize, graphSettings);
+    }
+
     const label = node.name.contains(".")
       ? node.name.substring(0, node.name.length - 3)
       : node.name;
@@ -91,7 +128,7 @@ export class Drawing {
     ctx.font = `${fontSize}px Sans-Serif`;
 
     const color =
-      node.label === "selected"
+      node.selected
         ? this.SELECTED_COLOR
         : node.label === "parent"
           ? graphSettings.linkColorIn
@@ -182,6 +219,119 @@ export class Drawing {
 
       node.nodeDims = [totalWidth, height];
     }
+  }
+
+  static drawParagraphNode(
+    node: Node & Coords & NodeData,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number,
+    bodyFontSize: number,
+    graphSettings: GraphSettings
+  ) {
+    const text = node.name.contains(".")
+      ? node.name.substring(0, node.name.length - 3)
+      : node.name;
+    const fontSize = bodyFontSize / globalScale;
+    const lineHeight = fontSize * 1.3;
+
+    ctx.font = `${fontSize}px Sans-Serif`;
+
+    function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+      const words = text.split(" ");
+      const lines: string[] = [];
+      let currentLine = "";
+
+      for (const word of words) {
+        const testLine = currentLine ? currentLine + " " + word : word;
+        if (ctx.measureText(testLine).width > maxWidth) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      return lines;
+    }
+
+    function getWidestString(
+      ctx: CanvasRenderingContext2D,
+      strings: string[]
+    ): number {
+      let maxWidth = 0;
+
+      for (const s of strings) {
+        const w = ctx.measureText(s).width;
+        if (w > maxWidth) {
+          maxWidth = w;
+        }
+      }
+
+      return maxWidth;
+    }
+
+    const maxWidth = 180 / globalScale; // you can modify this
+    const lines = wrapText(ctx, text, maxWidth);
+
+    const padding = 6 / globalScale;
+    const foldSize = 12 / globalScale;
+
+    const width = getWidestString(ctx, lines) + padding * 2;
+    const height = lines.length * lineHeight + padding * 2;
+
+    const x = node.x - width / 2;
+    const y = node.y - height / 2;
+
+    const color =
+      node.selected
+        ? this.SELECTED_COLOR
+        : node.label === "parent"
+          ? graphSettings.linkColorIn
+          : node.label === "child"
+            ? graphSettings.linkColorOut
+            : graphSettings.linkColorOther;
+
+    // --- DRAW PARAGRAPH BOX WITH FOLDED CORNER ---
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width - foldSize, y);
+    ctx.lineTo(x + width, y + foldSize);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = `rgb(${color})`;
+    ctx.lineWidth = 2 / globalScale;
+    ctx.fill();
+    ctx.stroke();
+
+    // --- DRAW THE FOLD ---
+    ctx.beginPath();
+    ctx.moveTo(x + width - foldSize, y);
+    ctx.lineTo(x + width - foldSize, y + foldSize);
+    ctx.lineTo(x + width, y + foldSize);
+    ctx.closePath();
+
+    ctx.fillStyle = "#f0f0f0";   // folded corner color
+    ctx.fill();
+    ctx.stroke();
+
+    // --- DRAW TEXT ---
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    let textY = y + 2 * padding;
+    for (const line of lines) {
+      ctx.fillText(line, x + padding, textY);
+      textY += lineHeight;
+    }
+
+    node.nodeDims = [width, height];
   }
 
   /**
