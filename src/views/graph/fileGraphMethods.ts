@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { App, TFile, Vault } from "obsidian";
 
 import type { Link } from "@/graph/Link";
 import type { Node } from "@/graph/Node";
@@ -132,10 +132,6 @@ export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph)
   await Promise.all(imageLoad);
 };
 
-/**
- * this is called by the plugin to create a new local graph.
- * It will not have any setting. The files is also
- */
 export const getNewLocalGraph = (
   plugin: ForceGraphPlugin,
   config?: {
@@ -209,3 +205,57 @@ export const getNewLocalGraph = (
 
   return graph;
 };
+
+export const implodeGraph = async (app: App, plugin: ForceGraphPlugin, nodePath: string): Graph => {
+  const node = plugin.globalGraph.nodes.find((n) => n.path == nodePath)
+  if (node === undefined) {
+    const file = app.vault.getAbstractFileByPath(nodePath);
+    if (!file || !(file instanceof TFile)) {
+      return Graph.createEmpty();
+    }
+    const sections = await parseNoteSections(file, app.vault);
+
+  }
+}
+
+interface SectionData {
+  links: string[]; // Resolved note names or paths
+  level: number; // Heading level (1 for #, 2 for ##, etc.)
+}
+
+interface NoteGraphData {
+  sections: Record<string, SectionData>; // e.g., {'#animal': {links: ['mustang', 'arab'], level: 1}}
+  // Add other note metadata as needed
+}
+
+async function parseNoteSections(file: TFile, vault: Vault): Promise<NoteGraphData> {
+  const content = await vault.read(file);
+  const lines = content.split('\n');
+  const sections: Record<string, SectionData> = {};
+  let currentSection: string = '';
+  let currentLevel = 0;
+  sections[currentSection] = { links: [], level: 0 };
+
+  for (const line of lines) {
+    const headingMatch = line.match(/^(#{1,1})\s*(.+)/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      currentSection = headingMatch[2].trim(); // e.g., 'animal' or 'wooden horse'
+      currentLevel = level;
+      if (!sections[currentSection]) {
+        sections[currentSection] = { links: [], level };
+      }
+      continue; // Move to next line after setting section
+    }
+
+    // Extract wiki-style links [[Note|Alias]] or [[Note]], ignore embeds ![[ ]]
+    const linkRegex = /$$ \[([^!][^ $$]+)\]\]/g; // Excludes embeds starting with !
+    let match;
+    while ((match = linkRegex.exec(line)) !== null) {
+      const linkText = match[1].split('|')[0].trim(); // Get target note name/path, ignore alias
+      sections[currentSection].links.push(linkText);
+    }
+  }
+
+  return { sections };
+}

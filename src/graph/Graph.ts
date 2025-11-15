@@ -8,6 +8,7 @@ export class Graph {
   public rootPath: string | undefined;
   public readonly nodes: Node[];
   public readonly links: Link[];
+  public readonly subNodes: Node[] = [];
 
   // Indexes to quickly retrieve nodes and links by id
   private readonly nodeIndex: Map<string, number>;

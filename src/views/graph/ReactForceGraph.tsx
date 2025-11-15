@@ -522,6 +522,131 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
     }
   };
 
+  const handleImplode = () => {
+    const node = graphData.nodes.find((n) =>
+      selectedNode.selectedIndex
+        ? n.idx === selectedNode.selectedIndex
+        : n.path === selectedNode.selectedPath
+    ) as Node;
+    if (!node.imploded) {
+      implodeNodeOp(node.path, node.idx);
+      node.imploded = true;
+    }
+  };
+
+  const implodeNodeOp = async (nodePath: string | undefined, nodeIndex: number | undefined) => {
+    const fullConns = false;
+
+    const { nodes, links } = await getExpandNode(nodePath);
+    const expandedNode: Node & NodeData = graphData.nodes.find((n) =>
+      nodeIndex ? n.idx === nodeIndex : n.path === nodePath
+    ) as Node & NodeData;
+    if (!expandedNode) {
+      // when opening file totally ouf of visible graph scope
+      setGraphData({ nodes: assignIdx(nodes), links: links } as Graph);
+      signalSelectedNode(
+        nodes.find((n) => (nodeIndex ? n.idx === nodeIndex : n.path === nodePath)) as Node
+      );
+      return;
+    }
+
+    let newNodes;
+    let newLinks;
+    if (fullConns) {
+      newNodes = nodes.filter((n) => {
+        return !graphData.nodes.find((existingNode) => {
+          const exists = Node.compare(n, existingNode);
+          if (exists) {
+            links.forEach((l) => {
+              if (l.source.path === existingNode.path) {
+                l.source = existingNode as Node & Coords;
+              } else if (l.target.path === existingNode.path) {
+                l.target = existingNode as Node & Coords;
+              }
+            });
+            existingNode.links = [
+              ...existingNode.links,
+              ...n.links.filter(
+                (l) =>
+                  !existingNode.links.find(
+                    (existingLink) =>
+                      l.source.path === existingLink.source.path &&
+                      l.target.path === existingLink.target.path
+                  )
+              ),
+            ];
+          }
+          return exists;
+        });
+      });
+      newLinks = links.filter((l) => {
+        return !graphData.links.find((existingLink) => {
+          return Link.compare(l, existingLink);
+        });
+      });
+    } else {
+      const nodeDuplicates = new Set<string>();
+      newLinks = links.filter((l) => {
+        const exists = graphData.links.find((existingLink) => {
+          return (
+            (existingLink.source.idx === expandedNode.idx ||
+              existingLink.target.idx === expandedNode.idx) &&
+            Link.compare(l, existingLink)
+          );
+        });
+        if (exists) {
+          nodeDuplicates.add(l.source.path);
+          nodeDuplicates.add(l.target.path);
+        }
+        return !exists;
+      });
+      newNodes = nodes.filter((n) => {
+        const isItExpanded = n.path === expandedNode.path;
+        if (isItExpanded) {
+          const existingNode = expandedNode;
+          links.forEach((l) => {
+            if (l.source.path === existingNode.path) {
+              l.source = existingNode as Node & NodeData & Coords;
+            } else if (l.target.path === existingNode.path) {
+              l.target = existingNode as Node & NodeData & Coords;
+            }
+          });
+          existingNode.links = [
+            ...existingNode.links,
+            ...n.links.filter(
+              (l) =>
+                !existingNode.links.find(
+                  (existingLink) =>
+                    l.source.path === existingLink.source.path &&
+                    l.target.path === existingLink.target.path
+                )
+            ),
+          ];
+          return false;
+        }
+        return !nodeDuplicates.has(n.path);
+      });
+    }
+
+    graphData.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+
+    //// debug code
+    // const simplifiedNodes = [...graphData.nodes, ...newNodes].map(node => ({
+    //   path: node.path,
+    //   links: node.links.map((link) => link.source.path + "->" + link.target.path),
+    // }));
+    // console.debug(`Nodes after expand: ${JSON.stringify(simplifiedNodes)}`);
+
+    setGraphData({
+      nodes: [...graphData.nodes, ...assignIdx(newNodes)],
+      links: [...graphData.links, ...newLinks],
+    } as Graph);
+
+    signalSelectedNode(expandedNode);
+    console.debug(`New graph data after expansion: ${graphData.nodes.length + newNodes.length} 
+      nodes and ${graphData.links.length + newLinks.length} links`);
+  };
+
   return (
     <div
       id="pocket-memory"
@@ -571,6 +696,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         onDirectionToggle={handleDirectionToggle}
         isDescending={isDescending}
         onMaxPathLengthChange={setMaxPathLength}
+        onImplode={handleImplode}
       />
     </div>
   );

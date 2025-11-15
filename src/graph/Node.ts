@@ -21,6 +21,7 @@ export class Node {
   public zIndex: number = 10;
   public label?: string | null = null;
   public expanded: boolean = false;
+  public imploded: boolean = false;
 
   constructor(
     name: string,

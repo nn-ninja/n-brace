@@ -5,6 +5,7 @@ import {
   ArrowUp,
   FlipVertical,
   FlipVertical2,
+  ScanText,
   Sun,
   Sunrise,
 } from "lucide-react";
@@ -22,6 +23,7 @@ interface GraphControlsProps {
   onDirectionToggle: () => void;
   isDescending: boolean;
   onMaxPathLengthChange: (maxPathLength: number) => void;
+  onImplode: () => void;
 }
 
 export const GraphControls: React.FC<GraphControlsProps> = ({
@@ -32,6 +34,7 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
   onDirectionToggle,
   isDescending,
   onMaxPathLengthChange,
+  onImplode,
 }) => {
   const [isHidden, setIsHidden] = useState(false);
   const graphSettings = useAtomValue(graphSettingsAtom);
@@ -44,6 +47,12 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
   const handleToggle = () => {
     if (onDirectionToggle) {
       onDirectionToggle();
+    }
+  };
+
+  const handleImplode = () => {
+    if (onImplode) {
+      onImplode();
     }
   };
 
@@ -78,7 +87,12 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
           />
         </div>
       )}
-      <div className="pm-graph-controls">
+      <div className="pm-graph-controls first-row">
+        <button onClick={handleImplode} title="Implode">
+          <ScanText />
+        </button>
+      </div>
+      <div className="pm-graph-controls right-grid">
         <button onClick={handleToggle} title="Flip direction (Ctrl)">
           {isDescending ? <FlipVertical /> : <FlipVertical2 />}
         </button>
