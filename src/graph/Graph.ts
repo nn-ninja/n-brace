@@ -219,7 +219,7 @@ const getMapFromMetaCache = (
         )
         .filter(
           (nodePath) =>
-            nodePath.startsWith(baseFolder) && (nodePath.endsWith(".md") || isAvatarImg(nodePath))
+            (baseFolder === "" || nodePath.startsWith(baseFolder + "/")) && (nodePath.endsWith(".md") || isAvatarImg(nodePath))
         );
     });
 

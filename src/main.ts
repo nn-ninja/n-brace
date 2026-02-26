@@ -1,43 +1,30 @@
+import "@total-typescript/ts-reset";
+import "@total-typescript/ts-reset/dom";
+import { getDefaultStore } from "jotai/index";
+import { RESET } from "jotai/utils";
 import { Plugin, TFile } from "obsidian";
 
+import type { GraphSettings } from "@/atoms/graphAtoms";
 import type { LinkCache } from "@/graph/Link";
-import type { App, HoverParent, HoverPopover, PluginManifest, WorkspaceLeaf } from "obsidian";
+import type { App, PluginManifest, WorkspaceLeaf } from "obsidian";
 
-import {
-  expandNodePathAtom,
-  graphDataAtom,
-  graphNavAtom,
-  graphSettingsAtom,
-  navIndexHistoryAtom,
-  nodeIdxMaxAtom,
-} from "@/atoms/graphAtoms";
+import { expandNodePathAtom, graphDataAtom, graphNavAtom, graphSettingsAtom, navIndexHistoryAtom, nodeIdxMaxAtom } from "@/atoms/graphAtoms";
 import { config } from "@/config";
 import { Graph } from "@/graph/Graph";
 import { PluginSettingManager } from "@/SettingManager";
 import { deepCompare } from "@/util/deepCompare";
 import { eventBus } from "@/util/EventBus";
 import { State } from "@/util/State";
-
-
-import "@total-typescript/ts-reset";
-import "@total-typescript/ts-reset/dom";
 import { ReactForceGraphView, VIEW_TYPE_REACT_FORCE_GRAPH } from "@/views/ReactForceGraphView";
 import { SettingTab } from "@/views/SettingTab";
 
-import { getDefaultStore } from "jotai/index";
 
-import type { GraphSettings } from "@/atoms/graphAtoms";
-
-
-import { RESET } from "jotai/utils";
-
-export default class ForceGraphPlugin extends Plugin implements HoverParent {
+export default class ForceGraphPlugin extends Plugin {
   _resolvedCache: LinkCache;
   public readonly cacheIsReady: State<boolean> = new State(
-    this.app.metadataCache.resolvedLinks !== undefined
+    this.app.metadataCache.resolvedLinks !== undefined,
   );
   readonly store = getDefaultStore();
-  private isCacheReadyOnce = false;
   /**
    *  we keep a graph here because we dont want to create a new graph every time we open a graph view
    */
@@ -45,14 +32,11 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
   public settingManager: PluginSettingManager;
   public baseFolder: string = "";
-  public mousePosition = { x: 0, y: 0 };
-
-  public hoverPopover: HoverPopover | null = null;
 
   constructor(app: App, manifest: PluginManifest) {
     super(app, manifest);
 
-    console.debug('Main construct start.');
+    console.debug("Main construct start.");
 
     // this will be initialized in the on cache changed function
     this._resolvedCache = undefined as unknown as LinkCache;
@@ -69,7 +53,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
    */
   async onload() {
 
-    console.debug('Main onload start.');
+    console.debug("Main onload start.");
     await this.settingManager.loadSettings();
 
     // get the setting from setting manager
@@ -83,12 +67,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
     // init listeners
     this.initListeners();
-
-    this.registerDomEvent(window, "mousemove", (event) => {
-      // set the mouse position
-      this.mousePosition.x = event.clientX;
-      this.mousePosition.y = event.clientY;
-    });
 
     this.addSettingTab(new SettingTab(this.app, this));
 
@@ -106,7 +84,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
             this.store.set(expandNodePathAtom, file.path);
           }
         }
-      })
+      }),
     );
 
     this.registerHoverLinkSource("force-graph", {
@@ -125,16 +103,13 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
 
   onunload(): void {
     super.unload();
-    // unregister the resolved cache listener
-    this.app.metadataCache.off("resolved", this.onGraphCacheReady);
-    this.app.metadataCache.off("resolve", this.onGraphCacheChanged);
   }
 
   private initListeners() {
     // all files are resolved, so the cache is ready:
-    this.app.metadataCache.on("resolved", this.onGraphCacheReady);
+    this.registerEvent(this.app.metadataCache.on("resolved", this.onGraphCacheReady));
     // the cache changed:
-    this.app.metadataCache.on("resolve", this.onGraphCacheChanged);
+    this.registerEvent(this.app.metadataCache.on("resolve", this.onGraphCacheChanged));
 
     // show open local graph button in file menu
     this.registerEvent(
@@ -142,11 +117,11 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
         if (!file) return;
         menu.addItem((item) => {
           item
-            .setTitle("use N-brace")
+            .setTitle("Use N-brace")
             .setIcon(config.icon)
             .onClick(() => this.openGraph());
         });
-      })
+      }),
     );
   }
 
@@ -213,8 +188,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     let leafToUse: WorkspaceLeaf;
 
     if (targetLeaf !== undefined) {
-      leafToUse = targetLeaf;
-
       if (filePath !== targetLeaf.view.file?.path) {
         await targetLeaf.openFile(file);
       }
@@ -297,8 +270,6 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
       this._resolvedCache = structuredClone(this.app.metadataCache.resolvedLinks);
       const pluginSetting = this.settingManager.getSettings().pluginSetting;
       this.resetGlobalGraph(pluginSetting.baseFolder);
-    } else {
-      this.isCacheReadyOnce = true;
     }
   };
 
@@ -314,7 +285,10 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     if (!leaves || !leaves.length) {
       return;
     }
-    const view = leaves[0]!.view as ReactForceGraphView;
+    const view = leaves[0]!.view;
+    if (!(view instanceof ReactForceGraphView)) {
+      return;
+    }
     const graph = await view.getNewGraphData();
 
     let maxIdx = 0;
@@ -344,7 +318,7 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
   private openGraph = async () => {
     if (!this.app.workspace.lastActiveFile.path.startsWith(this.baseFolder)) {
       alert(
-        `Your file isn't under mind map base path ${this.baseFolder}. You can set it up in settings.`
+        `Your file isn't under base path ${this.baseFolder}. You can set it up in settings.`,
       );
       return;
     }
@@ -365,19 +339,11 @@ export default class ForceGraphPlugin extends Plugin implements HoverParent {
     let loadingOverlay: HTMLDivElement | undefined = undefined;
     if (graphView.length > 0) {
       loadingOverlay = graphView[0]?.view.containerEl.createDiv({
-        cls: "loading-overlay",
-        attr: {
-          style:
-            "position: absolute; top: 0; left: 0; width: 100%; height: 100%; " +
-            "background: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; align-items: center;",
-        },
+        cls: "nbrace-loading-overlay",
       });
       loadingOverlay?.createEl("h2", {
-        text: "...loading...",
-        attr: {
-          style:
-            "color: white; font-family: Arial, sans-serif; font-size: 24px; text-align: center;",
-        },
+        cls: "nbrace-loading-text",
+        text: "Loading…",
       });
     }
     return loadingOverlay;

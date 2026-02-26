@@ -1,4 +1,5 @@
 import { getDefaultStore } from "jotai";
+import { RESET } from "jotai/utils";
 import { ItemView } from "obsidian";
 import { StrictMode, createContext } from "react";
 import { createRoot } from "react-dom/client";
@@ -9,13 +10,13 @@ import type { IconName, WorkspaceLeaf } from "obsidian";
 import type { Root } from "react-dom/client";
 
 
-import { dimensionsAtom } from "@/atoms/graphAtoms";
+import { dimensionsAtom, expandNodePathAtom, graphDataAtom, graphNavAtom, navIndexHistoryAtom, nodeIdxMaxAtom } from "@/atoms/graphAtoms";
 import { config } from "@/config";
 import { AppContext } from "@/context";
 import { Graph } from "@/graph/Graph";
 import { tagIndex } from "@/graph/TagIndex";
 import { eventBus } from "@/util/EventBus";
-import { getNewLocalGraph, implodeGraph, loadImagesForGraph, loadTagsForGraph } from "@/views/graph/fileGraphMethods";
+import { getNewLocalGraph, loadImagesForGraph, loadTagsForGraph } from "@/views/graph/fileGraphMethods";
 import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
 
 
@@ -59,9 +60,7 @@ export class ReactForceGraphView extends ItemView {
   }
 
   private renderComponent() {
-    const initGraph = this.getNewGraphData.bind(this);
     const expandNodeFun = this.expandNode.bind(this);
-    const implodeFun = this.implodeNode.bind(this);
 
     if (this.root) {
       this.root.render(
@@ -69,9 +68,7 @@ export class ReactForceGraphView extends ItemView {
           <AppContext.Provider value={this.app}>
             <ViewContext.Provider value={this}>
               <ReactForceGraph
-                getInitialGraph={initGraph}
                 getExpandNode={expandNodeFun}
-                implodeNode={implodeFun}
                 titleFontSize={this.settingManager.getSettings().pluginSetting.titleFontSize}
               />
             </ViewContext.Provider>
@@ -82,8 +79,20 @@ export class ReactForceGraphView extends ItemView {
   }
 
   async onOpen() {
+    // Reset all graph state so reopening always shows a fresh graph
+    this.store.set(graphDataAtom, Graph.createEmpty());
+    this.store.set(graphNavAtom, RESET);
+    this.store.set(navIndexHistoryAtom, RESET);
+    this.store.set(nodeIdxMaxAtom, 0);
+
     this.root = createRoot(this.containerEl.children[1]!);
     this.renderComponent();
+
+    const path = (this.plugin.app.workspace.getActiveFile()
+      ?? this.plugin.app.workspace.lastActiveFile)?.path;
+    if (path) {
+      this.store.set(expandNodePathAtom, path);
+    }
   }
 
   onResize() {
@@ -121,10 +130,6 @@ export class ReactForceGraphView extends ItemView {
     console.debug(`Graph loaded ${nodePath}`);
     return graph;
   }
-
-  private async implodeNode(nodePath: string): Promise<Graph> {
-    return implodeGraph(this.app, this.plugin, nodePath);
-  };
 
   public async getNewGraphData(): Promise<Graph> {
     return this.expandNode(this.plugin.app.workspace.getActiveFile()?.path ?? undefined);

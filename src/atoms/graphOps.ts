@@ -1,26 +1,5 @@
-import type { NavHistory, NavIndexHistory } from "@/atoms/graphAtoms";
+import type { NavIndexHistory } from "@/atoms/graphAtoms";
 import type { Node } from "@/graph/Node";
-
-export const stackOnHistory = (navHistory: NavHistory, soFarSelected: Node, newSelected: Node) => {
-  if (!soFarSelected) {
-    return navHistory;
-  }
-
-  const shortPaths = getShortestPath(soFarSelected, newSelected);
-  if (!shortPaths || shortPaths.length <= 1) {
-    return navHistory;
-  }
-  // console.log(`SHORTPATH: ${shortPaths.map((n) => n.path)}`);
-
-  for (const nodePair of consecutivePairs(shortPaths)) {
-    if (nodePair[0].isChildOf(nodePair[1].path)) {
-      navHistory.backward[nodePair[0].path] = nodePair[1].path;
-      navHistory.forward[nodePair[1].path] = nodePair[0].path;
-    }
-  }
-
-  return navHistory;
-};
 
 export const stackOnIndexHistory = (
   navHistory: NavIndexHistory,
@@ -46,18 +25,6 @@ export const stackOnIndexHistory = (
   return navHistory;
 };
 
-export const getNavBackward = (navHistory: NavHistory, node: Node): string | undefined => {
-  function getFirstParent() {
-    const firstParent = node.links.find((l) => l.target.path === node.path);
-    if (firstParent) {
-      return firstParent.source.path;
-    }
-    return undefined;
-  }
-
-  return navHistory.backward[node.path] ?? getFirstParent();
-};
-
 export const getNavIndexBackward = (
   navHistory: NavIndexHistory,
   node: Node
@@ -71,18 +38,6 @@ export const getNavIndexBackward = (
   }
 
   return navHistory.backward[node.idx] ?? getFirstParent();
-};
-
-export const getNavForward = (navHistory: NavHistory, node: Node): string | undefined => {
-  function getFirstChild() {
-    const firstChild = node.links.find((l) => l.source.path === node.path);
-    if (firstChild) {
-      return firstChild.target.path;
-    }
-    return undefined;
-  }
-
-  return navHistory.forward[node.path] ?? getFirstChild();
 };
 
 export const getNavIndexForward = (navHistory: NavIndexHistory, node: Node): number | undefined => {

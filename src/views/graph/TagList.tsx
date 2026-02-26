@@ -204,32 +204,32 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
   const showNodePanel = selectedNodePath && (ownTags.length > 0 || neighborOnlyTags.length > 0);
 
   return (
-    <div className="pm-tag-list">
-      <div className="pm-tag-left">
-        <div className="pm-tag-color-toggle">
+    <div className="nbrace-tag-list">
+      <div className="nbrace-tag-left">
+        <div className="nbrace-tag-color-toggle">
           <button
-            className="pm-tag-minimize-btn"
+            className="nbrace-tag-minimize-btn"
             onClick={() => setIsMinimized((v) => !v)}
             title={isMinimized ? "Expand tag list" : "Minimize tag list"}
           >
             {isMinimized ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
           </button>
           <button
-            className={`pm-tag-color-btn${tagColorMode === "nodes" ? " active" : ""}`}
+            className={`nbrace-tag-color-btn${tagColorMode === "nodes" ? " active" : ""}`}
             onClick={() => onSetTagColorMode("nodes")}
             title="Color nodes by tag"
-          >Nodes view</button>
+          >Cloudy tags</button>
           <button
-            className={`pm-tag-color-btn${tagColorMode === "edges" ? " active" : ""}`}
+            className={`nbrace-tag-color-btn${tagColorMode === "edges" ? " active" : ""}`}
             onClick={() => onSetTagColorMode("edges")}
             title="Color edges by tag"
-          >Edges view</button>
+          >Edgy tags</button>
         </div>
         {!isMinimized && (
-        <div className="pm-tag-filter-panel">
-        <div className="pm-tag-search-wrap">
+        <div className="nbrace-tag-filter-panel">
+        <div className="nbrace-tag-search-wrap">
           <input
-            className="pm-tag-search"
+            className="nbrace-tag-search"
             type="text"
             placeholder="Filter tags…"
             value={search}
@@ -237,21 +237,21 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
             onKeyDown={(e) => { if (e.key === "Enter") handleSelectAll(); }}
           />
           {search && (
-            <button className="pm-tag-search-clear" onClick={() => onSearchChange("")} title="Clear">×</button>
+            <button className="nbrace-tag-search-clear" onClick={() => onSearchChange("")} title="Clear">×</button>
           )}
         </div>
-        <label className="pm-tag-item pm-tag-select-all">
+        <label className="nbrace-tag-item nbrace-tag-select-all">
           <input
             ref={selectAllRef}
             type="checkbox"
             checked={allChecked}
             onChange={handleSelectAll}
           />
-          <span className="pm-tag-select-all-label">All</span>
+          <span className="nbrace-tag-select-all-label">All</span>
         </label>
         <div
           ref={itemsRef}
-          className="pm-tag-items"
+          className="nbrace-tag-items"
           style={itemsMaxHeight !== undefined ? { maxHeight: itemsMaxHeight } : undefined}
         >
           {filteredTags.map(([tag, count], i) => {
@@ -259,7 +259,7 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
             const isChecked = !uncheckedTags.has(tag);
             const isDisabled = isOnSelected && isChecked && checkedCurrentTagCount <= 1;
             return (
-              <label key={tag} ref={i === 0 ? firstItemRef : undefined} className="pm-tag-item">
+              <label key={tag} ref={i === 0 ? firstItemRef : undefined} className="nbrace-tag-item">
                 <input
                   type="checkbox"
                   checked={isChecked}
@@ -267,12 +267,12 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
                   onChange={() => onToggleTag(tag)}
                 />
                 <span
-                  className="pm-tag-pill"
+                  className="nbrace-tag-pill"
                   style={{ backgroundColor: tagColorMap.get(tag) ?? "#9e9e9e" }}
                 >
                   {tag === UNTAGGED ? "UNSPECIFIED" : tag}
                 </span>
-                <span className="pm-tag-count">{count}</span>
+                <span className="nbrace-tag-count">{count}</span>
               </label>
             );
           })}
@@ -282,18 +282,18 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
       </div>
 
       {!isMinimized && showNodePanel && (
-        <div className="pm-tag-node-panel">
-          <div className="pm-tag-node-panel-header">Node tags</div>
-          <div className="pm-tag-node-items" style={itemsMaxHeight !== undefined ? { maxHeight: itemsMaxHeight } : undefined}>
+        <div className="nbrace-tag-node-panel">
+          <div className="nbrace-tag-node-panel-header">Node tags</div>
+          <div className="nbrace-tag-node-items" style={itemsMaxHeight !== undefined ? { maxHeight: itemsMaxHeight } : undefined}>
             {ownTags.map((tag) => (
-              <label key={tag} className="pm-tag-item">
+              <label key={tag} className="nbrace-tag-item">
                 <input
                   type="checkbox"
                   checked={pendingToggled.has(tag) ? pendingToggled.get(tag)! : selectedNodeTags.has(tag)}
                   onChange={() => handleFileTagToggle(tag)}
                 />
                 <span
-                  className="pm-tag-pill"
+                  className="nbrace-tag-pill"
                   style={{ backgroundColor: tagColorMap.get(tag) ?? "#9e9e9e" }}
                 >
                   {tag}
@@ -301,19 +301,19 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
               </label>
             ))}
             {neighborOnlyTags.map(([tag, count]) => (
-              <label key={tag} className="pm-tag-item">
+              <label key={tag} className="nbrace-tag-item">
                 <input
                   type="checkbox"
                   checked={pendingToggled.has(tag) ? pendingToggled.get(tag)! : selectedNodeTags.has(tag)}
                   onChange={() => handleFileTagToggle(tag)}
                 />
                 <span
-                  className="pm-tag-pill pm-tag-pill--neighbor"
+                  className="nbrace-tag-pill nbrace-tag-pill--neighbor"
                   style={{ backgroundColor: tagColorMap.get(tag) ?? "#9e9e9e" }}
                 >
                   {tag}
                 </span>
-                <span className="pm-tag-count">{count}</span>
+                <span className="nbrace-tag-count">{count}</span>
               </label>
             ))}
           </div>

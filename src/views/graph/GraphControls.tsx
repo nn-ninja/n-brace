@@ -1,3 +1,4 @@
+import { useAtomValue } from "jotai/react";
 import {
   ArrowDown,
   ArrowLeft,
@@ -9,8 +10,8 @@ import {
   Sunrise,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+
 import "@/views/graph/GraphControls.css";
-import { useAtomValue } from "jotai/react";
 
 import { graphSettingsAtom } from "@/atoms/graphAtoms";
 
@@ -22,7 +23,6 @@ interface GraphControlsProps {
   onDirectionToggle: () => void;
   isDescending: boolean;
   onMaxPathLengthChange: (maxPathLength: number) => void;
-  onImplode: () => void;
 }
 
 export const GraphControls: React.FC<GraphControlsProps> = ({
@@ -33,7 +33,6 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
   onDirectionToggle,
   isDescending,
   onMaxPathLengthChange,
-  onImplode,
 }) => {
   const [isHidden, setIsHidden] = useState(false);
   const graphSettings = useAtomValue(graphSettingsAtom);
@@ -63,7 +62,7 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
   }, [maxPathLength, onMaxPathLengthChange]);
 
   return (
-    <div className="pm-graph-controls right-grid">
+    <div className="nbrace-graph-controls nbrace-right-grid">
       <button onClick={handleToggle} title="Flip direction (Ctrl)">
         {isDescending ? <FlipVertical /> : <FlipVertical2 />}
       </button>
@@ -84,7 +83,7 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
           <button onClick={onPanRight} title="Clockwise">
             <ArrowRight />
           </button>
-          <div className="slider-control">
+          <div className="nbrace-slider-control">
             <label htmlFor="max-path-length" title="Visible graph span size">
               G-span {maxPathLength}
             </label>

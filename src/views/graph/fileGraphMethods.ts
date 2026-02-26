@@ -1,13 +1,12 @@
 import { TFile } from "obsidian";
 
-
+import type { Link } from "@/graph/Link";
+import type { Node } from "@/graph/Node";
 import type ForceGraphPlugin from "@/main";
 import type { LocalGraphSettings } from "@/SettingsSchemas";
-import type { App, Vault } from "obsidian";
+import type { App } from "obsidian";
 
 import { Graph } from "@/graph/Graph";
-import { Link } from "@/graph/Link";
-import { Node } from "@/graph/Node";
 import { type TagIndex } from "@/graph/TagIndex";
 
 /**
@@ -91,7 +90,6 @@ const traverseNode = (
 export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph) => {
   console.debug("Loading images...");
   const imageLoad = graph.nodes.map(async (node) => {
-    // console.info(`try image ${node.path}... ${node.imagePath}`);
     if (node.imagePath && !node.image) {
       console.debug(`Loading ${node.imagePath} image for ${node.path}`);
       const file = plugin.app.vault.getAbstractFileByPath(node.imagePath);
@@ -197,47 +195,6 @@ export const getNewLocalGraph = (
   return graph;
 };
 
-export const implodeGraph = async (app: App, plugin: ForceGraphPlugin, nodePath: string): Promise<Graph> => {
-  const node = plugin.globalGraph.getNodeById(nodePath)
-  if (node === null) {
-    return Graph.createEmpty();
-  }
-  if (!node.imploded) {
-    const file = app.vault.getAbstractFileByPath(nodePath);
-    if (!file || !(file instanceof TFile)) {
-      return Graph.createEmpty();
-    }
-    const sections = await parseNoteSections(file, app.vault);
-    node.paras = sections.paras;
-  }
-
-  const paraLinks: Link[] = [];
-  const paraNodes = Object.entries(node.paras).filter(([key]) => { return key !== ''})
-    .map(([paraTitle, sections]) => {
-      const paraName = paraTitle.contains("#") ? paraTitle.substring(0, paraTitle.indexOf('#')) : paraTitle;
-      const paraPath = paraTitle.contains("#") ? paraTitle : `${nodePath}#${paraTitle}`;
-      // 3 stands for .md
-      // const paraPath = `${node.path.substring(0, node.path.length - 3)}#${paraName}`;
-      const paraNode = new Node(paraName, paraPath, 0, sections.links.length);
-      paraNode.type = "para";
-      paraNode.label = "para";
-      paraNode.expanded = true;
-
-      paraNode.links = [];
-      for (const target of sections.links) {
-        const targetNode = new Node(target, target, 0, 0);
-        paraNode.links.push(new Link(paraNode, targetNode));
-      }
-      paraLinks.push(...paraNode.links);
-      
-      return paraNode;
-    });
-
-  return {
-    nodes: paraNodes, links: paraLinks
-  } as unknown as Graph;
-}
-
 export const loadTagsForGraph = (app: App, graph: Graph, tagIdx: TagIndex) => {
   for (const node of graph.nodes) {
     if (tagIdx.has(node.path)) {
@@ -282,44 +239,3 @@ export const loadTagsForGraph = (app: App, graph: Graph, tagIdx: TagIndex) => {
   }
 };
 
-export interface SectionData {
-  links: string[]; // Resolved note names or paths
-  level: number; // Heading level (1 for #, 2 for ##, etc.)
-}
-
-interface NoteGraphData {
-  paras: Record<string, SectionData>; // e.g., {'#animal': {links: ['mustang', 'arab'], level: 1}}
-  // Add other note metadata as needed
-}
-
-async function parseNoteSections(file: TFile, vault: Vault): Promise<NoteGraphData> {
-  const content = await vault.read(file);
-  const lines = content.split('\n');
-  const sections: Record<string, SectionData> = {};
-  let currentSection: string = '';
-  let currentLevel = 0;
-  sections[currentSection] = { links: [], level: 0 };
-
-  for (const line of lines) {
-    const headingMatch = line.match(/^(#{1,1})\s*(.+)/);
-    if (headingMatch) {
-      const level = headingMatch[1].length;
-      currentSection = headingMatch[2].trim(); // e.g., 'animal' or 'wooden horse'
-      currentLevel = level;
-      if (!sections[currentSection]) {
-        sections[currentSection] = { links: [], level };
-      }
-      continue; // Move to next line after setting section
-    }
-
-    // Extract wiki-style links [[Note|Alias]] or [[Note]], ignore embeds ![[ ]]
-    const linkRegex = /\[\[([^!].+)]]/g; // Excludes embeds starting with !
-    let match;
-    while ((match = linkRegex.exec(line)) !== null) {
-      const linkText = match[1].replace('|', '#').trim();
-      sections[currentSection].links.push(linkText);
-    }
-  }
-
-  return { paras: sections };
-}

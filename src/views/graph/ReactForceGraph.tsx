@@ -23,16 +23,12 @@ import { TagList, UNTAGGED } from "@/views/graph/TagList";
 
 interface GraphComponentProps {
   data?: Graph;
-  getInitialGraph: () => Promise<Graph>;
   getExpandNode: (nodePath: string | undefined) => Promise<Graph>;
-  implodeNode: (nodePath: string | undefined) => Promise<Graph>;
   titleFontSize: number;
 }
 
 export const ReactForceGraph: React.FC<GraphComponentProps> = ({
-  getInitialGraph,
   getExpandNode,
-  implodeNode,
   titleFontSize,
 }) => {
   const fgRef = useRef<ForceGraphMethods | undefined>(undefined);
@@ -52,14 +48,11 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
     setGraphData,
     selectedNode,
     navIndexHistory,
-    assignIdx,
     expandNode,
     signalSelectedNode,
-    handleImplode,
     hoverNode,
   } = useGraphOperations({
     getExpandNode,
-    implodeNode,
     zoomToFitNodes,
   });
 
@@ -99,13 +92,6 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
     setNodeTagVersion((v) => v + 1);
     setGraphData({ nodes: graphData.nodes, links: graphData.links } as Graph);
   }, [graphData, setGraphData]);
-
-  // After tag mutations are committed, force a canvas redraw (simulation may be idle)
-  useEffect(() => {
-    if (nodeTagVersion > 0) {
-      (fgRef.current as any)?.refresh?.();
-    }
-  }, [nodeTagVersion]);
 
   const handleToggleTag = useCallback((tag: string) => {
     setUncheckedTags((prev) => {
@@ -191,7 +177,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
 
     const nodes = tagFilteredData.nodes as (Node & Coords & NodeData)[];
     for (const node of nodes) {
-      if (node.label === "para" || node.x === undefined || node.y === undefined) continue;
+      if (node.x === undefined || node.y === undefined) continue;
       const nodeTags = (node.tags ?? []).filter((t) => !uncheckedTags.has(t));
       if (nodeTags.length === 0) continue;
 
@@ -242,7 +228,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
 
     const allNodes = tagFilteredData.nodes as (Node & Coords & NodeData)[];
     const visibleNodes = allNodes.filter(
-      (n) => n.label !== "para" && n.x !== undefined && n.y !== undefined
+      (n) => n.x !== undefined && n.y !== undefined
     );
 
     const getHalfDiag = (n: Node & Coords & NodeData) =>
@@ -306,17 +292,8 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
   // D3 force configuration
   useGraphForces(fgRef, dimensions, graphData, setGraphData);
 
-  // Initialize graph on mount
+  // Focus container for keyboard navigation on mount
   useEffect(() => {
-    const initGraph = async () => {
-      const graph = await getInitialGraph();
-      console.debug(`Init Graph data starting with ${graph.rootPath}`);
-      assignIdx(graph.nodes);
-      setGraphData(graph);
-    };
-    initGraph();
-
-    // Focus container for keyboard navigation
     containerRef.current?.focus();
   }, []);
 
@@ -385,7 +362,6 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         onDirectionToggle={navigation.handleDirectionToggle}
         isDescending={navigation.isDescending}
         onMaxPathLengthChange={setMaxPathLength}
-        onImplode={handleImplode}
       />
     </div>
   );

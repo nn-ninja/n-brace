@@ -1,11 +1,24 @@
 import { rgb } from "d3";
-import { PluginSettingTab, Setting } from "obsidian";
+import { AbstractInputSuggest, PluginSettingTab, Setting, normalizePath } from "obsidian";
 
 import type { GraphSettings } from "@/atoms/graphAtoms";
 import type ForceGraphPlugin from "@/main";
 import type { Setting as SettingPlugin } from "@/SettingsSchemas";
 import type { State } from "@/util/State";
-import type { App } from "obsidian";
+import type { App , TFolder} from "obsidian";
+
+class FolderSuggest extends AbstractInputSuggest<TFolder> {
+  getSuggestions(query: string): TFolder[] {
+    const lower = query.toLowerCase();
+    return this.app.vault.getAllFolders(true).filter((f) =>
+      f.path.toLowerCase().includes(lower)
+    );
+  }
+
+  renderSuggestion(folder: TFolder, el: HTMLElement): void {
+    el.setText(normalizePath(folder.path));
+  }
+}
 
 import { DEFAULT_SETTING } from "@/SettingManager";
 import { eventBus } from "@/util/EventBus";
@@ -41,34 +54,36 @@ export class SettingTab extends PluginSettingTab {
     containerEl.addClasses(["n-brace-setting-tab"]);
 
     new Setting(containerEl)
-      .setName("Base Folder")
+      .setName("Base folder")
       .setDesc(
-        "The base directory where your notes for exploration live — navigation builds from here."
+        "Only notes inside this folder will appear in the graph."
       )
       .addText((text) => {
         text
           .setPlaceholder(`${DEFAULT_BASE_FOLDER}`)
           .setValue(String(pluginSetting.baseFolder ?? DEFAULT_BASE_FOLDER))
           .onChange(async (value) => {
-            // check if value is a number
             if (!value.startsWith("/")) {
-              // set the error to the input
               text.inputEl.setCustomValidity("Please enter absolute path (beginning with /).");
               this.plugin.settingManager.updateSettings((setting) => {
                 setting.value.pluginSetting.baseFolder = DEFAULT_BASE_FOLDER;
               });
             } else {
-              // remove the error
               text.inputEl.setCustomValidity("");
+              const clean = ("/" + normalizePath(value)).replace("//", "/");
               this.plugin.settingManager.updateSettings((setting) => {
-                setting.value.pluginSetting.baseFolder = value;
+                setting.value.pluginSetting.baseFolder = clean;
               });
-
-              this.plugin.resetGlobalGraph(value);
+              this.plugin.resetGlobalGraph(clean);
             }
             text.inputEl.reportValidity();
           });
         text.inputEl.setAttribute("type", "string");
+        const folderSuggest = new FolderSuggest(this.app, text.inputEl);
+        folderSuggest.onSelect((folder) => {
+          folderSuggest.setValue(("/" + normalizePath(folder.path)).replace("//", "/"));
+          text.inputEl.dispatchEvent(new Event("input"));
+        });
       });
 
     new Setting(containerEl)
@@ -132,13 +147,13 @@ export class SettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Link Color")
+      .setName("Link color")
       .setDesc("Choose predefined colors or a custom color for graph links")
       .addDropdown((dropdown) =>
         dropdown
           .addOption("light", "Light")
           .addOption("dark", "Dark")
-          .addOption("custom", "Custom Color In & Out & Other")
+          .addOption("custom", "Custom color in & out & other")
           .setValue(pluginSetting.linkColorTheme)
           .onChange(async (value: "custom" | "light" | "dark") => {
             if (value === "dark") {

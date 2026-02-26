@@ -1,4 +1,4 @@
-import { type Node, type ElemType } from "@/graph/Node";
+import { type Node } from "@/graph/Node";
 
 export type LinkCache = Record<string, Record<string, number>>;
 
@@ -6,7 +6,6 @@ export class Link {
   public source: Node & Coords;
   public target: Node & Coords;
   public color: string = "green";
-  public type: ElemType = "note";
   public label?: string;
   public distance: number = 0;
 
@@ -17,23 +16,6 @@ export class Link {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     this.target = target;
-  }
-
-  /**
-   * Creates a link index for an array of links
-   * @param links
-   * @returns
-   */
-  static createLinkIndex(links: Link[]): Map<string, Map<string, number>> {
-    const linkIndex = new Map<string, Map<string, number>>();
-    links.forEach((link, index) => {
-      if (!linkIndex.has(link.source.id)) {
-        linkIndex.set(link.source.id, new Map<string, number>());
-      }
-      linkIndex.get(link.source.id)?.set(link.target.id, index);
-    });
-
-    return linkIndex;
   }
 
   public static compare = (a: Link, b: Link) => {

@@ -1,9 +1,6 @@
-import type { SectionData } from "@/views/graph/fileGraphMethods";
 import type { TAbstractFile } from "obsidian";
 
 import { type Link } from "@/graph/Link";
-
-export type ElemType = "note" | "para";
 
 export class Node {
   public readonly id: string;
@@ -14,7 +11,6 @@ export class Node {
 
   public idx: number;
   public readonly neighbors: Node[];
-  // public readonly parents: Node[];
   public inlinkCount: number;
   public outlinkCount: number;
   public links: Link[];
@@ -22,14 +18,10 @@ export class Node {
   public imagePath?: string;
   public image?: ImageBitmap;
   public zIndex: number = 10;
-  public type: ElemType = "note";
   public label?: string | null = null;
   public selected: boolean = false;
   public expanded: boolean = false;
-  public imploded: boolean = false;
   public tags: string[] = [];
-
-  public paras: Record<string, SectionData> = {};
 
   constructor(
     name: string,
@@ -82,10 +74,6 @@ export class Node {
     }
   }
 
-  // addParent(parent: Node) {
-  //   if (!this.parents.includes(parent)) this.parents.push(parent);
-  // }
-
   // Pushes a link to the node's links array if it doesn't already exist
   addLink(link: Link, isGlobal: boolean = false) {
     if (!this.links.some((l) => l.source === link.source && l.target === link.target)) {
@@ -107,15 +95,6 @@ export class Node {
     else return this.neighbors.some((neighbor) => neighbor.id === node);
   }
 
-  /**
-   * Child links has target pointing to the child.
-   * @param nodePath
-   */
-  public isParentOf(nodePath: string) {
-    // return this.parents.some((parent) => parent.path === nodePath);
-    return this.path !== nodePath && this.links.some((link) => link.target.path === nodePath);
-  }
-
   public isChildOf(nodePath: string) {
     return this.path !== nodePath && this.links.some((link) => link.source.path === nodePath);
   }
@@ -123,12 +102,4 @@ export class Node {
   public static compare = (a: Node, b: Node) => {
     return a.path === b.path;
   };
-
-  public static createNodeIndex(nodes: Node[]) {
-    const nodeIndex = new Map<string, number>();
-    nodes.forEach((node, index) => {
-      nodeIndex.set(node.id, index);
-    });
-    return nodeIndex;
-  }
 }

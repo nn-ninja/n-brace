@@ -21,11 +21,6 @@ export type GraphSettings = {
   linkColorOther: string;
 };
 
-export type NavHistory = {
-  backward: Record<string, string>;
-  forward: Record<string, string>;
-};
-
 export type NavIndexHistory = {
   backward: Record<number, number>;
   forward: Record<number, number>;
@@ -45,8 +40,6 @@ export const graphSettingsAtom = atom<GraphSettings>({
   linkColorOther: DEFAULT_SETTING.pluginSetting.linkColorOther,
 });
 
-export const navHistoryAtom = atom<NavHistory>({ backward: {}, forward: {} });
-
 export const navIndexHistoryAtom = atomWithReset<NavIndexHistory>({ backward: {}, forward: {} });
 
 /** Temporal state turning into selected node. */
@@ -65,12 +58,3 @@ export const graphDataAtom = atom(
     links: set(linksAtom, newGraph.links),
   })
 );
-
-// const graphData = atom(async (get) => {
-//   const id = get(postId)
-//   const response = await fetch(
-//     `https://hacker-news.firebaseio.com/v0/item/${id}.json`
-//   )
-//   const data: PostData = await response.json()
-//   return data
-// })

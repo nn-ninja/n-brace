@@ -1,6 +1,6 @@
-# Obsidian N-brace Plugin
+# N-brace Plugin
 
-[Obsidian N-brace Plugin](https://nn-ninja.github.io/n-brace/) Homepage
+[N-brace Plugin](https://nn-ninja.github.io/n-brace/) Homepage
 
 A slightly different Graph navigation and visualization for Obsidian.
 
@@ -61,16 +61,18 @@ I have in my plans to optimize this process.
 
 It is designed to rather operate on a local graph, not on huge and unclear global graph. 
 
+### Tag List
+
+The tag panel appears on the left side of the graph whenever any visible node carries a tag. Tags are sorted by frequency and color-coded consistently across the view.
+
+**Filtering:** Uncheck tags to hide nodes that don't share at least one checked tag. The graph contracts to show only nodes reachable from the selected note through the filtered set. A search box lets you filter the tag list itself by name (comma-separated terms supported).
+
+**Color modes:** Two coloring modes are available via the toggle buttons:
+- **Cloudy tags** — each node is surrounded by a translucent color cloud showing its tags. Double-clicking a cloud segment isolates that tag.
+- **Edgy tags** — links are colored by tags shared between their source and target nodes.
+
+**Node tags panel:** When a note is selected, a secondary panel shows the tags of that note alongside tags present on its direct neighbors (dimmed). You can add or remove tags from the selected note directly by clicking the checkboxes — changes are written back to the file immediately.
+
 ### Save Setting
 
 You can update and save your general settings.
-
-## Acknowledgement
-
-I want to especially thank to the creators of this repos:
-1. Force Graph repo: <https://github.com/vasturiano/force-graph>
-2. The original 3D graph plugin: <https://github.com/AlexW00/obsidian-3d-graph>
-3. The improved version: <https://github.com/HananoshikaYomaru/obsidian-3d-graph>
-
-Their work was very helpful in getting my project off the ground.
-

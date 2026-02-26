@@ -3,7 +3,6 @@ import { useEffect } from "react";
 
 import type { GraphData } from "./useGraphFiltering";
 import type { Graph } from "@/graph/Graph";
-import type { Link } from "@/graph/Link";
 import type { MutableRefObject } from "react";
 import type { ForceGraphMethods } from "react-force-graph-2d";
 
@@ -24,15 +23,6 @@ export function useGraphForces(
     if (!fg) return;
 
     console.debug("Setting Graph forces");
-
-    fg.d3Force(
-      "link",
-      d3.forceLink().distance((link: Link) => {
-        if (link.label === "para") return 15;
-        if (link.source.imploded || link.target.imploded) return 50;
-        return 30;
-      })
-    );
 
     fg.d3Force("collide", d3.forceCollide(12));
     fg.d3Force("center", d3.forceCenter(dimensions.width / 2, dimensions.height / 2));

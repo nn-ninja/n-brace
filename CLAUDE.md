@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-N-brace (also called Brainavigator) is an Obsidian plugin that provides interactive 2D graph navigation and visualization using react-force-graph-2d. It displays local graphs centered on the current note, allowing keyboard-based navigation through note connections.
+N-brace is an Obsidian plugin that provides interactive 2D graph navigation and visualization using react-force-graph-2d. It displays local graphs centered on the current note, allowing keyboard-based navigation through note connections.
 
 ## Build Commands
 
