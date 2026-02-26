@@ -1,7 +1,7 @@
 {
 	"id": "n-brace",
 	"name": "N-brace",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"minAppVersion": "1.9.14",
 	"description": "Altered local graph's visual layout. Quick graph navigation.",
 	"author": "Rafael Hazan",
