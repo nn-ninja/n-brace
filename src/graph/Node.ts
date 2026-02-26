@@ -27,6 +27,7 @@ export class Node {
   public selected: boolean = false;
   public expanded: boolean = false;
   public imploded: boolean = false;
+  public tags: string[] = [];
 
   public paras: Record<string, SectionData> = {};
 

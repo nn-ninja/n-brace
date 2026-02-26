@@ -1,56 +1,46 @@
+import { DirectedGraph } from "graphology";
+
 import type { LinkCache } from "@/graph/Link";
 import type { App } from "obsidian";
+
 
 import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
 
+type NodeAttrs = { node: Node };
+type EdgeAttrs = { link: Link };
+
 export class Graph {
   public rootPath: string | undefined = undefined;
-  public readonly nodes: Node[];
-  public readonly links: Link[];
+  private readonly _graph: DirectedGraph<NodeAttrs, EdgeAttrs>;
 
-  // Indexes to quickly retrieve nodes and links by id
-  private readonly nodeIndex: Map<string, number>;
-  private readonly linkIndex: Map<string, Map<string, number>>;
-
-  constructor(
-    rootPath: string | undefined,
-    nodes: Node[],
-    links: Link[],
-    nodeIndex: Map<string, number>,
-    linkIndex: Map<string, Map<string, number>>
-  ) {
+  constructor(rootPath: string | undefined, graph: DirectedGraph<NodeAttrs, EdgeAttrs>) {
     this.rootPath = rootPath;
-    this.nodes = nodes;
-    this.links = links;
-    this.nodeIndex = nodeIndex || new Map<string, number>();
-    this.linkIndex = linkIndex || new Map<string, Map<string, number>>();
+    this._graph = graph;
   }
 
-  public resort() {
-    this.nodes.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+  public get nodes(): Node[] {
+    return this._graph.mapNodes((_, attrs) => attrs.node);
+  }
+
+  public get links(): Link[] {
+    return this._graph.mapEdges((_, attrs) => attrs.link);
   }
 
   public getNodeById(id: string): Node | null {
-    const index = this.nodeIndex.get(id);
-    if (typeof index === "number") {
-      return this.nodes[index] ?? null;
+    if (this._graph.hasNode(id)) {
+      return this._graph.getNodeAttribute(id, "node");
     }
     return null;
   }
 
   public getLinksFromNode(sourceNodeId: string): Link[] {
-    const linkIndexes = this.linkIndex.get(sourceNodeId);
-    if (linkIndexes) {
-      return Array.from(linkIndexes.values())
-        .map((index) => this.links[index])
-        .filter(Boolean);
-    }
-    return [];
+    if (!this._graph.hasNode(sourceNodeId)) return [];
+    return this._graph.mapOutEdges(sourceNodeId, (_, attrs) => attrs.link);
   }
 
   public static createEmpty = (): Graph => {
-    return new Graph(undefined, [], [], new Map(), new Map());
+    return new Graph(undefined, new DirectedGraph<NodeAttrs, EdgeAttrs>());
   };
 
   // Creates a graph using the Obsidian API
@@ -97,7 +87,14 @@ export class Graph {
     const nodeMap = new Map<string, Node>();
     newNodes.forEach((node) => nodeMap.set(node.id, node));
 
-    const links: Link[] = [];
+    const dg = new DirectedGraph<NodeAttrs, EdgeAttrs>();
+
+    // Add all nodes to the graphology graph
+    for (const node of newNodes) {
+      if (!dg.hasNode(node.id)) {
+        dg.addNode(node.id, { node });
+      }
+    }
 
     Object.entries(map).forEach(([sourceId, targetIds]) => {
       const sourceNode = nodeMap.get(sourceId);
@@ -111,13 +108,22 @@ export class Graph {
           if (!targetNode) {
             targetNode = new Node(targetId, targetId, 0, 0);
             newNodes.push(targetNode);
+            nodeMap.set(targetNode.id, targetNode);
+            if (!dg.hasNode(targetNode.id)) {
+              dg.addNode(targetNode.id, { node: targetNode });
+            }
           }
 
           // Create new instances of links
           const link = new Link(sourceNode, targetNode);
-          links.push(link);
 
-          // As we are creating new nodes, we need to make sure they are properly linked
+          // Add edge to graphology graph
+          const edgeKey = `${sourceId}::${targetId}`;
+          if (!dg.hasEdge(edgeKey)) {
+            dg.addEdgeWithKey(edgeKey, sourceId, targetId, { link });
+          }
+
+          // Populate Node.links and Node.neighbors for traversal compatibility
           sourceNode.addNeighbor(targetNode);
           sourceNode.addLink(link, isGlobal);
           targetNode.addLink(link, isGlobal);
@@ -125,13 +131,7 @@ export class Graph {
       });
     });
 
-    return new Graph(
-      undefined,
-      newNodes,
-      links,
-      Node.createNodeIndex(newNodes),
-      Link.createLinkIndex(links)
-    );
+    return new Graph(undefined, dg);
   }
 
   /**
@@ -165,14 +165,6 @@ export class Graph {
     const linkMap = Link.createLinkMap(filteredLinks);
 
     return Graph.createFromLinkMap(app, linkMap, filteredNodes);
-  };
-
-  public filterNodes(pred: (node: Node) => boolean): Node[] {
-    return this.nodes.filter(pred);
-  }
-
-  public applyNodes = (fun: (node: Node) => void): void => {
-    this.nodes.forEach(fun);
   };
 
   private isCyclicUtil = (nodeId: string, visited: Set<string>, recStack: Set<string>): boolean => {

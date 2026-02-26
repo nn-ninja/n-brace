@@ -5,15 +5,17 @@ import { createRoot } from "react-dom/client";
 
 import type ForceGraphPlugin from "@/main";
 import type { PluginSettingManager } from "@/SettingManager";
-import type { App, IconName, WorkspaceLeaf } from "obsidian";
+import type { IconName, WorkspaceLeaf } from "obsidian";
 import type { Root } from "react-dom/client";
 
 
 import { dimensionsAtom } from "@/atoms/graphAtoms";
 import { config } from "@/config";
+import { AppContext } from "@/context";
 import { Graph } from "@/graph/Graph";
+import { tagIndex } from "@/graph/TagIndex";
 import { eventBus } from "@/util/EventBus";
-import { getNewLocalGraph, implodeGraph, loadImagesForGraph } from "@/views/graph/fileGraphMethods";
+import { getNewLocalGraph, implodeGraph, loadImagesForGraph, loadTagsForGraph } from "@/views/graph/fileGraphMethods";
 import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
 
 
@@ -23,7 +25,7 @@ import { ReactForceGraph } from "@/views/graph/ReactForceGraph";
 
 export const VIEW_TYPE_REACT_FORCE_GRAPH = "react-force-graph-view";
 
-export const AppContext = createContext<App | undefined>(undefined);
+export { AppContext };
 export const ViewContext = createContext<ReactForceGraphView | undefined>(undefined);
 
 export class ReactForceGraphView extends ItemView {
@@ -109,6 +111,7 @@ export class ReactForceGraphView extends ItemView {
       },
     });
     await loadImagesForGraph(this.plugin, graph);
+    loadTagsForGraph(this.app, graph, tagIndex);
     graph.rootPath = nodePath;
     graph.nodes.forEach((n) => {
       if (n.path === nodePath) {

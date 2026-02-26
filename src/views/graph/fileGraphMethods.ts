@@ -8,6 +8,7 @@ import type { App, Vault } from "obsidian";
 import { Graph } from "@/graph/Graph";
 import { Link } from "@/graph/Link";
 import { Node } from "@/graph/Node";
+import { type TagIndex } from "@/graph/TagIndex";
 
 /**
  *
@@ -124,7 +125,8 @@ export const loadImagesForGraph = async (plugin: ForceGraphPlugin, graph: Graph)
         const circularBlob = await offscreenCanvas.convertToBlob();
         node.image = await createImageBitmap(circularBlob);
 
-        plugin.globalGraph.nodes.find((n) => n.path == node.path)!.image = node.image;
+        const globalNode = plugin.globalGraph.getNodeById(node.path);
+        if (globalNode) globalNode.image = node.image;
       }
     } else if (node.imagePath) {
       console.debug(`Image ${node.imagePath} for ${node.path} already loaded!`);
@@ -196,8 +198,8 @@ export const getNewLocalGraph = (
 };
 
 export const implodeGraph = async (app: App, plugin: ForceGraphPlugin, nodePath: string): Promise<Graph> => {
-  const node = plugin.globalGraph.nodes.find((n) => n.path == nodePath)
-  if (node === undefined) {
+  const node = plugin.globalGraph.getNodeById(nodePath)
+  if (node === null) {
     return Graph.createEmpty();
   }
   if (!node.imploded) {
@@ -235,6 +237,50 @@ export const implodeGraph = async (app: App, plugin: ForceGraphPlugin, nodePath:
     nodes: paraNodes, links: paraLinks
   } as unknown as Graph;
 }
+
+export const loadTagsForGraph = (app: App, graph: Graph, tagIdx: TagIndex) => {
+  for (const node of graph.nodes) {
+    if (tagIdx.has(node.path)) {
+      node.tags = [...tagIdx.getTagsForNode(node.path)];
+      continue;
+    }
+
+    const file = app.vault.getAbstractFileByPath(node.path);
+    if (!file || !(file instanceof TFile)) continue;
+
+    const cache = app.metadataCache.getFileCache(file);
+    if (!cache) continue;
+
+    const tags: string[] = [];
+
+    // Only inline tags on the first content line (after frontmatter)
+    if (cache.tags) {
+      const startLine = cache.frontmatterPosition ? cache.frontmatterPosition.end.line + 1 : 0;
+      for (const tagCache of cache.tags) {
+        if (tagCache.position.start.line === startLine) {
+          tags.push(tagCache.tag);
+        }
+      }
+    }
+
+    // Frontmatter tags
+    if (cache.frontmatter) {
+      const fmTags = cache.frontmatter.tags ?? cache.frontmatter.tag;
+      if (Array.isArray(fmTags)) {
+        for (const t of fmTags) {
+          const normalized = String(t).startsWith("#") ? String(t) : `#${t}`;
+          tags.push(normalized);
+        }
+      } else if (typeof fmTags === "string") {
+        const normalized = fmTags.startsWith("#") ? fmTags : `#${fmTags}`;
+        tags.push(normalized);
+      }
+    }
+
+    tagIdx.addTags(node.path, tags);
+    node.tags = tags;
+  }
+};
 
 export interface SectionData {
   links: string[]; // Resolved note names or paths

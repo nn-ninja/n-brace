@@ -3,14 +3,16 @@ import type { Link } from "@/graph/Link";
 import type { Node } from "@/graph/Node";
 
 export class Drawing {
-  private static readonly SELECTED_COLOR = "21, 0, 158";
+  private static readonly SELECTED_COLOR = "255, 215, 0";
 
   static drawLink(
     link: Link,
     ctx: CanvasRenderingContext2D,
     globalScale: number,
     navDescending: boolean,
-    graphSettings: GraphSettings
+    graphSettings: GraphSettings,
+    tagColorMap?: Map<string, string>,
+    uncheckedTags?: Set<string>
   ) {
     if (link.color === "parent") {
       return;
@@ -55,20 +57,93 @@ export class Drawing {
           : link.label === "para"
             ? this.SELECTED_COLOR
             : graphSettings.linkColorOther;
-    // Create a gradient for the line width
-    const gradient = ctx.createLinearGradient(0, 0, length, 0);
-    gradient.addColorStop(0, `rgba(${color}, 1`); // Start color 1
-    gradient.addColorStop(1, `rgba(${color}, 0.5`); // End color 0.25
+    // Color edge only by tags shared between source and target
+    const sourceTags = link.source.tags ?? [];
+    const targetTags = link.target.tags ?? [];
+    const sumTags = [...new Set([...sourceTags, ...targetTags])];
+    const coloringTags = uncheckedTags
+      ? sumTags.filter((t) => !uncheckedTags.has(t))
+      : sumTags;
+    const tagColors = tagColorMap
+      ? coloringTags.map((t) => tagColorMap.get(t)).filter((c): c is string => c !== undefined)
+      : [];
 
-    // ctx.strokeStyle = `rgba(${color}, 1)`; // gradient;
-    ctx.strokeStyle = gradient;
+    if (tagColors.length > 0) {
+      // Draw multi-color striped taper – one horizontal stripe per tag
+      const n = tagColors.length;
+      const bandHeight = endWidth / n;
+      for (let i = 0; i < n; i++) {
+        const yTopEnd = -endWidth / 2 + i * bandHeight;
+        const yBotEnd = yTopEnd + bandHeight;
+        // Interpolate start-width band proportionally
+        const yTopStart = -startWidth / 2 + (i / n) * startWidth;
+        const yBotStart = -startWidth / 2 + ((i + 1) / n) * startWidth;
 
-    // Create a pattern for widening the link
-    for (let i = 1; i < length; i++) {
+        const tagColor = tagColors[i] ?? "#9e9e9e";
+        const gradient = ctx.createLinearGradient(0, 0, length, 0);
+        gradient.addColorStop(0, tagColor);
+        gradient.addColorStop(1, Drawing.hexToRgba(tagColor, 0.5));
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(0, yTopStart);
+        ctx.lineTo(length, yTopEnd);
+        ctx.lineTo(length, yBotEnd);
+        ctx.lineTo(0, yBotStart);
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else {
+      // Default gradient fill
+      const gradient = ctx.createLinearGradient(0, 0, length, 0);
+      gradient.addColorStop(0, `rgba(${graphSettings.linkColorOther}, 1)`);
+      gradient.addColorStop(1, `rgba(${graphSettings.linkColorOther}, 0.5)`);
+
+      ctx.fillStyle = gradient;
+
       ctx.beginPath();
-      ctx.lineWidth = startWidth + (endWidth - startWidth) * (i / length);
-      ctx.moveTo(i - 1, 0);
-      ctx.lineTo(i, 0);
+      ctx.moveTo(0, -startWidth / 2);
+      ctx.lineTo(length, -endWidth / 2);
+      ctx.lineTo(length, endWidth / 2);
+      ctx.lineTo(0, startWidth / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Stroke outline with dash pattern for child/parent edges
+    if (link.label === "child" || link.label === "parent") {
+      // Re-draw the full outer taper path so stroke covers the whole shape
+      ctx.beginPath();
+      ctx.moveTo(0, -startWidth / 2);
+      ctx.lineTo(length, -endWidth / 2);
+      ctx.lineTo(length, endWidth / 2);
+      ctx.lineTo(0, startWidth / 2);
+      ctx.closePath();
+
+      ctx.strokeStyle = `rgba(${color}, 1.0)`;
+      ctx.lineWidth = 0.6;
+      if (link.label === "child") {
+        ctx.setLineDash([2, 4]);
+      } else {
+        ctx.setLineDash([8, 4]);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Draw 3 chevrons pointing from parent toward child (along +x in rotated space)
+    ctx.setLineDash([]);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.lineWidth = 1;
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = `rgba(${color}, 1.0)`;
+    const chevSize = 2.0;
+    for (const t of [0.4, 0.5, 0.6]) {
+      const cx = t * length;
+      ctx.beginPath();
+      ctx.moveTo(cx - chevSize, -chevSize);
+      ctx.lineTo(cx, 0);
+      ctx.lineTo(cx - chevSize, chevSize);
       ctx.stroke();
     }
 
@@ -100,6 +175,82 @@ export class Drawing {
     ctx.lineTo(x2, y2);
     ctx.stroke();
     ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // Draw a glowing rectangle between two nodes sharing a tag.
+  // Inset at both ends so the rect is fully hidden under the node clouds.
+  static drawTagEdge(
+    x1: number, y1: number,
+    x2: number, y2: number,
+    cloudRadius: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist === 0) return;
+
+    ctx.save();
+    ctx.translate(x1, y1);
+    ctx.rotate(Math.atan2(dy, dx));
+
+    const halfW = cloudRadius;
+    const grad = ctx.createLinearGradient(0, -halfW, 0, halfW);
+    grad.addColorStop(0, Drawing.hexToRgba(color, 0));
+    grad.addColorStop(0.1, Drawing.hexToRgba(color, 1.0));
+    grad.addColorStop(0.9, Drawing.hexToRgba(color, 1.0));
+    grad.addColorStop(1, Drawing.hexToRgba(color, 0));
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, -halfW, dist, halfW * 2);
+
+    ctx.restore();
+  }
+
+  // nodeHalfDiag: half-diagonal of the node bounding box in graph coords
+  static drawNodeTagCloud(
+    node: Node & Coords,
+    ctx: CanvasRenderingContext2D,
+    nodeHalfDiag: number,
+    tagColorMap: Map<string, string>,
+    uncheckedTags: Set<string>
+  ) {
+    const nodeTags = (node.tags ?? []).filter((t) => !uncheckedTags.has(t));
+    const tagColors = nodeTags
+      .map((t) => tagColorMap.get(t))
+      .filter((c): c is string => c !== undefined);
+
+    if (tagColors.length === 0) return;
+
+    const cx = node.x!;
+    const cy = node.y!;
+    const n = tagColors.length;
+    const angleStep = (2 * Math.PI) / n;
+
+    // Circle is 2× the node half-diagonal; color visible only in the outer 10% ring
+    const cloudRadius = nodeHalfDiag * 2;
+
+    ctx.save();
+    for (let i = 0; i < n; i++) {
+      const startAngle = i * angleStep - Math.PI / 2;
+      const endAngle = startAngle + angleStep;
+      const color = tagColors[i]!;
+
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cloudRadius);
+      grad.addColorStop(0, Drawing.hexToRgba(color, 1.0));
+      grad.addColorStop(0.9, Drawing.hexToRgba(color, 1.0));
+      grad.addColorStop(1, Drawing.hexToRgba(color, 0));
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, cloudRadius, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -332,6 +483,13 @@ export class Drawing {
     }
 
     node.nodeDims = [width, height];
+  }
+
+  private static hexToRgba(hex: string, alpha: number): string {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   /**

@@ -5,7 +5,6 @@ import {
   ArrowUp,
   FlipVertical,
   FlipVertical2,
-  ScanText,
   Sun,
   Sunrise,
 } from "lucide-react";
@@ -50,12 +49,6 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
     }
   };
 
-  const handleImplode = () => {
-    if (onImplode) {
-      onImplode();
-    }
-  };
-
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     setMaxPathLength(value);
@@ -70,52 +63,43 @@ export const GraphControls: React.FC<GraphControlsProps> = ({
   }, [maxPathLength, onMaxPathLengthChange]);
 
   return (
-    <>
+    <div className="pm-graph-controls right-grid">
+      <button onClick={handleToggle} title="Flip direction (Ctrl)">
+        {isDescending ? <FlipVertical /> : <FlipVertical2 />}
+      </button>
+      <button onClick={handleHidden} title={isHidden ? "Show" : "Hide"}>
+        {isHidden ? <Sun /> : <Sunrise />}
+      </button>
       {!isHidden && (
-        <div className="slider-control">
-          <label htmlFor="max-path-length" title="Visisble graph span size">
-            G-span {maxPathLength}
-          </label>
-          <input
-            id="max-path-length"
-            type="range"
-            min="0"
-            max="99"
-            value={maxPathLength}
-            onChange={handleSliderChange}
-            aria-label="Visisble graph span size"
-          />
-        </div>
+        <>
+          <button onClick={onPanUp} title="Descend">
+            <ArrowUp />
+          </button>
+          <button onClick={onPanDown} title="Go Back">
+            <ArrowDown />
+          </button>
+          <button onClick={onPanLeft} title="Anti Clockwise">
+            <ArrowLeft />
+          </button>
+          <button onClick={onPanRight} title="Clockwise">
+            <ArrowRight />
+          </button>
+          <div className="slider-control">
+            <label htmlFor="max-path-length" title="Visible graph span size">
+              G-span {maxPathLength}
+            </label>
+            <input
+              id="max-path-length"
+              type="range"
+              min="0"
+              max="99"
+              value={maxPathLength}
+              onChange={handleSliderChange}
+              aria-label="Visible graph span size"
+            />
+          </div>
+        </>
       )}
-      <div className="pm-graph-controls first-row">
-        <button onClick={handleImplode} title="Implode">
-          <ScanText />
-        </button>
-      </div>
-      <div className="pm-graph-controls right-grid">
-        <button onClick={handleToggle} title="Flip direction (Ctrl)">
-          {isDescending ? <FlipVertical /> : <FlipVertical2 />}
-        </button>
-        <button onClick={handleHidden} title={isHidden ? "Show" : "Hide"}>
-          {isHidden ? <Sun /> : <Sunrise />}
-        </button>
-        {!isHidden && (
-          <>
-            <button onClick={onPanUp} title="Descend">
-              <ArrowUp />
-            </button>
-            <button onClick={onPanDown} title="Go Back">
-              <ArrowDown />
-            </button>
-            <button onClick={onPanLeft} title="Anti Clockwise">
-              <ArrowLeft />
-            </button>
-            <button onClick={onPanRight} title="Clockwise">
-              <ArrowRight />
-            </button>
-          </>
-        )}
-      </div>
-    </>
+    </div>
   );
 };

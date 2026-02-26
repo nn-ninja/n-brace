@@ -2,7 +2,7 @@
 
 [Obsidian N-brace Plugin](https://nn-ninja.github.io/n-brace/) Homepage
 
-A more intuitive Graph navigation and visualization for Obsidian.
+A slightly different Graph navigation and visualization for Obsidian.
 
 See the demo: <not yet published!>
 

@@ -28,10 +28,10 @@
     "baseFolder": "/",
     "titleFontSize": 16,
     "defaultGraphSpan": 5,
-    "linkColorTheme": "dark",
+    "linkColorTheme": "custom",
     "linkColorIn": "122, 41, 143",
     "linkColorOut": "13, 91, 130",
-    "linkColorOther": "71, 30, 143",
+    "linkColorOther": "148, 148, 148",
     "maxNodeNumber": 1000,
     "searchEngine": "default"
   }
