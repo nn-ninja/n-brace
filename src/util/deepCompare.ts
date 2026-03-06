@@ -8,7 +8,7 @@ export const deepCompare = (obj1: unknown, obj2: unknown): boolean => {
       Object.keys(obj1).length === Object.keys(obj2).length &&
       Object.keys(obj1).every((key) => {
         return (
-          obj2.hasOwnProperty(key) &&
+          Object.prototype.hasOwnProperty.call(obj2, key) &&
           deepCompare(
             (obj1 as { [x: string]: unknown })[key],
             (obj2 as { [x: string]: unknown })[key]

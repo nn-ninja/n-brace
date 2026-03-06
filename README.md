@@ -76,3 +76,9 @@ The tag panel appears on the left side of the graph whenever any visible node ca
 ### Save Setting
 
 You can update and save your general settings.
+
+### Before deploying new version
+
+bun run typecheck   # TS errors + circular deps
+bun run lint        # ESLint
+bun run build       # Production bundle

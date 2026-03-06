@@ -2,5 +2,5 @@ import { Notice } from "obsidian";
 
 export const createNotice = (
   message: string | DocumentFragment,
-  duration?: number | undefined
-): Notice => new Notice(`3D graph: ${message}`, duration);
+  duration?: number
+): Notice => new Notice(typeof message === "string" ? `N-brace: ${message}` : message, duration);

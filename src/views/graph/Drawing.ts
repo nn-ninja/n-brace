@@ -193,8 +193,8 @@ export class Drawing {
 
     if (tagColors.length === 0) return;
 
-    const cx = node.x!;
-    const cy = node.y!;
+    const cx = node.x;
+    const cy = node.y;
     const n = tagColors.length;
     const angleStep = (2 * Math.PI) / n;
 
@@ -270,7 +270,7 @@ export class Drawing {
 
       // Drawing.drawCircle();
       ctx.beginPath();
-      ctx.arc(node.x!, node.y!, imgRadius, 0, 2 * Math.PI);
+      ctx.arc(node.x, node.y, imgRadius, 0, 2 * Math.PI);
       ctx.fillStyle = "white";
       ctx.strokeStyle = `rgb(${color})`;
       ctx.lineWidth = 0.5; /// globalScale;

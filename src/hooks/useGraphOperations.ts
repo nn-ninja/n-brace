@@ -137,8 +137,8 @@ export function useGraphOperations({
       signalSelectedNode(node);
       return;
     }
-    expandNodeOp(node.path, node.idx);
     node.expanded = true;
+    void expandNodeOp(node.path, node.idx);
   };
 
   const hoverNode = (node: Node) => {
@@ -181,7 +181,7 @@ export function useGraphOperations({
     if (expandNodePath) {
       expandNodeOp(expandNodePath, undefined).then(() => {
         setExpandNodePath(undefined);
-      });
+      }).catch(console.error);
     }
   }, [expandNodePath]);
 

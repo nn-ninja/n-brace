@@ -10,12 +10,8 @@ export class Link {
   public distance: number = 0;
 
   constructor(source: Node, target: Node) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    this.source = source;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    this.target = target;
+    this.source = source as Node & Coords;
+    this.target = target as Node & Coords;
   }
 
   public static compare = (a: Link, b: Link) => {

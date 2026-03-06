@@ -46,7 +46,7 @@ export class SettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  async display(): Promise<void> {
+  display(): void {
     const pluginSetting = this.plugin.settingManager.getSettings().pluginSetting;
     const { containerEl } = this;
 
@@ -62,7 +62,7 @@ export class SettingTab extends PluginSettingTab {
         text
           .setPlaceholder(`${DEFAULT_BASE_FOLDER}`)
           .setValue(String(pluginSetting.baseFolder ?? DEFAULT_BASE_FOLDER))
-          .onChange(async (value) => {
+          .onChange((value) => {
             if (!value.startsWith("/")) {
               text.inputEl.setCustomValidity("Please enter absolute path (beginning with /).");
               this.plugin.settingManager.updateSettings((setting) => {
@@ -74,7 +74,7 @@ export class SettingTab extends PluginSettingTab {
               this.plugin.settingManager.updateSettings((setting) => {
                 setting.value.pluginSetting.baseFolder = clean;
               });
-              this.plugin.resetGlobalGraph(clean);
+              void this.plugin.resetGlobalGraph(clean);
             }
             text.inputEl.reportValidity();
           });
@@ -93,7 +93,7 @@ export class SettingTab extends PluginSettingTab {
         text
           .setPlaceholder(`${DEFAULT_GRAPH_SPAN}`)
           .setValue(String(pluginSetting.defaultGraphSpan ?? DEFAULT_GRAPH_SPAN))
-          .onChange(async (value) => {
+          .onChange((value) => {
             // check if value is a number
             if (isNaN(Number(value)) || Number(value) <= 0) {
               // set the error to the input
@@ -124,7 +124,7 @@ export class SettingTab extends PluginSettingTab {
         text
           .setPlaceholder(`${DEFAULT_TITLE_FONT_SIZE}`)
           .setValue(String(pluginSetting.titleFontSize ?? DEFAULT_TITLE_FONT_SIZE))
-          .onChange(async (value) => {
+          .onChange((value) => {
             // check if value is a number
             if (isNaN(Number(value)) || Number(value) <= 3) {
               // set the error to the input
@@ -155,7 +155,7 @@ export class SettingTab extends PluginSettingTab {
           .addOption("dark", "Dark")
           .addOption("custom", "Custom color in & out & other")
           .setValue(pluginSetting.linkColorTheme)
-          .onChange(async (value: "custom" | "light" | "dark") => {
+          .onChange((value: "custom" | "light" | "dark") => {
             if (value === "dark") {
               this.plugin.settingManager.updateSettings((setting) => {
                 setting.value.pluginSetting.linkColorTheme = value;
@@ -177,7 +177,7 @@ export class SettingTab extends PluginSettingTab {
                 setting.value.pluginSetting.linkColorTheme = value;
               });
             }
-            await this.display();
+            this.display();
           })
       )
       .addColorPicker((color) => {
@@ -186,7 +186,7 @@ export class SettingTab extends PluginSettingTab {
         }
         color
           .setValue(rgb(`rgb(${pluginSetting.linkColorIn})`).formatHex())
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settingManager.updateSettings((setting) => {
               const rgbObj = rgb(value);
               setting.value.pluginSetting.linkColorIn = `${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}`;
@@ -200,7 +200,7 @@ export class SettingTab extends PluginSettingTab {
         }
         color
           .setValue(rgb(`rgb(${pluginSetting.linkColorOut})`).formatHex())
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settingManager.updateSettings((setting) => {
               const rgbObj = rgb(value);
               setting.value.pluginSetting.linkColorOut = `${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}`;
@@ -214,7 +214,7 @@ export class SettingTab extends PluginSettingTab {
         }
         color
           .setValue(rgb(`rgb(${pluginSetting.linkColorOther})`).formatHex())
-          .onChange(async (value) => {
+          .onChange((value) => {
             this.plugin.settingManager.updateSettings((setting) => {
               const rgbObj = rgb(value);
               setting.value.pluginSetting.linkColorOther = `${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}`;

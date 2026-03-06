@@ -2,7 +2,7 @@ import "@total-typescript/ts-reset";
 import "@total-typescript/ts-reset/dom";
 import { getDefaultStore } from "jotai/index";
 import { RESET } from "jotai/utils";
-import { Plugin, TFile } from "obsidian";
+import { Notice, Plugin, TFile } from "obsidian";
 
 import type { GraphSettings } from "@/atoms/graphAtoms";
 import type { LinkCache } from "@/graph/Link";
@@ -94,9 +94,9 @@ export default class ForceGraphPlugin extends Plugin {
 
     eventBus.on("open-file", (filePath: string) => {
       if (filePath.contains("#")) {
-        this.openParaInFirstTab(filePath);
+        void this.openParaInFirstTab(filePath);
       } else {
-        this.openFileInFirstTab(filePath);
+        void this.openFileInFirstTab(filePath);
       }
     });
   }
@@ -117,7 +117,7 @@ export default class ForceGraphPlugin extends Plugin {
         if (!file) return;
         menu.addItem((item) => {
           item
-            .setTitle("Use N-brace")
+            .setTitle("N-brace view")
             .setIcon(config.icon)
             .onClick(() => this.openGraph());
         });
@@ -148,13 +148,13 @@ export default class ForceGraphPlugin extends Plugin {
     if (targetLeaf !== undefined) {
       if (filePath !== targetLeaf.view.file?.path) {
         await targetLeaf.openFile(file);
-        workspace.revealLeaf(targetLeaf);
+        await workspace.revealLeaf(targetLeaf);
       }
     } else {
       // No Markdown leaves in left split, create a new left tab
       const newLeaf = workspace.createLeafBySplit(graphLeaf, "vertical", true); // Split left
       await newLeaf.openFile(file);
-      workspace.revealLeaf(newLeaf);
+      await workspace.revealLeaf(newLeaf);
     }
   }
 
@@ -269,7 +269,7 @@ export default class ForceGraphPlugin extends Plugin {
     ) {
       this._resolvedCache = structuredClone(this.app.metadataCache.resolvedLinks);
       const pluginSetting = this.settingManager.getSettings().pluginSetting;
-      this.resetGlobalGraph(pluginSetting.baseFolder);
+      void this.resetGlobalGraph(pluginSetting.baseFolder);
     }
   };
 
@@ -317,7 +317,7 @@ export default class ForceGraphPlugin extends Plugin {
    */
   private openGraph = async () => {
     if (!this.app.workspace.lastActiveFile.path.startsWith(this.baseFolder)) {
-      alert(
+      new Notice(
         `Your file isn't under base path ${this.baseFolder}. You can set it up in settings.`,
       );
       return;

@@ -290,7 +290,7 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
                 <input
                   type="checkbox"
                   checked={pendingToggled.has(tag) ? pendingToggled.get(tag)! : selectedNodeTags.has(tag)}
-                  onChange={() => handleFileTagToggle(tag)}
+                  onChange={() => void handleFileTagToggle(tag)}
                 />
                 <span
                   className="nbrace-tag-pill"
@@ -305,7 +305,7 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
                 <input
                   type="checkbox"
                   checked={pendingToggled.has(tag) ? pendingToggled.get(tag)! : selectedNodeTags.has(tag)}
-                  onChange={() => handleFileTagToggle(tag)}
+                  onChange={() => void handleFileTagToggle(tag)}
                 />
                 <span
                   className="nbrace-tag-pill nbrace-tag-pill--neighbor"

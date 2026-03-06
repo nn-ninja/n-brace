@@ -225,7 +225,7 @@ export const loadTagsForGraph = (app: App, graph: Graph, tagIdx: TagIndex) => {
       const fmTags = cache.frontmatter.tags ?? cache.frontmatter.tag;
       if (Array.isArray(fmTags)) {
         for (const t of fmTags) {
-          const normalized = String(t).startsWith("#") ? String(t) : `#${t}`;
+          const normalized = String(t).startsWith("#") ? String(t) : `#${String(t)}`;
           tags.push(normalized);
         }
       } else if (typeof fmTags === "string") {

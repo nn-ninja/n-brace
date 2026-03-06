@@ -108,8 +108,8 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
   const tagFilteredData = useMemo(() => {
     if (uncheckedTags.size === 0) return filteredGraphData;
 
-    const nodes = filteredGraphData.nodes as Node[];
-    const links = filteredGraphData.links as Link[];
+    const nodes = filteredGraphData.nodes;
+    const links = filteredGraphData.links;
 
     // Nodes that have at least one checked tag (or pass the "untagged" filter)
     const hideUntagged = uncheckedTags.has(UNTAGGED);
@@ -197,7 +197,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         setTagSearch(tag === UNTAGGED ? "unspecified" : tag);
         // Uncheck all tags except the clicked one
         const allTags = new Set<string>();
-        for (const n of filteredGraphData.nodes as Node[]) {
+        for (const n of filteredGraphData.nodes) {
           if (n.tags.length === 0) allTags.add(UNTAGGED);
           else for (const t of n.tags) allTags.add(t);
         }
@@ -211,7 +211,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
   // Compute tag color map from filtered nodes (same order as TagList's sortedTags)
   const tagColorMap = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const node of filteredGraphData.nodes as Node[]) {
+    for (const node of filteredGraphData.nodes) {
       for (const tag of node.tags) {
         counts.set(tag, (counts.get(tag) ?? 0) + 1);
       }
@@ -254,7 +254,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
 
     // 1st layer: edge guides only along actual graph edges where both nodes share the tag
     const drawn = new Set<string>();
-    for (const link of tagFilteredData.links as Link[]) {
+    for (const link of tagFilteredData.links) {
       const a = nodeByPath.get(link.source.path);
       const b = nodeByPath.get(link.target.path);
       if (!a || !b || a.x === undefined || b.x === undefined) continue;
@@ -269,7 +269,7 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         const color = tagColorMap.get(tag);
         if (!color) continue;
         const cr = (getHalfDiag(a) + getHalfDiag(b));
-        Drawing.drawTagEdge(a.x!, a.y!, b.x!, b.y!, cr, color, ocCtx);
+        Drawing.drawTagEdge(a.x, a.y, b.x, b.y, cr, color, ocCtx);
         drawn.add(pairKey);
         break; // one rect per edge (first shared tag wins — clouds show all tags)
       }
@@ -341,8 +341,8 @@ export const ReactForceGraph: React.FC<GraphComponentProps> = ({
         onNodeHover={hoverNode}
       />
       <TagList
-        nodes={filteredGraphData.nodes as Node[]}
-        links={filteredGraphData.links as Link[]}
+        nodes={filteredGraphData.nodes}
+        links={filteredGraphData.links}
         selectedNodePath={selectedNode.selectedPath}
         uncheckedTags={uncheckedTags}
         onToggleTag={handleToggleTag}

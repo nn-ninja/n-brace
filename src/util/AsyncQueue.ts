@@ -10,7 +10,7 @@ export class AsyncQueue {
   push(task: () => Promise<void> | void): void {
     this.queue.push(task);
     if (this.queue.length === 1) {
-      this.run();
+      void this.run();
     }
   }
 
@@ -24,7 +24,7 @@ export class AsyncQueue {
     try {
       await task();
     } catch (error) {
-      console.error(`Error executing task: ${error}`);
+      console.error("Error executing task:", error);
     } finally {
       this.queue.shift();
     }
