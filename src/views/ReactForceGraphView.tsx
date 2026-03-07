@@ -78,7 +78,7 @@ export class ReactForceGraphView extends ItemView {
     }
   }
 
-  async onOpen() {
+  async onOpen(): Promise<void> {
     // Reset all graph state so reopening always shows a fresh graph
     this.store.set(graphDataAtom, Graph.createEmpty());
     this.store.set(graphNavAtom, RESET);
@@ -135,7 +135,7 @@ export class ReactForceGraphView extends ItemView {
     return this.expandNode(this.plugin.app.workspace.getActiveFile()?.path ?? undefined);
   }
 
-  async onClose() {
+  async onClose(): Promise<void> {
     this.root?.unmount();
   }
 }

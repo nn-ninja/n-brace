@@ -30,7 +30,7 @@ interface InternalPlugin {
 
   enabled: boolean;
   _loaded: boolean;
-  instance: { name: string; id: string; [other: string]: any };
+  instance: { name: string; id: string; [other: string]: unknown };
 }
 
 interface GraphPlugin extends InternalPlugin {
@@ -109,7 +109,7 @@ declare module "obsidian" {
     removeChild(leaf: WorkspaceLeaf, resize?: boolean): void;
 
     containerEl: HTMLElement;
-    children: any;
+    children: WorkspaceItem[];
   }
 
   interface WorkspaceLeaf {
