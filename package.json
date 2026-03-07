@@ -36,7 +36,7 @@
     "builtin-modules": "3.3.0",
     "dpdm": "^3.14.0",
     "esbuild": "^0.27.0",
-    "eslint": "^9.39.1",
+    "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-depend": "^1.5.0",
     "eslint-plugin-import": "^2.32.0",
