@@ -1,6 +1,6 @@
 {
   "name": "n-brace",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A graph navigation and visualization for Obsidian",
   "main": "main.js",
   "scripts": {
