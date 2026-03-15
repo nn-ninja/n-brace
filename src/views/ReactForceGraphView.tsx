@@ -93,6 +93,7 @@ export class ReactForceGraphView extends ItemView {
     if (path) {
       this.store.set(expandNodePathAtom, path);
     }
+    await Promise.resolve();
   }
 
   onResize() {
@@ -137,5 +138,6 @@ export class ReactForceGraphView extends ItemView {
 
   async onClose(): Promise<void> {
     this.root?.unmount();
+    await Promise.resolve();
   }
 }
