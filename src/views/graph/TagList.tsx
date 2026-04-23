@@ -165,32 +165,39 @@ export const TagList: React.FC<TagListProps> = ({ nodes, links, selectedNodePath
     if (!(file instanceof TFile)) return;
 
     const tagWithHash = tag.startsWith("#") ? tag : `#${tag}`;
-    const content = await app.vault.read(file);
 
     if (currentlyChecked) {
       // Remove: strip the tag and collapse any resulting double-space
       const escaped = tagWithHash.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const newContent = content
-        .replace(new RegExp(`(?:^|\\s)${escaped}(?=\\s|$)`), (match) =>
-          match.startsWith(" ") && match.length > tagWithHash.length ? " " : ""
-        )
-        .trimStart();
-      if (newContent !== content) {
-        await app.vault.modify(file, newContent);
+      let changed = false;
+      await app.vault.process(file, (content) => {
+        const newContent = content
+          .replace(new RegExp(`(?:^|\\s)${escaped}(?=\\s|$)`), (match) =>
+            match.startsWith(" ") && match.length > tagWithHash.length ? " " : ""
+          )
+          .trimStart();
+        if (newContent !== content) {
+          changed = true;
+          return newContent;
+        }
+        return content;
+      });
+      if (changed) {
         tagIndex.updateTag(selectedNodePath, tagWithHash, false);
         onNodeTagUpdate(selectedNodePath, tagWithHash, false);
       }
     } else {
-      // Add: insert with a space separator after frontmatter (or at beginning of file)
-      const frontmatterMatch = content.match(/^---\n[\s\S]*?\n---\n/);
-      let newContent: string;
-      if (frontmatterMatch) {
-        const offset = frontmatterMatch[0].length;
-        newContent = content.slice(0, offset) + tagWithHash + " " + content.slice(offset);
-      } else {
-        newContent = tagWithHash + " " + content;
-      }
-      await app.vault.modify(file, newContent);
+      // Add: insert after frontmatter (or at beginning of file). If the node had no
+      // tags, drop existing content to the next line so the new tag sits on its own line.
+      await app.vault.process(file, (content) => {
+        const separator = content.startsWith('#') ? " " : "\n";
+        const frontmatterMatch = content.match(/^---\n[\s\S]*?\n---\n/);
+        if (frontmatterMatch) {
+          const offset = frontmatterMatch[0].length;
+          return content.slice(0, offset) + tagWithHash + separator + content.slice(offset);
+        }
+        return tagWithHash + separator + content;
+      });
       tagIndex.updateTag(selectedNodePath, tagWithHash, true);
       onNodeTagUpdate(selectedNodePath, tagWithHash, true);
     }
