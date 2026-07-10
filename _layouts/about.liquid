@@ -38,7 +38,9 @@ layout: default
       </div>
     {% endif %}
 
-    <div class="clearfix">{{ content }}</div>
+    {% assign content_parts = content | split: "<!-- NEWS_ANCHOR -->" %}
+
+    <div class="clearfix">{{ content_parts[0] }}</div>
 
     <!-- News -->
     {% if page.announcements and page.announcements.enabled %}
@@ -47,6 +49,8 @@ layout: default
       </h2>
       {% include news.liquid limit=true %}
     {% endif %}
+
+    <div class="clearfix">{{ content_parts[1] }}</div>
 
     <!-- Latest posts -->
     {% if page.latest_posts and page.latest_posts.enabled %}

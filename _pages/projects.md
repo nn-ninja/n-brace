@@ -5,7 +5,7 @@ permalink: /projects/
 description: Projects belonging to the N-brace
 nav: true
 nav_order: 3
-display_categories: [learning]
+display_categories: [app, plugin]
 horizontal: false
 ---
 

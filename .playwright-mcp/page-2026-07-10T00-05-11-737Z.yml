@@ -1,0 +1,75 @@
+- generic [active] [ref=f50e1]:
+  - banner:
+    - navigation [ref=f50e2]:
+      - generic [ref=f50e3]:
+        - link [ref=f50e4] [cursor=pointer]:
+          - /url: /n-brace/
+          - img "n-brace logo" [ref=f50e5]
+          - text: N-brace
+        - list [ref=f50e7]:
+          - listitem [ref=f50e8]:
+            - link "about" [ref=f50e9] [cursor=pointer]:
+              - /url: /n-brace/
+          - listitem [ref=f50e10]:
+            - link "knowledge base" [ref=f50e11] [cursor=pointer]:
+              - /url: /n-brace/blog/
+          - listitem [ref=f50e12]:
+            - link "install (current)" [ref=f50e13] [cursor=pointer]:
+              - /url: /n-brace/projects/
+              - text: install
+              - generic [ref=f50e14]: (current)
+          - listitem [ref=f50e15]:
+            - link "contact" [ref=f50e16] [cursor=pointer]:
+              - /url: /n-brace/contact/
+          - listitem [ref=f50e17]:
+            - button "ctrl k " [ref=f50e18] [cursor=pointer]:
+              - generic [ref=f50e19]:
+                - text: ctrl k
+                - generic [ref=f50e20]: 
+          - listitem [ref=f50e21]:
+            - button "" [ref=f50e22] [cursor=pointer]:  
+    - progressbar [ref=f50e24]
+  - main [ref=f50e25]:
+    - generic [ref=f50e26]:
+      - generic [ref=f50e27]:
+        - heading "the App" [level=1] [ref=f50e28]
+        - paragraph [ref=f50e29]: standalone application
+      - article [ref=f50e30]:
+        - paragraph [ref=f50e31]: Great news!
+        - paragraph [ref=f50e32]: Finally after three major idea iterations which took me long years… n-brace application has been released.
+        - paragraph [ref=f50e33]:
+          - text: Installers are available at
+          - link "n-brace releases" [ref=f50e34] [cursor=pointer]:
+            - /url: https://github.com/nn-ninja/nbrace-releases/releases
+          - text: .
+        - paragraph [ref=f50e35]:
+          - img "n-brace app installed" [ref=f50e36]
+        - heading "Installation steps" [level=1] [ref=f50e37]
+        - paragraph [ref=f50e38]:
+          - text: Visit the releases page
+          - link "n-brace releases" [ref=f50e39] [cursor=pointer]:
+            - /url: https://github.com/nn-ninja/nbrace-releases/releases
+          - text: .
+        - paragraph [ref=f50e40]:
+          - img "n-brace releases" [ref=f50e41]
+        - paragraph [ref=f50e42]: "and choose proper installation file for your Operating System:"
+        - list [ref=f50e43]:
+          - listitem [ref=f50e44]: n-brace_xxx-setup.exe - Windows installer
+          - listitem [ref=f50e45]: n-brace_xxx_aarch64.dmg - macOS installer
+          - listitem [ref=f50e46]: n-brace.app.tar.gz - macOS application bundle for manual install
+          - listitem [ref=f50e47]: .deb/.rpm - Linux distributions
+        - paragraph [ref=f50e48]: Then install.
+        - paragraph [ref=f50e49]: Application should autoupdate when new version arrives.
+        - paragraph [ref=f50e50]: For now Mobile versions are not available (I have not enough funds for that).
+  - contentinfo [ref=f50e51]:
+    - generic [ref=f50e52]:
+      - text: © Copyright 2026 Rafael Hazan. Powered by
+      - link "Jekyll" [ref=f50e53] [cursor=pointer]:
+        - /url: https://jekyllrb.com/
+      - text: with
+      - link "al-folio" [ref=f50e54] [cursor=pointer]:
+        - /url: https://github.com/alshedivat/al-folio
+      - text: theme. Hosted by
+      - link "GitHub Pages" [ref=f50e55] [cursor=pointer]:
+        - /url: https://pages.github.com/
+      - text: .

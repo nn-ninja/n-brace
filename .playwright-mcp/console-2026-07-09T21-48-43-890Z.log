@@ -1,0 +1,4 @@
+[ 7764999ms] [ERROR] WebSocket connection to 'ws://0.0.0.0:35729/livereload' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://0.0.0.0:35729/livereload.js?snipver=1&port=35729:73
+[ 7767002ms] [ERROR] WebSocket connection to 'ws://0.0.0.0:35729/livereload' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://0.0.0.0:35729/livereload.js?snipver=1&port=35729:73
+[ 7771005ms] [ERROR] WebSocket connection to 'ws://0.0.0.0:35729/livereload' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://0.0.0.0:35729/livereload.js?snipver=1&port=35729:73
+[ 7779006ms] [ERROR] WebSocket connection to 'ws://0.0.0.0:35729/livereload' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://0.0.0.0:35729/livereload.js?snipver=1&port=35729:73

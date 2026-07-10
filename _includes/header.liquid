@@ -2,8 +2,12 @@
   <!-- Nav Bar -->
   <nav id="navbar" class="navbar navbar-light navbar-expand-sm {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}" role="navigation">
     <div class="container">
-      {% if page.permalink != '/' %}
+      {% if page.permalink == '/' and site.enable_navbar_social %}
+        <!-- Social Icons -->
+        <div class="navbar-brand social">{% include social.liquid %}</div>
+      {% else %}
         <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}/">
+          <img class="nav-logo" src="{{ '/assets/img/n-brace-logo.svg' | relative_url }}" alt="n-brace logo" height="30" />
           {% if site.title == 'blank' %}
             {% if site.first_name %}
               <span class="font-weight-bold">
@@ -20,9 +24,6 @@
             {{- site.title -}}
           {% endif %}
         </a>
-      {% elsif site.enable_navbar_social %}
-        <!-- Social Icons -->
-        <div class="navbar-brand social">{% include social.liquid %}</div>
       {% endif %}
       <!-- Navbar Toggle -->
       <button

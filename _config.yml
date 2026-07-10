@@ -9,11 +9,11 @@ last_name: Hazan
 contact_note: >
   rafal.hazan@gmail.com.
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
-  A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+  n-brace is a standalone, offline-first app (and Obsidian plugin) for visualizing and navigating your notes as a graph mind map.
 footer_text: >
   Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
   Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
-keywords: jekyll, jekyll-theme, academic-website, portfolio-website # add your own keywords or leave empty
+keywords: n-brace, graph mind map, note taking, obsidian plugin, pocket brain, knowledge graph # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
 icon: n-brace-favicon.svg
 
@@ -86,7 +86,7 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 # -----------------------------------------------------------------------------
 
 blog_name: Knowledge base # blog_name will be displayed in your blog page
-blog_description: philosophy and methods of N-brace learning method
+blog_description: philosophy and methods of using N-brace app
 permalink: /blog/:title/
 lsi: false # produce an index for related posts
 
@@ -137,8 +137,10 @@ collections:
   news:
     defaults:
       layout: post
+    permalink: /news/:path/
     output: true
   projects:
+    permalink: /projects/:path/
     output: true
 
 # -----------------------------------------------------------------------------

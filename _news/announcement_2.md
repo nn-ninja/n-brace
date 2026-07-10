@@ -17,8 +17,8 @@ Here’s a quick overview of the official places where you can learn about, inst
 ## 🌐 Main Site
 
 - [**n-brace Home Page**](https://nn-ninja.github.io/n-brace/) – overview of the project and main updates
-    - [Quickstart Guide](https://nn-ninja.github.io/n-brace/blog/methodology) – learn the basic methodology
-    - [Installation Instructions](https://nn-ninja.github.io/n-brace/projects/obsidian_plugin) – how to get started with the plugin
+    - [Quickstart Guide](https://nn-ninja.github.io/n-brace/blog/methodology/) – learn the basic methodology
+    - [Installation Instructions](https://nn-ninja.github.io/n-brace/projects/obsidian_plugin/) – how to get started with the plugin
 
 ## 🧠 Plugin
 
@@ -26,7 +26,7 @@ Here’s a quick overview of the official places where you can learn about, inst
 
 ## 🎥 Media
 
-- [YouTube Channel](https://www.youtube.com/@post-ai-human) – videos and tutorials by the creator
+- [YouTube Channel](https://www.youtube.com/@post-ai-human) – videos and tutorials (yet to come)
 
 ## 💻 Development
 

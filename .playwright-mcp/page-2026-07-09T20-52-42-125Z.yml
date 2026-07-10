@@ -1,0 +1,121 @@
+- generic [active] [ref=e1]:
+  - banner:
+    - navigation [ref=e2]:
+      - generic [ref=e3]:
+        - link [ref=e4] [cursor=pointer]:
+          - /url: /n-brace/
+          - img "n-brace logo" [ref=e5]
+          - text: N-brace
+        - list [ref=e7]:
+          - listitem [ref=e8]:
+            - link "about (current)" [ref=e9] [cursor=pointer]:
+              - /url: /n-brace/
+              - text: about
+              - generic [ref=e10]: (current)
+          - listitem [ref=e11]:
+            - link "knowledge base" [ref=e12] [cursor=pointer]:
+              - /url: /n-brace/blog/
+          - listitem [ref=e13]:
+            - link "install" [ref=e14] [cursor=pointer]:
+              - /url: /n-brace/projects/
+          - listitem [ref=e15]:
+            - link "contact" [ref=e16] [cursor=pointer]:
+              - /url: /n-brace/contact/
+          - listitem [ref=e17]:
+            - button "ctrl k " [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]:
+                - text: ctrl k
+                - generic [ref=e20]: 
+          - listitem [ref=e21]:
+            - button "" [ref=e22] [cursor=pointer]:  
+    - progressbar [ref=e24]
+  - main [ref=e25]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "N-brace" [level=1] [ref=e28]
+        - paragraph [ref=e29]: Embrace your brain.
+      - article [ref=e30]:
+        - generic [ref=e31]:
+          - paragraph [ref=e32]:
+            - strong [ref=e33]: n-brace
+            - text: is a standalone, offline-first app for visualizing and navigating your notes as a graph mind map. It’s designed around the
+            - emphasis [ref=e34]: Pocket Brain
+            - text: technique and helps you move smoothly through large knowledge networks.
+          - generic [ref=e35]:
+            - img "n-brace app screenshot" [ref=e38]
+            - button "Previous" [ref=e39] [cursor=pointer]
+            - button "Next" [ref=e42] [cursor=pointer]
+          - paragraph [ref=e45]:
+            - text: N-brace is available now as a
+            - strong [ref=e46]: free standalone app
+            - text: for Windows, macOS and Linux, and is under
+            - strong [ref=e47]: active development
+            - text: . If you’re an Obsidian user, the
+            - link "Obsidian plugin" [ref=e48] [cursor=pointer]:
+              - /url: /n-brace/projects/obsidian_plugin/
+            - text: is still around and supported, but the standalone app is where new features land first. If you find it useful, you can
+            - link "buy me a coffee" [ref=e49] [cursor=pointer]:
+              - /url: https://buymeacoffee.com/nbrace
+            - text: — free hugs for all supporters ☕🤗
+          - separator [ref=e50]
+          - heading "Features" [level=2] [ref=e51]
+          - list [ref=e52]:
+            - listitem [ref=e53]:
+              - strong [ref=e54]: Seamless navigation
+              - text: – show only the local part of the graph you’re currently exploring, move through linked notes, jump between nodes with keyboard shortcuts, and let automatic layout keep everything readable so you never have to adjust nodes by hand.
+            - listitem [ref=e55]:
+              - strong [ref=e56]: Quick graph manipulation
+              - text: – a radial pie menu puts create, link, group and move actions one click away, right where your cursor is, so reshaping the map never breaks your flow.
+            - listitem [ref=e57]:
+              - strong [ref=e58]: Tag area view layer
+              - text: – tags render as colored regions overlaid directly on the canvas, so you can see at a glance which cluster or topic a note belongs to, and filter the view down to just the layers you care about.
+            - listitem [ref=e59]:
+              - strong [ref=e60]: Edge tags for deep structures
+              - text: – links themselves can carry a tag, turning a simple connection into a labeled layer. The same idea can sit in many contexts at once without duplicating notes, letting deep, cross-cutting structures emerge from a flat graph.
+            - listitem [ref=e61]:
+              - strong [ref=e62]: MCP server for AI integration
+              - text: – a built-in
+              - link "MCP" [ref=e63] [cursor=pointer]:
+                - /url: https://modelcontextprotocol.io
+              - text: server exposes your note graph to AI assistants like Claude Desktop and Claude Code, so they can search your notes and import web articles as structured, tagged nodes directly into your map.
+            - listitem [ref=e64]:
+              - strong [ref=e65]: Multiple implementations
+              - text: – use n-brace as a standalone offline-first desktop app, or as an
+              - link "Obsidian plugin" [ref=e66] [cursor=pointer]:
+                - /url: /n-brace/projects/obsidian_plugin/
+              - text: if you’d rather stay inside your existing vault.
+            - listitem [ref=e67]:
+              - strong [ref=e68]: Interactive and mobile-friendly
+              - text: – works smoothly on desktop and mobile devices «not yet».
+        - heading [level=2] [ref=e69]:
+          - link "news" [ref=e70] [cursor=pointer]:
+            - /url: /n-brace/news/
+        - table [ref=e73]:
+          - rowgroup [ref=e74]:
+            - row [ref=e75]:
+              - rowheader "Jul 02, 2026" [ref=e76]
+              - cell [ref=e77]:
+                - link "First version of n-brace has been released!" [ref=e78] [cursor=pointer]:
+                  - /url: /n-brace/news/announcement_4/
+            - row [ref=e79]:
+              - rowheader "Feb 26, 2026" [ref=e80]
+              - cell [ref=e81]:
+                - link "N-brace Obsidian plugin has been approved!" [ref=e82] [cursor=pointer]:
+                  - /url: /n-brace/news/announcement_3/
+            - row [ref=e83]:
+              - rowheader "Oct 11, 2015" [ref=e84]
+              - cell [ref=e85]:
+                - link "Project sitemap — all official sources of information about N-brace" [ref=e86] [cursor=pointer]:
+                  - /url: /n-brace/news/announcement_2/
+  - contentinfo [ref=e87]:
+    - generic [ref=e88]:
+      - text: © Copyright 2026 Rafael Hazan. Powered by
+      - link "Jekyll" [ref=e89] [cursor=pointer]:
+        - /url: https://jekyllrb.com/
+      - text: with
+      - link "al-folio" [ref=e90] [cursor=pointer]:
+        - /url: https://github.com/alshedivat/al-folio
+      - text: theme. Hosted by
+      - link "GitHub Pages" [ref=e91] [cursor=pointer]:
+        - /url: https://pages.github.com/
+      - text: .
