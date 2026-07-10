@@ -30,15 +30,15 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/n-brace/contact/";
           },
-        },{id: "post-a-n-brace-methodology",
+        },{id: "post-first-version-of-n-brace-has-been-released",
         
-          title: "a N-brace methodology",
+          title: "First version of n-brace has been released",
         
-        description: "a methodology how to use N-brace for better learning",
+        description: "n-brace grows up from an Obsidian plugin into its own standalone app",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/n-brace/blog/methodology/";
+            window.location.href = "/n-brace/blog/first-release/";
           
         },
       },{id: "post-a-roadmap",
@@ -52,12 +52,18 @@ ninja.data = [{
             window.location.href = "/n-brace/blog/roadmap/";
           
         },
-      },{id: "books-the-godfather",
-          title: 'The Godfather',
-          description: "",
-          section: "Books",handler: () => {
-              window.location.href = "/n-brace/books/the_godfather/";
-            },},{id: "news-the-first-version-of-the-project-s-home-page-is-nearly-ready-here-we-ll-be-sharing-various-use-cases-and-techniques-for-using-the-n-brace-tool",
+      },{id: "post-a-n-brace-methodology",
+        
+          title: "a N-brace methodology",
+        
+        description: "a methodology how to use N-brace for better learning",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/n-brace/blog/methodology/";
+          
+        },
+      },{id: "news-the-first-version-of-the-project-s-home-page-is-nearly-ready-here-we-ll-be-sharing-various-use-cases-and-techniques-for-using-the-n-brace-tool",
           title: 'The first version of the project’s home page is nearly ready! Here, we’ll...',
           description: "",
           section: "News",},{id: "news-project-sitemap-all-official-sources-of-information-about-n-brace",
@@ -65,6 +71,26 @@ ninja.data = [{
           description: "",
           section: "News",handler: () => {
               window.location.href = "/n-brace/news/announcement_2/";
+            },},{id: "news-n-brace-obsidian-plugin-has-been-approved",
+          title: 'N-brace Obsidian plugin has been approved!',
+          description: "",
+          section: "News",handler: () => {
+              window.location.href = "/n-brace/news/announcement_3/";
+            },},{id: "news-first-version-of-n-brace-has-been-released",
+          title: 'First version of n-brace has been released!',
+          description: "",
+          section: "News",handler: () => {
+              window.location.href = "/n-brace/news/announcement_4/";
+            },},{id: "news-new-reminders-feature-never-lose-track-of-a-note-again",
+          title: 'New Reminders feature — never lose track of a note again',
+          description: "",
+          section: "News",handler: () => {
+              window.location.href = "/n-brace/news/announcement_5/";
+            },},{id: "projects-the-app",
+          title: 'the App',
+          description: "standalone application",
+          section: "Projects",handler: () => {
+              window.location.href = "/n-brace/projects/nbrace_app/";
             },},{id: "projects-obsidian-plugin",
           title: 'Obsidian plugin',
           description: "a plugin to work in obsidian",
