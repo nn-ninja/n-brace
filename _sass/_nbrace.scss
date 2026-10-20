@@ -6,6 +6,12 @@
 
 // ---------------------------------------------------------------- base type
 
+// Always reserve the scrollbar so short pages (contact) don't shift the menu.
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: var(--nb-ui);
   font-size: 1.0625rem;
