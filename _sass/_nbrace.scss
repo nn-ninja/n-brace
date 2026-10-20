@@ -238,14 +238,15 @@ footer.sticky-bottom {
 
 // ------------------------------------------------------------------- landing
 
-body.layout-landing {
-  .container {
-    max-width: 1120px;
-  }
+// Header and footer share one width on every page so the menu never shifts.
+.navbar .container,
+footer .container {
+  max-width: 1120px;
+}
 
-  > .container[role="main"] {
-    margin-top: 0 !important;
-  }
+body.layout-landing > .container[role="main"] {
+  max-width: 1120px;
+  margin-top: 0 !important;
 }
 
 .nb {
