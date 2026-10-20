@@ -16,7 +16,13 @@
   </head>
 
   <!-- Body -->
-  <body class="{% if site.navbar_fixed %}fixed-top-nav{% endif %} {% unless site.footer_fixed %}sticky-bottom-footer{% endunless %}">
+  <body class="layout-{{ page.layout }} {% if site.navbar_fixed %}fixed-top-nav{% endif %} {% unless site.footer_fixed %}sticky-bottom-footer{% endunless %}">
+    <!-- Paper texture layers -->
+    <div class="paper-fx paper-tooth" aria-hidden="true"></div>
+    <div class="paper-fx paper-grain" aria-hidden="true"></div>
+    <div class="paper-fx paper-fibers" aria-hidden="true"></div>
+    <div class="paper-fx paper-vignette" aria-hidden="true"></div>
+
     <!-- Header -->
     {% include header.liquid %}
 

@@ -1,0 +1,184 @@
+---
+layout: default
+---
+<div class="nb">
+  <header class="nb-hero">
+    <div>
+      <p class="eyebrow">Pocket brain · Graph mind map</p>
+      <h1>Embrace <em>your</em> brain.</h1>
+      <p class="lede">
+        n-brace is a free, offline-first app for visualizing and navigating your notes as a graph. Follow links instead of folders, and
+        see which topic a note belongs to at a glance.
+      </p>
+      <div class="cta">
+        <a class="btn-nb primary" href="{{ '/projects/' | relative_url }}">Download the app</a>
+        <a class="btn-nb secondary" href="{{ '/blog/' | relative_url }}">Read the knowledge base</a>
+      </div>
+    </div>
+    <div class="shot">
+      <img
+        src="{{ '/assets/img/landing/hero.webp' | relative_url }}"
+        alt="n-brace showing a recipe graph with colored tag regions"
+        width="1600"
+        height="859"
+        fetchpriority="high"
+      >
+    </div>
+  </header>
+
+  <div class="nb-facts">
+    <span><b>Free</b> standalone app</span>
+    <span><b>Windows</b> · macOS · Linux</span>
+    <span><b>Offline-first</b>, your notes stay on your machine</span>
+    <span><b>MCP</b> server for Claude</span>
+  </div>
+
+  <section class="nb-feats">
+    <h2>Move through your notes instead of digging for them.</h2>
+
+    <article class="nb-feat">
+      <div class="txt">
+        <p class="k">Navigate</p>
+        <h3>Seamless navigation</h3>
+        <p>
+          Show only the local part of the graph you are exploring. Move through linked notes, jump between nodes with keyboard
+          shortcuts, and let automatic layout keep everything readable.
+        </p>
+      </div>
+      <div class="nb-media">
+        <img
+          src="{{ '/assets/img/landing/navigation.webp' | relative_url }}"
+          alt="Graph of recipe notes centered on Lazy Dumplings"
+          loading="lazy"
+          width="1400"
+          height="898"
+        >
+      </div>
+    </article>
+
+    <article class="nb-feat">
+      <div class="txt">
+        <p class="k">Edit</p>
+        <h3>Quick graph manipulation</h3>
+        <p>
+          A radial pie menu puts create, link, group and move actions one click away, right where your cursor is. Reshaping the map
+          never breaks your flow.
+        </p>
+      </div>
+      <div class="nb-media narrow">
+        <img
+          src="{{ '/assets/img/landing/pie-menu.webp' | relative_url }}"
+          alt="Radial pie menu: zoom, add, edit and go to tag"
+          loading="lazy"
+          width="600"
+          height="540"
+        >
+      </div>
+    </article>
+
+    <article class="nb-feat">
+      <div class="txt">
+        <p class="k">See</p>
+        <h3>Tag area view layer</h3>
+        <p>
+          Tags render as colored regions overlaid on the canvas, so you see at a glance which cluster or topic a note belongs to.
+          Filter the view down to just the layers you care about.
+        </p>
+      </div>
+      <div class="nb-media">
+        <img
+          src="{{ '/assets/img/landing/tags.webp' | relative_url }}"
+          alt="Tag scope bar and colored tag regions behind the graph"
+          loading="lazy"
+          width="1120"
+          height="840"
+        >
+      </div>
+    </article>
+
+    <article class="nb-feat stack">
+      <div class="txt">
+        <p class="k">Structure</p>
+        <h3>Deep structure</h3>
+        <p>
+          A note can have many flavors and contextual contents. Pizza sits in the whole recipe graph, while the ingredients layer
+          shows only what it is made of. Deep, cross-cutting structures emerge from a flat graph.
+        </p>
+      </div>
+      <div class="nb-pair">
+        <div class="nb-media">
+          <img
+            src="{{ '/assets/img/landing/deep-pizza.webp' | relative_url }}"
+            alt="Pizza and its ingredients with the ingredients tag area highlighted"
+            loading="lazy"
+            width="1000"
+            height="1007"
+          >
+        </div>
+        <div class="nb-media">
+          <img
+            src="{{ '/assets/img/landing/deep-ingredients.webp' | relative_url }}"
+            alt="The ingredients layer on its own, centered on dairy"
+            loading="lazy"
+            width="1000"
+            height="1033"
+          >
+        </div>
+      </div>
+    </article>
+
+    <article class="nb-feat">
+      <div class="txt">
+        <p class="k">Remember</p>
+        <h3>Reminders</h3>
+        <p>
+          Set reminders on any note to resurface repeating tasks, refresh knowledge you don't want to forget, or manage household
+          chores, right from your graph.
+        </p>
+      </div>
+      <div class="nb-media narrow">
+        <img
+          src="{{ '/assets/img/landing/reminders.webp' | relative_url }}"
+          alt="House cleaning reminders with repeat schedules and progress counters"
+          loading="lazy"
+          width="778"
+          height="1175"
+        >
+      </div>
+    </article>
+
+    <article class="nb-feat stack">
+      <div class="txt">
+        <p class="k">Connect</p>
+        <h3>MCP server for AI</h3>
+        <p>
+          A built-in <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP</a> server exposes your note graph
+          to assistants like Claude Desktop and Claude Code. They can search your notes and import web articles as structured, tagged
+          nodes.
+        </p>
+      </div>
+      <div class="nb-media scroll-x">
+        <img
+          src="{{ '/assets/img/landing/mcp.webp' | relative_url }}"
+          alt="Claude Code adding a microservices subtree of 38 notes to n-brace through the MCP server"
+          loading="lazy"
+          width="1438"
+          height="453"
+        >
+      </div>
+    </article>
+  </section>
+
+  <section class="nb-news">
+    <h2><a href="{{ '/news/' | relative_url }}">News</a></h2>
+    {% include news.liquid limit=true %}
+  </section>
+
+  <section class="nb-support">
+    <div>
+      <h2>Free, and in active development.</h2>
+      <p>If you find n-brace useful, you can sponsor the project. Free hugs for all supporters ☕🤗</p>
+    </div>
+    <a class="btn-nb primary" href="https://buymeacoffee.com/nbrace" target="_blank" rel="noopener">Sponsor on Buy Me a Coffee</a>
+  </section>
+</div>
