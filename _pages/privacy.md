@@ -8,7 +8,7 @@ nav: false
 
 _Last updated: 17 November 2026_
 
-This policy applies to the **n-brace** application for Android, Windows, macOS and Linux, with a short section at the end for this website. n-brace is developed by Rafał Hazan ("I", "me").
+This policy applies to the **n-brace** application for Windows, macOS, Linux and Android, and to this website. n-brace is developed by Rafał Hazan ("I", "me").
 
 ## The short version
 
@@ -24,21 +24,27 @@ Your notes, links, tags, images, reminders, settings, and "life spaces" are stor
 
 ## Security of your data
 
-Your data is stored unencrypted in the app's private storage and protected by your device's own security (screen lock, disk encryption, OS user accounts). The optional life space password only locks the app's interface; it does not encrypt your data, and the MCP helper described below does not check it. Backup files you export are likewise not encrypted by the app. Keep them somewhere you trust.
+Your data is stored unencrypted in the app's private storage and protected by your device's own security (screen lock, disk encryption, OS user accounts). The optional life space password only locks the app's interface; it does not encrypt your data, and the desktop MCP helper described below does not check it. Backup files you export are likewise not encrypted by the app. Keep them somewhere you trust.
 
-## Network access
+## Desktop application (Windows, macOS, Linux)
 
-The Android app declares the `INTERNET` permission. n-brace uses the network only as follows:
+The desktop app uses the network only as follows:
 
-- **Update check (desktop only).** On launch, the Windows, macOS and Linux apps request a small version file from GitHub (`github.com/nn-ninja/nbrace-releases`) to see whether a newer version exists. If you accept an update, it is downloaded from GitHub. GitHub receives the usual technical information of any web request (such as your IP address), under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). The Android app does not check for updates itself.
-- **Content you choose to load.** If you add an image from a web address, the app downloads that image from the address you gave. The owner of that site sees the request.
-- **Optional AI assistant integration (MCP, desktop).** The desktop app ships with a local helper that lets an AI assistant you configure yourself (for example Claude Desktop) read and add notes in your local database. This is off unless you set it up. The helper runs on your computer; any note content you let the assistant read is sent to that assistant under the assistant provider's own terms and privacy policy. The helper can also fetch web pages you ask it to import.
+- **Update check.** On launch, the app requests a small version file from GitHub (`github.com/nn-ninja/nbrace-releases`) to see whether a newer version exists. If you accept an update, it is downloaded from GitHub. GitHub receives the usual technical information of any web request (such as your IP address), under [GitHub's privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+- **Optional AI assistant integration (MCP).** The desktop app ships with a local helper that lets an AI assistant you configure yourself (for example Claude Desktop) read and add notes in your local database. This is off unless you set it up. The helper runs on your computer; any note content you let the assistant read is sent to that assistant under the assistant provider's own terms and privacy policy. The helper can also fetch web pages and images from addresses you or the assistant ask it to import; the owners of those sites see the request.
 
-No personal data is sent to me in any of these cases.
+n-brace asks for no access to your contacts, location, camera, microphone or accounts. Files are accessed only through the system file dialog when you import or export something. Reminders are shown inside the app; the app does not use system notifications. No personal data is sent to me in any of these cases.
 
-## Permissions
+## Android application
 
-n-brace asks for no access to your contacts, location, camera, microphone, SMS, or accounts. Files are accessed only through the system file picker when you choose to import or export something. Reminder notifications, where used, are generated locally on your device.
+- **Permissions.** The app requests only the `INTERNET` permission. It asks for no access to your contacts, location, camera, microphone, SMS, phone, accounts, or shared storage. Backups are saved and imported only through Android's system file picker, in the place you choose.
+- **Network use.** The app does not connect to the internet by itself: it has no update check, no analytics and no other background requests. The `INTERNET` permission is declared but unused for your data. Updates come through Google Play or a manual install.
+- **No AI assistant helper.** The MCP helper described above is not part of the Android app.
+- **Local data.** Everything else, including notes, tags, reminders, search and recap, stays in the app's private storage on your device. Reminders are shown inside the app; the app does not use system notifications. No personal data is sent to me.
+
+## This website
+
+This is a static site hosted on GitHub Pages. It has no accounts, forms, analytics or tracking cookies, and I collect nothing from visitors. GitHub, as host, may log visits as described in its privacy statement. Your browser also loads some scripts and images from content delivery services (jsDelivr, cdnjs/Cloudflare, Amazon CloudFront and badge.dimensions.ai), which receive your IP address and browser details under their own policies. Fonts are served from this site. Download links lead to GitHub Releases.
 
 ## Children
 
@@ -55,10 +61,6 @@ I do not hold any of your personal data: it lives on your device, under your con
 ## Third-party links
 
 This page and the app link to services I don't control, such as GitHub, Buy Me a Coffee and any AI assistant you connect. Their privacy practices are theirs.
-
-## This website
-
-This is a static site hosted on GitHub Pages. It has no accounts, forms, analytics or tracking cookies, and I collect nothing from visitors. GitHub, as host, may log visits as described in its privacy statement. Your browser also loads some scripts and images from content delivery services (jsDelivr, cdnjs/Cloudflare, Amazon CloudFront and badge.dimensions.ai), which receive your IP address and browser details under their own policies. Fonts are served from this site. Download links lead to GitHub Releases.
 
 ## Changes
 
