@@ -10,7 +10,7 @@ related_posts: false
 
 After three major idea iterations and a long stretch of nights and weekends, **the first version of n-brace is out** — as a standalone, offline-first application, no longer tied to Obsidian.
 
-n-brace lets you visualize and navigate your notes as a graph mind map, built around the *Pocket Brain* technique, so you can move smoothly through large knowledge networks instead of getting lost in a wall of files.
+n-brace lets you visualize and navigate your notes as a graph mind map, built around the _Pocket Brain_ technique, so you can move smoothly through large knowledge networks instead of getting lost in a wall of files.
 
 Installers for Windows, macOS and Linux are available on the [releases page]({{ '/projects/nbrace_app/' | relative_url }}), and the app will auto-update itself from here on.
 

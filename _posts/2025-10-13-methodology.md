@@ -22,7 +22,7 @@ authors:
   - name: Rafael Hazan
     affiliations:
       name: Warsaw, Europe
-  
+
 # Below is an example of injecting additional post-specific styles.
 # If you use this post as a template, delete this _styles block.
 _styles: >

@@ -11,11 +11,11 @@ Great news!
 
 ![n-brace app installed]({{ '/assets/img/nbrace-app-installed.png' | relative_url }})
 
-
 Finally after three major idea iterations which took me long years...
 n-brace application has been released.
 
 ## Installation steps
+
 Choose proper installation file for your Operating System from [n-brace releases](https://github.com/nn-ninja/nbrace-releases/releases), or grab it directly from the table below — links always resolve to the current latest release.
 
 <div class="installer-table-wrap">

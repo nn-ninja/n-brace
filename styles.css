@@ -37,7 +37,7 @@
   gap: 5px;
   color: var(--color-base-00);
 }
-.nbrace-slider-control input[type=range] {
+.nbrace-slider-control input[type="range"] {
   width: 100px;
   cursor: pointer;
 }
@@ -171,12 +171,12 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.nbrace-tag-item input[type=checkbox] {
+.nbrace-tag-item input[type="checkbox"] {
   margin: 0;
   cursor: pointer;
   flex-shrink: 0;
 }
-.nbrace-tag-item input[type=checkbox]:disabled {
+.nbrace-tag-item input[type="checkbox"]:disabled {
   cursor: default;
   opacity: 0.5;
 }
